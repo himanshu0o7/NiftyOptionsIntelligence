@@ -1,0 +1,114 @@
+{
+  "underlying": "BANKNIFTY",
+  "lot_size": 15,
+  "tick_size": 0.05,
+  "current_symbols": {
+    "index": "NIFTY BANK",
+    "futures": [
+      "BANKNIFTY25JAN",
+      "BANKNIFTY25FEB",
+      "BANKNIFTY25MAR",
+      "BANKNIFTY25APR",
+      "BANKNIFTY25MAY"
+    ],
+    "weekly_options": [
+      "BANKNIFTY25JAN22",
+      "BANKNIFTY25JAN29",
+      "BANKNIFTY25FEB05",
+      "BANKNIFTY25FEB12",
+      "BANKNIFTY25FEB19"
+    ],
+    "monthly_options": [
+      "BANKNIFTY25JAN",
+      "BANKNIFTY25FEB",
+      "BANKNIFTY25MAR",
+      "BANKNIFTY25APR"
+    ]
+  },
+  "strike_range": {
+    "min": 40000,
+    "max": 55000,
+    "step": 100
+  },
+  "typical_strikes": {
+    "deep_otm_call": [44000, 44100, 44200, 44300, 44400],
+    "otm_call": [44500, 44600, 44700, 44800, 44900],
+    "atm_call": [45000, 45100, 45200],
+    "itm_call": [45300, 45400, 45500, 45600, 45700],
+    "deep_itm_call": [45800, 45900, 46000, 46100, 46200],
+    "deep_otm_put": [46200, 46100, 46000, 45900, 45800],
+    "otm_put": [45700, 45600, 45500, 45400, 45300],
+    "atm_put": [45200, 45100, 45000],
+    "itm_put": [44900, 44800, 44700, 44600, 44500],
+    "deep_itm_put": [44400, 44300, 44200, 44100, 44000]
+  },
+  "example_symbols": {
+    "calls": [
+      "BANKNIFTY25JAN22C45000",
+      "BANKNIFTY25JAN22C45100",
+      "BANKNIFTY25JAN22C45200",
+      "BANKNIFTY25JAN29C45000",
+      "BANKNIFTY25JAN29C45100",
+      "BANKNIFTY25FEB05C45000",
+      "BANKNIFTY25FEBC45000",
+      "BANKNIFTY25FEBC45100"
+    ],
+    "puts": [
+      "BANKNIFTY25JAN22P45000",
+      "BANKNIFTY25JAN22P44900",
+      "BANKNIFTY25JAN22P44800",
+      "BANKNIFTY25JAN29P45000",
+      "BANKNIFTY25JAN29P44900",
+      "BANKNIFTY25FEB05P45000",
+      "BANKNIFTY25FEBP45000",
+      "BANKNIFTY25FEBP44900"
+    ]
+  },
+  "trading_info": {
+    "exchange": "NFO",
+    "segment": "OPTIDX",
+    "product_type": "CARRYFORWARD",
+    "margin_required": "12-15% of contract value",
+    "settlement": "European Style - Cash Settlement",
+    "expiry_day": "Wednesday",
+    "expiry_time": "15:30 IST",
+    "trading_hours": "09:15 - 15:30 IST"
+  },
+  "risk_parameters": {
+    "var_margin": "12%",
+    "elm_margin": "5%",
+    "adhoc_margin": "Variable",
+    "delivery_margin": "100%",
+    "exposure_margin": "3%"
+  },
+  "current_levels": {
+    "support_levels": [44500, 44000, 43500, 43000],
+    "resistance_levels": [45500, 46000, 46500, 47000],
+    "pivot_points": {
+      "pivot": 45000,
+      "r1": 45300,
+      "r2": 45600,
+      "r3": 45900,
+      "s1": 44700,
+      "s2": 44400,
+      "s3": 44100
+    }
+  },
+  "sector_composition": {
+    "major_banks": [
+      "HDFCBANK",
+      "ICICIBANK", 
+      "KOTAKBANK",
+      "SBIN",
+      "AXISBANK",
+      "INDUSINDBK",
+      "BANDHANBNK",
+      "FEDERALBNK",
+      "IDFCFIRSTB",
+      "PNB"
+    ],
+    "weightage_info": "Market cap weighted index of banking stocks",
+    "base_date": "01-Jun-2000",
+    "base_value": 1000
+  }
+}

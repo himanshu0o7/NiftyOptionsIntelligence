@@ -1,0 +1,97 @@
+{
+  "underlying": "NIFTY",
+  "lot_size": 50,
+  "tick_size": 0.05,
+  "current_symbols": {
+    "index": "NIFTY 50",
+    "futures": [
+      "NIFTY25JAN",
+      "NIFTY25FEB",
+      "NIFTY25MAR",
+      "NIFTY25APR",
+      "NIFTY25MAY"
+    ],
+    "weekly_options": [
+      "NIFTY25JAN23",
+      "NIFTY25JAN30",
+      "NIFTY25FEB06",
+      "NIFTY25FEB13",
+      "NIFTY25FEB20"
+    ],
+    "monthly_options": [
+      "NIFTY25JAN",
+      "NIFTY25FEB",
+      "NIFTY25MAR",
+      "NIFTY25APR"
+    ]
+  },
+  "strike_range": {
+    "min": 19000,
+    "max": 26000,
+    "step": 50
+  },
+  "typical_strikes": {
+    "deep_otm_call": [21000, 21050, 21100, 21150, 21200],
+    "otm_call": [21250, 21300, 21350, 21400, 21450],
+    "atm_call": [21500, 21550, 21600],
+    "itm_call": [21650, 21700, 21750, 21800, 21850],
+    "deep_itm_call": [21900, 21950, 22000, 22050, 22100],
+    "deep_otm_put": [22100, 22050, 22000, 21950, 21900],
+    "otm_put": [21850, 21800, 21750, 21700, 21650],
+    "atm_put": [21600, 21550, 21500],
+    "itm_put": [21450, 21400, 21350, 21300, 21250],
+    "deep_itm_put": [21200, 21150, 21100, 21050, 21000]
+  },
+  "example_symbols": {
+    "calls": [
+      "NIFTY25JAN23C21500",
+      "NIFTY25JAN23C21550",
+      "NIFTY25JAN23C21600",
+      "NIFTY25JAN30C21500",
+      "NIFTY25JAN30C21550",
+      "NIFTY25FEB06C21500",
+      "NIFTY25FEBC21500",
+      "NIFTY25FEBC21550"
+    ],
+    "puts": [
+      "NIFTY25JAN23P21500",
+      "NIFTY25JAN23P21450",
+      "NIFTY25JAN23P21400",
+      "NIFTY25JAN30P21500",
+      "NIFTY25JAN30P21450",
+      "NIFTY25FEB06P21500",
+      "NIFTY25FEBP21500",
+      "NIFTY25FEBP21450"
+    ]
+  },
+  "trading_info": {
+    "exchange": "NFO",
+    "segment": "OPTIDX",
+    "product_type": "CARRYFORWARD",
+    "margin_required": "12-15% of contract value",
+    "settlement": "European Style - Cash Settlement",
+    "expiry_day": "Thursday",
+    "expiry_time": "15:30 IST",
+    "trading_hours": "09:15 - 15:30 IST"
+  },
+  "risk_parameters": {
+    "var_margin": "12%",
+    "elm_margin": "5%",
+    "adhoc_margin": "Variable",
+    "delivery_margin": "100%",
+    "exposure_margin": "3%"
+  },
+  "current_levels": {
+    "support_levels": [21200, 21000, 20800, 20600],
+    "resistance_levels": [21800, 22000, 22200, 22400],
+    "pivot_points": {
+      "pivot": 21500,
+      "r1": 21700,
+      "r2": 21900,
+      "r3": 22100,
+      "s1": 21300,
+      "s2": 21100,
+      "s3": 20900
+    }
+  }
+}
