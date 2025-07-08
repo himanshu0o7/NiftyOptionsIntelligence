@@ -37,6 +37,10 @@ class OrderManager:
                 else:
                     return None
             
+            # Calculate proper quantity (must be multiple of lot size)
+            lot_size = signal.get('lot_size', 50)  # Default NIFTY lot size
+            quantity = lot_size  # Always trade 1 lot as per requirement
+            
             # Build order parameters in Angel One format
             order_params = {
                 "variety": "NORMAL",
@@ -50,7 +54,7 @@ class OrderManager:
                 "price": "0",  # Market order
                 "squareoff": "0",
                 "stoploss": "0",
-                "quantity": str(signal['lot_size'])  # Full lot size
+                "quantity": str(quantity)  # Proper lot size multiple
             }
             
             self.logger.info(f"Placing order: {order_params['tradingsymbol']} {order_params['transactiontype']} {order_params['quantity']}")

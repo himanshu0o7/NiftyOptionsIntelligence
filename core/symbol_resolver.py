@@ -78,7 +78,8 @@ class SymbolResolver:
             if not matching_options.empty:
                 # Get the nearest expiry (current week)
                 today = datetime.now()
-                matching_options['expiry_dt'] = pd.to_datetime(matching_options['expiry'])
+                matching_options = matching_options.copy()
+                matching_options['expiry_dt'] = pd.to_datetime(matching_options['expiry'], format='%d%b%Y')
                 future_expiries = matching_options[matching_options['expiry_dt'] >= today]
                 
                 if not future_expiries.empty:
@@ -99,7 +100,8 @@ class SymbolResolver:
             if not underlying_options.empty:
                 # Filter for current week expiries only
                 today = datetime.now()
-                underlying_options['expiry_dt'] = pd.to_datetime(underlying_options['expiry'])
+                underlying_options = underlying_options.copy()
+                underlying_options['expiry_dt'] = pd.to_datetime(underlying_options['expiry'], format='%d%b%Y')
                 current_week = underlying_options[
                     (underlying_options['expiry_dt'] >= today) &
                     (underlying_options['expiry_dt'] <= today + pd.Timedelta(days=7))
