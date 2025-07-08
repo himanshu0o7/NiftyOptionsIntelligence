@@ -31,6 +31,7 @@ from ml_models.simple_ml import SimplifiedMLEngine
 from styles.dashboard_styles import DASHBOARD_CSS, POPUP_JS, get_status_badge, get_live_indicator, create_signal_card, create_progress_bar
 from utils.popup_manager import PopupManager
 from utils.capital_manager import CapitalManager
+from strategies.professional_options_strategy import ProfessionalOptionsStrategy
 
 # Initialize session state
 if 'api_client' not in st.session_state:
@@ -510,8 +511,40 @@ def generate_breakout_signals():
             st.warning(f"⚠️ Low capital available: ₹{capital_status['available_capital']:,.0f}")
             return []
         
-        # Generate compliant NIFTY signal
-        nifty_signal = capital_manager.create_compliant_signal('NIFTY', 'BUY', 0.78, 'Breakout Analysis')
+        # Use professional strategy for signal generation
+        professional_strategy = ProfessionalOptionsStrategy()
+        
+        # Generate market data for analysis
+        nifty_market_data = {
+            'current_price': capital_manager.get_current_spot_price('NIFTY'),
+            'rsi': 62,  # Simulated RSI
+            'ema_5': 23520,
+            'ema_20': 23480,
+            'volume_ratio': 1.8
+        }
+        
+        # Generate professional signal
+        professional_signal = professional_strategy.generate_professional_signal('NIFTY', nifty_market_data)
+        
+        if professional_signal.get('action') == 'WAIT':
+            st.info(f"⏳ NIFTY: {professional_signal['reason']}")
+            return []
+        
+        # Convert to capital manager format
+        nifty_signal = capital_manager.create_compliant_signal(
+            'NIFTY', 
+            'BUY', 
+            professional_signal.get('confidence', 0.75), 
+            'Professional Strategy'
+        )
+        
+        # Update with professional strategy data
+        nifty_signal.update({
+            'market_sentiment': professional_signal.get('market_sentiment'),
+            'professional_reasoning': professional_signal.get('reasoning'),
+            'greeks_validation': professional_signal.get('greeks_message'),
+            'liquidity_check': professional_signal.get('liquidity_message')
+        })
         
         # Validate signal against all limits
         is_valid, message = capital_manager.validate_signal_for_trading(nifty_signal)
