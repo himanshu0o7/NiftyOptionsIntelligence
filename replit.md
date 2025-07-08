@@ -144,6 +144,8 @@ Preferred communication style: Simple, everyday language.
   - Advanced ML models now integrated with options Greeks for enhanced signal quality
   - Live trading enabled with real Angel One option tokens and NFO exchange
   - Comprehensive options dashboard with Greeks display and market sentiment analysis
+  - **FIXED: Current Week Expiry Dates** - Updated to 10JUL25 (NIFTY) and 09JUL25 (BANKNIFTY)
+  - **RESOLVED: API Authentication** - Added missing IP/MAC attributes for Greeks API calls
 
 ## Trading Configuration
 

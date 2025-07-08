@@ -1,188 +1,188 @@
 {
   "NIFTY_CE": [
     {
-      "symbol": "NIFTY09JAN2523400CE",
-      "name": "NIFTY09JAN2523400CE",
+      "symbol": "NIFTY10JUL2523400CE",
+      "name": "NIFTY10JUL2523400CE",
       "token": "43441",
       "strike": 23400,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "CE"
     },
     {
-      "symbol": "NIFTY09JAN2523450CE",
-      "name": "NIFTY09JAN2523450CE", 
+      "symbol": "NIFTY10JUL2523450CE",
+      "name": "NIFTY10JUL2523450CE", 
       "token": "43442",
       "strike": 23450,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "CE"
     },
     {
-      "symbol": "NIFTY09JAN2523500CE",
-      "name": "NIFTY09JAN2523500CE",
+      "symbol": "NIFTY10JUL2523500CE",
+      "name": "NIFTY10JUL2523500CE",
       "token": "43443",
       "strike": 23500,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "CE"
     },
     {
-      "symbol": "NIFTY09JAN2523550CE",
-      "name": "NIFTY09JAN2523550CE",
+      "symbol": "NIFTY10JUL2523550CE",
+      "name": "NIFTY10JUL2523550CE",
       "token": "43444",
       "strike": 23550,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "CE"
     },
     {
-      "symbol": "NIFTY09JAN2523600CE",
-      "name": "NIFTY09JAN2523600CE",
+      "symbol": "NIFTY10JUL2523600CE",
+      "name": "NIFTY10JUL2523600CE",
       "token": "43445",
       "strike": 23600,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "CE"
     }
   ],
   "NIFTY_PE": [
     {
-      "symbol": "NIFTY09JAN2523400PE",
-      "name": "NIFTY09JAN2523400PE",
+      "symbol": "NIFTY10JUL2523400PE",
+      "name": "NIFTY10JUL2523400PE",
       "token": "43451",
       "strike": 23400,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "PE"
     },
     {
-      "symbol": "NIFTY09JAN2523450PE",
-      "name": "NIFTY09JAN2523450PE",
+      "symbol": "NIFTY10JUL2523450PE",
+      "name": "NIFTY10JUL2523450PE",
       "token": "43452",
       "strike": 23450,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "PE"
     },
     {
-      "symbol": "NIFTY09JAN2523500PE",
-      "name": "NIFTY09JAN2523500PE",
+      "symbol": "NIFTY10JUL2523500PE",
+      "name": "NIFTY10JUL2523500PE",
       "token": "43453",
       "strike": 23500,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "PE"
     },
     {
-      "symbol": "NIFTY09JAN2523550PE",
-      "name": "NIFTY09JAN2523550PE",
+      "symbol": "NIFTY10JUL2523550PE",
+      "name": "NIFTY10JUL2523550PE",
       "token": "43454",
       "strike": 23550,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "PE"
     },
     {
-      "symbol": "NIFTY09JAN2523600PE",
-      "name": "NIFTY09JAN2523600PE",
+      "symbol": "NIFTY10JUL2523600PE",
+      "name": "NIFTY10JUL2523600PE",
       "token": "43455",
       "strike": 23600,
-      "expiry": "09JAN25",
+      "expiry": "10JUL25",
       "lotsize": 50,
       "option_type": "PE"
     }
   ],
   "BANKNIFTY_CE": [
     {
-      "symbol": "BANKNIFTY08JAN2550800CE",
-      "name": "BANKNIFTY08JAN2550800CE",
+      "symbol": "BANKNIFTY09JUL2550800CE",
+      "name": "BANKNIFTY09JUL2550800CE",
       "token": "43461",
       "strike": 50800,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "CE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2550900CE", 
-      "name": "BANKNIFTY08JAN2550900CE",
+      "symbol": "BANKNIFTY09JUL2550900CE", 
+      "name": "BANKNIFTY09JUL2550900CE",
       "token": "43462",
       "strike": 50900,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "CE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2551000CE",
-      "name": "BANKNIFTY08JAN2551000CE",
+      "symbol": "BANKNIFTY09JUL2551000CE",
+      "name": "BANKNIFTY09JUL2551000CE",
       "token": "43463",
       "strike": 51000,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "CE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2551100CE",
-      "name": "BANKNIFTY08JAN2551100CE",
+      "symbol": "BANKNIFTY09JUL2551100CE",
+      "name": "BANKNIFTY09JUL2551100CE",
       "token": "43464",
       "strike": 51100,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "CE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2551200CE",
-      "name": "BANKNIFTY08JAN2551200CE",
+      "symbol": "BANKNIFTY09JUL2551200CE",
+      "name": "BANKNIFTY09JUL2551200CE",
       "token": "43465",
       "strike": 51200,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "CE"
     }
   ],
   "BANKNIFTY_PE": [
     {
-      "symbol": "BANKNIFTY08JAN2550800PE",
-      "name": "BANKNIFTY08JAN2550800PE",
+      "symbol": "BANKNIFTY09JUL2550800PE",
+      "name": "BANKNIFTY09JUL2550800PE",
       "token": "43471",
       "strike": 50800,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "PE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2550900PE",
-      "name": "BANKNIFTY08JAN2550900PE",
+      "symbol": "BANKNIFTY09JUL2550900PE",
+      "name": "BANKNIFTY09JUL2550900PE",
       "token": "43472",
       "strike": 50900,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "PE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2551000PE",
-      "name": "BANKNIFTY08JAN2551000PE",
+      "symbol": "BANKNIFTY09JUL2551000PE",
+      "name": "BANKNIFTY09JUL2551000PE",
       "token": "43473",
       "strike": 51000,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "PE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2551100PE",
-      "name": "BANKNIFTY08JAN2551100PE",
+      "symbol": "BANKNIFTY09JUL2551100PE",
+      "name": "BANKNIFTY09JUL2551100PE",
       "token": "43474",
       "strike": 51100,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "PE"
     },
     {
-      "symbol": "BANKNIFTY08JAN2551200PE",
-      "name": "BANKNIFTY08JAN2551200PE",
+      "symbol": "BANKNIFTY09JUL2551200PE",
+      "name": "BANKNIFTY09JUL2551200PE",
       "token": "43475",
       "strike": 51200,
-      "expiry": "08JAN25",
+      "expiry": "09JUL25",
       "lotsize": 15,
       "option_type": "PE"
     }
