@@ -109,11 +109,20 @@ This is a comprehensive options trading system built with Python and Streamlit t
 
 ### Automation Features
 - **Auto Order Placement**: Places orders based on live market signals automatically
+- **AI-Powered Signals**: Machine learning models generate high-confidence trading signals
+- **Ensemble Predictions**: Multiple ML algorithms vote on trading decisions
 - **Stale Order Management**: Monitors and replaces orders older than 30 minutes
 - **Risk Management**: Automatic position sizing and loss limits
 - **P&L Tracking**: Real-time profit/loss monitoring and updates
-- **Telegram Notifications**: Alerts for all trading activities
-- **Signal Monitoring**: Continuous analysis of breakout and OI signals
+- **Telegram Notifications**: Alerts for all trading activities (includes ML signal notifications)
+- **Signal Monitoring**: Continuous analysis of breakout, OI, and ML signals
+
+### Machine Learning Integration
+- **4 ML Algorithms**: Random Forest, SVM, Logistic Regression, Neural Network
+- **8 Technical Features**: Price momentum, volatility, volume ratios, moving averages
+- **Real-time Predictions**: Live market analysis with confidence scoring
+- **Model Performance Tracking**: Accuracy monitoring and ensemble optimization
+- **OpenMP-Free Implementation**: Stable operation without external dependencies
 
 ## User Preferences
 
@@ -121,13 +130,18 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 08, 2025**: Complete automated trading system deployed
+- **July 08, 2025**: Complete automated trading system with ML integration deployed
   - Configured system for ₹17,000 capital with 1 lot trading
   - Implemented comprehensive risk management (5% daily loss limit, 20% position size)
   - Angel One API integration with manual TOTP authentication
   - Added full automation features: auto order placement, stale order monitoring, P&L tracking
+  - **NEW: Advanced ML models integrated** - 4 algorithms (Random Forest, SVM, Logistic Regression, Neural Network)
+  - **NEW: Real-time AI signal generation** with confidence scoring and ensemble predictions
+  - **NEW: ML Models dashboard** with training controls and performance tracking
+  - Resolved OpenMP dependency issues with simplified ML engine
+  - ML signals now integrated into automated trading system
   - Telegram notifications for all trading events (order placement, execution, alerts)
-  - No manual intervention required after launch - fully automated system
+  - No manual intervention required after launch - fully automated system with AI enhancement
 
 ## Trading Configuration
 

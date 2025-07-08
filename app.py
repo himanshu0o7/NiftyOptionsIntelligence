@@ -475,7 +475,7 @@ def generate_oi_signals():
     st.success(f"Generated {len(signals)} OI analysis signals!")
 
 def generate_all_signals():
-    """Generate all types of signals"""
+    """Generate all types of signals including ML signals"""
     signals = []
     
     # Generate breakout signals
@@ -487,6 +487,19 @@ def generate_all_signals():
     oi_signals = generate_oi_signals()
     if oi_signals:
         signals.extend(oi_signals)
+    
+    # Generate ML signals if engine is available and trained
+    if hasattr(st.session_state, 'ml_engine') and st.session_state.ml_engine and st.session_state.ml_engine.is_trained:
+        try:
+            # Generate sample market data for ML analysis
+            current_data = generate_sample_market_data(days=100)
+            ml_signals = st.session_state.ml_engine.generate_signals(current_data, min_confidence=0.65)
+            if ml_signals:
+                signals.extend(ml_signals)
+                print(f"Generated {len(ml_signals)} ML signals")
+                
+        except Exception as e:
+            print(f"ML signal generation failed: {str(e)}")
     
     return signals
 
@@ -832,25 +845,34 @@ def display_ml_dashboard():
     
     with col2:
         if st.button("🔮 Generate ML Signals", type="primary"):
-            if st.session_state.is_connected:
-                with st.spinner("Generating ML signals..."):
-                    try:
-                        # Generate sample current data
-                        current_data = generate_sample_market_data(days=100)  # Need more data for features
-                        signals = ml_engine.generate_signals(current_data, min_confidence=confidence_threshold)
+            with st.spinner("Generating ML signals..."):
+                try:
+                    # Generate sample current data
+                    current_data = generate_sample_market_data(days=100)  # Need more data for features
+                    signals = ml_engine.generate_signals(current_data, min_confidence=confidence_threshold)
+                    
+                    if signals:
+                        st.success(f"✅ Generated {len(signals)} ML signals")
                         
-                        if signals:
-                            st.success(f"✅ Generated {len(signals)} ML signals")
-                            
-                            for signal in signals:
-                                with st.expander(f"{signal['action']} - {signal['symbol']} (Confidence: {signal['confidence']:.1%})"):
-                                    st.json(signal)
-                        else:
-                            st.info("No high-confidence signals generated")
-                    except Exception as e:
-                        st.error(f"Signal generation error: {str(e)}")
-            else:
-                st.warning("Please connect to Angel One API first")
+                        for signal in signals:
+                            with st.expander(f"🧠 {signal['action']} - {signal['symbol']} (Confidence: {signal['confidence']:.1%})"):
+                                col1, col2 = st.columns(2)
+                                with col1:
+                                    st.write("**Signal Details:**")
+                                    st.write(f"Action: {signal['action']}")
+                                    st.write(f"Confidence: {signal['confidence']:.1%}")
+                                    st.write(f"Type: {signal['signal_type']}")
+                                    st.write(f"Source: {signal['source']}")
+                                with col2:
+                                    st.write("**Model Predictions:**")
+                                    predictions = signal.get('model_predictions', {})
+                                    for model, pred in predictions.items():
+                                        st.write(f"{model}: {pred['prediction']} ({pred['confidence']:.2f})")
+                    else:
+                        st.info("No high-confidence signals generated")
+                        st.write("Try adjusting the confidence threshold or ensure models are properly trained.")
+                except Exception as e:
+                    st.error(f"Signal generation error: {str(e)}")
     
     # Model Configuration
     with st.expander("⚙️ Advanced Configuration"):
