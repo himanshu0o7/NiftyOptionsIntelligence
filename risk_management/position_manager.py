@@ -29,10 +29,10 @@ class Position:
 class PositionManager:
     """Manage trading positions and risk"""
     
-    def __init__(self, config: Dict):
+    def __init__(self, config: Dict, db=None):
         self.config = config
         self.logger = Logger()
-        self.db = Database()
+        self.db = db if db else Database()
         self.greeks_calc = GreeksCalculator()
         
         # Position tracking

@@ -38,6 +38,14 @@ if 'active_positions' not in st.session_state:
     st.session_state.active_positions = []
 if 'signals' not in st.session_state:
     st.session_state.signals = []
+if 'db' not in st.session_state:
+    st.session_state.db = None
+if 'logger' not in st.session_state:
+    st.session_state.logger = None
+if 'settings' not in st.session_state:
+    st.session_state.settings = None
+if 'components_initialized' not in st.session_state:
+    st.session_state.components_initialized = False
 
 # Page configuration
 st.set_page_config(
@@ -48,18 +56,23 @@ st.set_page_config(
 )
 
 def initialize_components():
-    """Initialize all system components"""
+    """Initialize all system components - only once per session"""
+    if st.session_state.components_initialized:
+        return st.session_state.db, st.session_state.logger, st.session_state.settings
+    
     try:
         # Initialize database
-        db = Database()
+        st.session_state.db = Database()
         
         # Initialize logger
-        logger = Logger()
+        st.session_state.logger = Logger()
         
         # Initialize settings
-        settings = Settings()
+        st.session_state.settings = Settings()
         
-        return db, logger, settings
+        st.session_state.components_initialized = True
+        
+        return st.session_state.db, st.session_state.logger, st.session_state.settings
     except Exception as e:
         st.error(f"Error initializing components: {str(e)}")
         return None, None, None
@@ -960,11 +973,11 @@ def update_positions():
     else:
         st.success("Paper trading positions updated!")
     
-    # Initialize position manager with live trading config
+    # Initialize position manager with live trading config and shared database
     if st.session_state.live_trading:
         config = get_live_trading_config()
         if st.session_state.api_client:
-            position_manager = PositionManager(config)
+            position_manager = PositionManager(config, db=st.session_state.db)
             # Fetch real positions from API
             st.info("Connected to API - ready for live position management")
 

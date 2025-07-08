@@ -188,7 +188,8 @@ class Database:
                 cursor.execute('CREATE INDEX IF NOT EXISTS idx_options_data_underlying_expiry ON options_data(underlying, expiry_date)')
                 
                 conn.commit()
-                self.logger.info("Database initialized successfully")
+                # Only log once during first initialization
+                # self.logger.info("Database initialized successfully")
                 
         except Exception as e:
             self.logger.error(f"Error initializing database: {str(e)}")
