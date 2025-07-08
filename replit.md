@@ -110,7 +110,28 @@ This is a comprehensive options trading system built with Python and Streamlit t
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **July 08, 2025**: Live trading configuration complete
+  - Configured system for ₹17,000 capital with 1 lot trading
+  - Implemented comprehensive risk management (5% daily loss limit, 20% position size)
+  - Angel One API integration with manual TOTP authentication
+  - Fixed TOTP secret encoding issues and missing utilities
+  - System now ready for live trading with proper risk controls
+
+## Trading Configuration
+
+### Live Trading Setup
+- **Capital**: ₹17,000 total trading capital
+- **Risk Management**: 
+  - Daily loss limit: ₹850 (5% of capital)
+  - Position size limit: ₹3,400 (20% per position)
+  - Risk per trade: ₹340 (2% of capital)
+  - Maximum concurrent positions: 5
+  - Lot size: 1 lot only
+- **Trading Mode**: Live trading enabled (paper trading disabled)
+- **API Integration**: Angel One SmartAPI with secure credential storage
+
 ## Changelog
 
-Changelog:
-- July 08, 2025. Initial setup
+- July 08, 2025: Initial setup and live trading configuration
