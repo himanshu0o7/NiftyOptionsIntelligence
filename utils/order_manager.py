@@ -24,7 +24,7 @@ class OrderManager:
                 return None
             
             # 1. Capital Check - Ensure order value <= 17,000
-            lot_size = signal.get('lot_size', 50)
+            lot_size = signal.get('lot_size', 75)
             premium = signal.get('premium', 0)
             
             if premium > 0:
@@ -150,7 +150,7 @@ class OrderManager:
                 'strike': strike,
                 'expiry': expiry,
                 'option_type': 'CE',
-                'lot_size': 50 if underlying == 'NIFTY' else 15,
+                'lot_size': 75 if underlying == 'NIFTY' else 35,
                 'action': 'BUY',
                 'underlying': underlying
             }

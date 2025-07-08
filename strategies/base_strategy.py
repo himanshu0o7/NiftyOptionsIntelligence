@@ -268,7 +268,7 @@ class BaseStrategy(ABC):
             'trade_volume': 5000,  # Default volume that passes validation
             'oi_change': 1000,  # Default OI change that passes validation
             'liquidity_score': 0.8,  # Default liquidity score that passes validation
-            'lot_size': 50 if 'NIFTY' in symbol and 'BANKNIFTY' not in symbol else 15,
+            'lot_size': 75 if 'NIFTY' in symbol and 'BANKNIFTY' not in symbol else 35,
             'option_type': 'CE' if 'CE' in symbol else 'PE',
             'exchange': 'NFO'
         }

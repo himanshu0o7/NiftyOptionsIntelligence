@@ -37,8 +37,8 @@ class TradingSettings:
     VWAP_PERIOD: int = 20
     
     # Options Trading
-    NIFTY_LOT_SIZE: int = 50
-    BANKNIFTY_LOT_SIZE: int = 15
+    NIFTY_LOT_SIZE: int = 75
+    BANKNIFTY_LOT_SIZE: int = 35
     
     OPTION_EXPIRY_DAYS: List[str] = None
     

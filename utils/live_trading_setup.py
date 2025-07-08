@@ -291,7 +291,7 @@ class LiveTradingSetup:
             )
             
             if symbol and token:
-                lot_sizes = {'NIFTY': 50, 'BANKNIFTY': 15}
+                lot_sizes = {'NIFTY': 75, 'BANKNIFTY': 35}
                 
                 signal = {
                     'symbol': symbol,
