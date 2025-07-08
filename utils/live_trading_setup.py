@@ -268,15 +268,15 @@ class LiveTradingSetup:
             spot_price = spot_prices.get(underlying, 23500)
             
             if action == 'BUY':
-                if confidence > 0.7:
-                    option_type = 'CE'  # Strong bullish - buy calls
-                    strike = round((spot_price + 50) / 50) * 50  # Slightly OTM
+                if confidence > 0.8:
+                    option_type = 'CE'  # Very strong bullish - buy calls
+                    strike = round((spot_price + 25) / 50) * 50  # Near ATM (slightly OTM)
                 elif confidence < 0.4:
                     option_type = 'PE'  # Bearish - buy puts
-                    strike = round((spot_price - 50) / 50) * 50
+                    strike = round((spot_price - 25) / 50) * 50  # Near ATM puts
                 else:
                     option_type = 'CE'  # Default calls
-                    strike = round(spot_price / 50) * 50  # ATM
+                    strike = round(spot_price / 50) * 50  # ATM (At-The-Money)
             else:
                 option_type = 'CE'
                 strike = round(spot_price / 50) * 50
