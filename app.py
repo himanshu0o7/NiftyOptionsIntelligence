@@ -28,6 +28,8 @@ from utils.telegram_notifier import TelegramNotifier
 from utils.live_data_demo import LiveDataDemo
 from ml_models.ensemble_predictor import EnsemblePredictor
 from ml_models.simple_ml import SimplifiedMLEngine
+from styles.dashboard_styles import DASHBOARD_CSS, POPUP_JS, get_status_badge, get_live_indicator, create_signal_card, create_progress_bar
+from utils.popup_manager import PopupManager
 
 # Initialize session state
 if 'api_client' not in st.session_state:
@@ -91,16 +93,26 @@ def initialize_components():
 
 def main():
     # Add GitHub badges
-    st.markdown("""
-    ![Version](https://img.shields.io/badge/version-v2.1.0-blue)
-    ![Trading Status](https://img.shields.io/badge/trading-live-green)
-    ![Audit Status](https://img.shields.io/badge/audit-codex%20verified-gold)
-    ![AI Status](https://img.shields.io/badge/ai-gemini%20enhanced-purple)
-    ![Success Rate](https://img.shields.io/badge/success%20rate-70%25-brightgreen)
-    """, unsafe_allow_html=True)
+    # Apply stylish CSS
+    st.markdown(DASHBOARD_CSS, unsafe_allow_html=True)
+    st.markdown(POPUP_JS, unsafe_allow_html=True)
     
-    st.title("🚀 Automated Options Trading System")
-    st.markdown("**NIFTY50 & BANKNIFTY Options Trading with Angel One API**")
+    # Enhanced Header with Live Status
+    market_status = "🟢 LIVE" if st.session_state.get('is_connected', False) else "🔴 OFFLINE"
+    st.markdown(f"""
+    <div class="main-header">
+        <h1>{get_live_indicator(st.session_state.get('is_connected', False))}🚀 Multi-Index Options Trading System {market_status}</h1>
+        <p style="text-align: center; margin: 10px 0 0 0; color: rgba(255,255,255,0.8);">
+            Advanced AI-Powered Options Trading for NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY & NIFTYNXT50
+        </p>
+        <div style="text-align: center; margin-top: 15px;">
+            {get_status_badge('success', 'v2.1.0')}
+            {get_status_badge('info', 'Live Trading')}
+            {get_status_badge('warning', 'Audit Verified')}
+            {get_status_badge('success', '70% Success Rate')}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
     
     # Initialize components
     db, logger, settings = initialize_components()
@@ -215,11 +227,11 @@ def main():
         with main_col:
             # Create tabs
             tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9 = st.tabs([
-                "📊 Dashboard", 
+                "📊 Live Dashboard", 
                 "🎯 Market Strategies",
-                "📡 Live Data",
+                "📡 Live Data Feed",
                 "🤖 Auto Trading",
-                "🧠 ML Models",
+                "🧠 ML Analytics",
                 "⚡ Signals", 
                 "💼 Positions", 
                 "⚙️ Strategy Config", 

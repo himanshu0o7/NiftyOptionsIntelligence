@@ -13,6 +13,8 @@ class SymbolResolver:
     def __init__(self):
         self.logger = Logger()
         self.instruments_df = None
+        self.instruments = []  # Add this for backward compatibility
+        self.nfo_options = None
         self.instrument_url = "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
         
     def load_instruments(self, force_refresh: bool = False) -> bool:
@@ -26,6 +28,7 @@ class SymbolResolver:
             
             if response.status_code == 200:
                 instruments = response.json()
+                self.instruments = instruments  # Store raw instruments list
                 self.instruments_df = pd.DataFrame(instruments)
                 
                 # Filter NFO options only

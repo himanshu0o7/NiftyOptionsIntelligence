@@ -233,7 +233,7 @@ class LiveDataDemo:
                     "api_connected": self.api_client.is_session_valid(),
                     "websocket_available": True,
                     "greeks_api_active": True,
-                    "symbol_resolver_loaded": len(self.symbol_resolver.instruments) > 0
+                    "symbol_resolver_loaded": hasattr(self.symbol_resolver, 'instruments') and len(self.symbol_resolver.instruments) > 0
                 },
                 "data_sources": {
                     "real_time_prices": "Angel One WebSocket v2",
