@@ -254,8 +254,69 @@ class LiveTradingSetup:
         return signal
     
     def create_live_signal(self, underlying: str, action: str, confidence: float, signal_type: str) -> Dict:
-        """Create a live trading signal with valid option data (backward compatibility)"""
-        return self.create_live_signal_with_greeks(underlying, action, confidence, signal_type)
+        """Create live trading signal using Angel One symbol resolver"""
+        try:
+            from core.symbol_resolver import SymbolResolver
+            
+            resolver = SymbolResolver()
+            if not resolver.load_instruments():
+                self.logger.error("Failed to load Angel One instruments")
+                return None
+            
+            # Determine option parameters based on signal
+            spot_prices = {'NIFTY': 23500, 'BANKNIFTY': 51000}
+            spot_price = spot_prices.get(underlying, 23500)
+            
+            if action == 'BUY':
+                if confidence > 0.7:
+                    option_type = 'CE'  # Strong bullish - buy calls
+                    strike = round((spot_price + 50) / 50) * 50  # Slightly OTM
+                elif confidence < 0.4:
+                    option_type = 'PE'  # Bearish - buy puts
+                    strike = round((spot_price - 50) / 50) * 50
+                else:
+                    option_type = 'CE'  # Default calls
+                    strike = round(spot_price / 50) * 50  # ATM
+            else:
+                option_type = 'CE'
+                strike = round(spot_price / 50) * 50
+            
+            # Get current week expiry
+            expiry_dates = {'NIFTY': '10JUL25', 'BANKNIFTY': '09JUL25'}
+            expiry = expiry_dates.get(underlying, '10JUL25')
+            
+            # Resolve real Angel One symbol and token
+            symbol, token = resolver.get_option_symbol_and_token(
+                underlying, expiry, strike, option_type
+            )
+            
+            if symbol and token:
+                lot_sizes = {'NIFTY': 50, 'BANKNIFTY': 15}
+                
+                signal = {
+                    'symbol': symbol,
+                    'token': token,
+                    'strike': strike,
+                    'expiry': expiry,
+                    'option_type': option_type,
+                    'lot_size': lot_sizes.get(underlying, 50),
+                    'exchange': 'NFO',
+                    'action': action,
+                    'confidence': confidence,
+                    'signal_type': signal_type,
+                    'underlying': underlying,
+                    'timestamp': datetime.now().isoformat()
+                }
+                
+                self.logger.info(f"Live signal created: {symbol} {action} confidence {confidence}")
+                return signal
+            else:
+                self.logger.error(f"Could not resolve {underlying} {strike} {option_type} {expiry}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Error creating live signal: {e}")
+            return None
     
     def get_tradeable_symbols(self) -> List[Dict]:
         """Get list of symbols ready for live trading"""
