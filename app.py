@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
@@ -25,6 +26,8 @@ if 'websocket_client' not in st.session_state:
     st.session_state.websocket_client = None
 if 'is_connected' not in st.session_state:
     st.session_state.is_connected = False
+if 'ml_engine' not in st.session_state:
+    st.session_state.ml_engine = None
 if 'paper_trading' not in st.session_state:
     st.session_state.paper_trading = False  # Live trading mode
 if 'live_trading' not in st.session_state:
@@ -170,9 +173,10 @@ def main():
     # Main Dashboard
     if st.session_state.is_connected:
         # Create tabs
-        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
             "📊 Dashboard", 
             "🤖 Auto Trading",
+            "🧠 ML Models",
             "⚡ Signals", 
             "💼 Positions", 
             "⚙️ Strategy Config", 
@@ -186,15 +190,18 @@ def main():
             auto_trading_dashboard()
         
         with tab3:
-            display_signals()
+            display_ml_dashboard()
         
         with tab4:
-            display_positions()
+            display_signals()
         
         with tab5:
-            display_strategy_config()
+            display_positions()
         
         with tab6:
+            display_strategy_config()
+        
+        with tab7:
             display_pnl_analysis()
     
     else:
@@ -672,6 +679,242 @@ def auto_trading_dashboard():
             st.rerun()
     else:
         st.info("🔴 Automated trading is INACTIVE - switch to Auto Trading tab and click Start")
+
+def display_ml_dashboard():
+    """Display ML models dashboard"""
+    st.subheader("🧠 Machine Learning Models")
+    
+    # Initialize ML engine if not exists
+    if st.session_state.ml_engine is None:
+        try:
+            from ml_models.ml_integration import MLTradingEngine
+            st.session_state.ml_engine = MLTradingEngine()
+            st.info("ML Engine initialized")
+        except Exception as e:
+            st.error(f"Failed to initialize ML engine: {str(e)}")
+            return
+    
+    ml_engine = st.session_state.ml_engine
+    
+    # Model Status Overview
+    col1, col2, col3, col4 = st.columns(4)
+    
+    try:
+        model_status = ml_engine.get_model_status()
+        
+        with col1:
+            ml_trained = model_status.get('ml_ensemble', {}).get('is_trained', False)
+            st.metric("ML Ensemble", "✅ Trained" if ml_trained else "❌ Not Trained")
+            
+        with col2:
+            lstm_trained = model_status.get('lstm', {}).get('is_trained', False)
+            st.metric("LSTM Model", "✅ Trained" if lstm_trained else "❌ Not Trained")
+            
+        with col3:
+            performance = ml_engine.get_performance_metrics()
+            overall_accuracy = 0
+            if performance:
+                total_correct = sum(p.get('correct_signals', 0) for p in performance.values())
+                total_signals = sum(p.get('total_signals', 0) for p in performance.values())
+                overall_accuracy = total_correct / total_signals if total_signals > 0 else 0
+            st.metric("Overall Accuracy", f"{overall_accuracy:.1%}")
+            
+        with col4:
+            should_retrain = model_status.get('should_retrain', False)
+            st.metric("Retrain Status", "🔄 Due" if should_retrain else "✅ Current")
+    
+    except Exception as e:
+        st.error(f"Error getting model status: {str(e)}")
+    
+    # Training Controls
+    st.subheader("🎯 Model Training")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        if st.button("🚀 Train ML Models", type="primary"):
+            if st.session_state.is_connected:
+                with st.spinner("Training ML models... This may take several minutes."):
+                    try:
+                        # Generate sample data for training (in production, use real historical data)
+                        sample_data = generate_sample_market_data()
+                        results = ml_engine.initialize_models(sample_data, initial_training=True)
+                        
+                        if results:
+                            st.success("✅ ML models trained successfully!")
+                            st.json(results)
+                        else:
+                            st.error("❌ Training failed")
+                    except Exception as e:
+                        st.error(f"Training error: {str(e)}")
+            else:
+                st.warning("Please connect to Angel One API first")
+    
+    with col2:
+        if st.button("🔄 Retrain Models"):
+            with st.spinner("Retraining models..."):
+                try:
+                    sample_data = generate_sample_market_data()
+                    results = ml_engine.retrain_models(sample_data)
+                    if results:
+                        st.success("✅ Models retrained successfully!")
+                    else:
+                        st.error("❌ Retraining failed")
+                except Exception as e:
+                    st.error(f"Retraining error: {str(e)}")
+    
+    with col3:
+        auto_retrain = st.session_state.get('auto_retrain', False)
+        if st.button("🤖 Auto Retrain: " + ("ON" if auto_retrain else "OFF")):
+            st.session_state.auto_retrain = not auto_retrain
+            if st.session_state.auto_retrain:
+                st.success("🤖 Automatic retraining enabled")
+            else:
+                st.info("🔄 Automatic retraining disabled")
+    
+    # Model Performance
+    st.subheader("📊 Model Performance")
+    
+    try:
+        performance_metrics = ml_engine.get_performance_metrics()
+        
+        if performance_metrics:
+            perf_df = pd.DataFrame([
+                {
+                    'Model': model_type.replace('_', ' ').title(),
+                    'Accuracy': f"{metrics.get('accuracy', 0):.1%}",
+                    'Total Signals': metrics.get('total_signals', 0),
+                    'Correct Signals': metrics.get('correct_signals', 0)
+                }
+                for model_type, metrics in performance_metrics.items()
+            ])
+            
+            st.dataframe(perf_df, use_container_width=True)
+        else:
+            st.info("No performance data available yet. Generate some signals first.")
+    
+    except Exception as e:
+        st.error(f"Error displaying performance: {str(e)}")
+    
+    # Feature Importance
+    st.subheader("🎯 Feature Importance")
+    
+    try:
+        importance_data = ml_engine.get_feature_importance_summary()
+        
+        if importance_data.get('top_features'):
+            # Create feature importance chart
+            features, importances = zip(*importance_data['top_features'][:15])
+            
+            fig = px.bar(
+                x=importances,
+                y=features,
+                orientation='h',
+                title="Top 15 Most Important Features",
+                labels={'x': 'Importance Score', 'y': 'Features'}
+            )
+            fig.update_layout(height=500)
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Feature importance data not available. Train models first.")
+    
+    except Exception as e:
+        st.error(f"Error displaying feature importance: {str(e)}")
+    
+    # ML Signal Generation
+    st.subheader("⚡ Generate ML Signals")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        confidence_threshold = st.slider("Confidence Threshold", 0.5, 0.9, 0.65, 0.05)
+    
+    with col2:
+        if st.button("🔮 Generate ML Signals", type="primary"):
+            if st.session_state.is_connected:
+                with st.spinner("Generating ML signals..."):
+                    try:
+                        # Generate sample current data
+                        current_data = generate_sample_market_data(days=1)
+                        signals = ml_engine.generate_ml_signals(current_data, min_confidence=confidence_threshold)
+                        
+                        if signals:
+                            st.success(f"✅ Generated {len(signals)} ML signals")
+                            
+                            for signal in signals:
+                                with st.expander(f"{signal['action']} - {signal['symbol']} (Confidence: {signal['confidence']:.1%})"):
+                                    st.json(signal)
+                        else:
+                            st.info("No high-confidence signals generated")
+                    except Exception as e:
+                        st.error(f"Signal generation error: {str(e)}")
+            else:
+                st.warning("Please connect to Angel One API first")
+    
+    # Model Configuration
+    with st.expander("⚙️ Advanced Configuration"):
+        st.subheader("Model Settings")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.write("**Ensemble Models:**")
+            st.write("- Random Forest")
+            st.write("- XGBoost") 
+            st.write("- LightGBM")
+            st.write("- Gradient Boosting")
+            st.write("- Neural Network")
+            
+        with col2:
+            st.write("**LSTM Model:**")
+            st.write("- Bidirectional LSTM")
+            st.write("- 60-day sequence length")
+            st.write("- 5-day prediction horizon")
+            st.write("- Early stopping & regularization")
+
+def generate_sample_market_data(days: int = 252) -> pd.DataFrame:
+    """Generate sample market data for ML training"""
+    try:
+        dates = pd.date_range(start='2023-01-01', periods=days, freq='D')
+        
+        # Generate realistic price data
+        np.random.seed(42)
+        price = 100
+        prices = []
+        volumes = []
+        
+        for i in range(days):
+            # Random walk with slight upward bias
+            change = np.random.normal(0.001, 0.02)
+            price = max(price * (1 + change), 50)  # Minimum price floor
+            prices.append(price)
+            
+            # Volume with some correlation to price changes
+            volume = np.random.normal(1000000, 200000)
+            volume = max(volume, 100000)
+            volumes.append(int(volume))
+        
+        data = pd.DataFrame({
+            'timestamp': dates,
+            'open': prices,
+            'high': [p * np.random.uniform(1.0, 1.05) for p in prices],
+            'low': [p * np.random.uniform(0.95, 1.0) for p in prices],
+            'close': prices,
+            'volume': volumes
+        })
+        
+        # Add some technical indicators
+        data['rsi'] = 50 + np.random.normal(0, 15, days)
+        data['macd'] = np.random.normal(0, 2, days)
+        data['bb_position'] = np.random.uniform(0, 1, days)
+        data['volatility'] = np.random.uniform(0.1, 0.5, days)
+        
+        data.set_index('timestamp', inplace=True)
+        return data
+        
+    except Exception as e:
+        st.error(f"Sample data generation error: {str(e)}")
+        return pd.DataFrame()
 
 def get_live_trading_config():
     """Get configuration for live trading with 17k capital"""
