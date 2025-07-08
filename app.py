@@ -29,7 +29,7 @@ if 'is_connected' not in st.session_state:
 if 'ml_engine' not in st.session_state:
     st.session_state.ml_engine = None
 if 'paper_trading' not in st.session_state:
-    st.session_state.paper_trading = True  # Start with paper trading for safety
+    st.session_state.paper_trading = False  # Enable live trading as requested
 if 'live_trading' not in st.session_state:
     st.session_state.live_trading = True
 if 'capital' not in st.session_state:
@@ -450,30 +450,22 @@ def create_sample_options_chain(symbol):
     return pd.DataFrame(data)
 
 def generate_breakout_signals():
-    """Generate breakout signals"""
-    # Use real symbols from the symbol files - current weekly options
+    """Generate breakout signals with real Angel One instruments"""
+    from utils.live_trading_setup import LiveTradingSetup
+    
+    setup = LiveTradingSetup()
+    
+    # Generate signals using validated instruments
     signals = [
-        {
-            'symbol': 'NIFTY25JAN23C21500',  # Real NIFTY weekly call option
-            'token': '43441',  # Real token - would come from instrument master
-            'action': 'BUY',
-            'signal_type': 'BREAKOUT',
-            'confidence': 0.85,
-            'price': 285.0,
-            'timestamp': datetime.now().isoformat(),
-            'source': 'Breakout Strategy'
-        },
-        {
-            'symbol': 'BANKNIFTY25JAN22P45000',  # Real BANKNIFTY weekly put option
-            'token': '43442',  # Real token - would come from instrument master
-            'action': 'SELL',
-            'signal_type': 'BREAKDOWN',
-            'confidence': 0.78,
-            'price': 320.0,
-            'timestamp': datetime.now().isoformat(),
-            'source': 'Breakout Strategy'
-        }
+        setup.create_live_signal('NIFTY', 'BUY', 0.85, 'BREAKOUT'),
+        setup.create_live_signal('BANKNIFTY', 'SELL', 0.78, 'BREAKDOWN')
     ]
+    
+    # Add timestamp and source
+    for signal in signals:
+        signal['timestamp'] = datetime.now().isoformat()
+        signal['source'] = 'Breakout Strategy'
+        signal['price'] = 21500.0 if 'NIFTY' in signal['symbol'] else 45000.0
     
     # Add to session state for display
     display_signals = [
@@ -500,19 +492,21 @@ def generate_breakout_signals():
     return signals
 
 def generate_oi_signals():
-    """Generate OI analysis signals"""
+    """Generate OI analysis signals with real instruments"""
+    from utils.live_trading_setup import LiveTradingSetup
+    
+    setup = LiveTradingSetup()
+    
+    # Generate OI-based signal
     signals = [
-        {
-            'symbol': 'NIFTY25JAN23P21450',  # Real NIFTY weekly put option
-            'token': '43443',  # Real token - would come from instrument master
-            'action': 'BUY',
-            'signal_type': 'HIGH_OI_BUILD',
-            'confidence': 0.72,
-            'price': 195.0,
-            'timestamp': datetime.now().isoformat(),
-            'source': 'OI Analysis'
-        }
+        setup.create_live_signal('NIFTY', 'BUY', 0.72, 'HIGH_OI_BUILD')
     ]
+    
+    # Add specific OI analysis data
+    for signal in signals:
+        signal['timestamp'] = datetime.now().isoformat()
+        signal['source'] = 'OI Analysis'
+        signal['price'] = 21450.0
     
     # Add to session state for display
     display_signals = [
@@ -628,23 +622,24 @@ def place_automated_order(signal):
             
         config = get_live_trading_config()
         
-        # Get symbol and token from signal
-        symbol = signal.get('symbol', 'NIFTY25JAN23C21500')
-        token = signal.get('token', '43441')
+        # Get symbol and token from signal (validated)
+        symbol = signal.get('symbol', 'Nifty 50')
+        token = signal.get('token', '99926000')
+        exchange = signal.get('exchange', 'NSE')
         
-        # For now, simulate order placement for demo purposes since we need valid instrument tokens
-        if st.session_state.get('paper_trading', True):
+        # Check if paper trading is enabled
+        if st.session_state.get('paper_trading', False):
             st.success(f"✅ PAPER TRADE: {signal['action']} {symbol} (Confidence: {signal.get('confidence', 0):.1%})")
             send_telegram_notification(f"Paper Trade: {signal['action']} {symbol} - Confidence: {signal.get('confidence', 0):.1%}")
             return True
         
-        # Real order placement - needs valid instrument tokens from Angel One
+        # Real order placement with validated instruments
         order_params = {
             'variety': 'NORMAL',
             'tradingsymbol': symbol,
             'symboltoken': token,
             'transactiontype': signal['action'].upper(),
-            'exchange': 'NFO',
+            'exchange': exchange,
             'ordertype': 'MARKET',
             'producttype': 'INTRADAY',
             'duration': 'DAY',
@@ -754,8 +749,15 @@ def auto_trading_dashboard():
         st.metric("Signals Generated", signals_count)
     
     with col3:
-        st.metric("Orders Today", "0")  # Would fetch from database
-        st.metric("Success Rate", "85%")  # Would calculate from historical data
+        trading_mode = "LIVE" if not st.session_state.get('paper_trading', False) else "PAPER"
+        st.metric("Trading Mode", trading_mode)
+        st.metric("Capital", f"₹{st.session_state.get('capital', 17000)}")
+        
+        # Add live trading status indicator
+        if trading_mode == "LIVE":
+            st.success("🟢 Live Trading Active")
+        else:
+            st.info("📄 Paper Trading Mode")
     
     # Automation features checklist
     st.subheader("✅ Automated Features")
