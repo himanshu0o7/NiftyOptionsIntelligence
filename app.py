@@ -22,6 +22,9 @@ from utils.logger import Logger
 from config.settings import Settings
 from risk_management.audit_filters import AuditBasedFilters
 from utils.success_rate_tracker import SuccessRateTracker
+from strategies.market_specific_strategies import MarketSpecificStrategies, MarketMode
+from utils.backtesting_engine import BacktestingEngine
+from utils.telegram_notifier import TelegramNotifier
 
 # Initialize session state
 if 'api_client' not in st.session_state:
@@ -206,8 +209,9 @@ def main():
         
         with main_col:
             # Create tabs
-            tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+            tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8 = st.tabs([
                 "📊 Dashboard", 
+                "🎯 Market Strategies",
                 "🤖 Auto Trading",
                 "🧠 ML Models",
                 "⚡ Signals", 
@@ -220,21 +224,24 @@ def main():
                 display_dashboard()
             
             with tab2:
+                display_market_strategies()
+            
+            with tab3:
                 auto_trading_dashboard()
         
-            with tab3:
+            with tab4:
                 display_ml_dashboard()
             
-            with tab4:
+            with tab5:
                 display_signals()
             
-            with tab5:
+            with tab6:
                 display_positions()
             
-            with tab6:
+            with tab7:
                 display_strategy_config()
             
-            with tab7:
+            with tab8:
                 display_pnl_analysis()
     
     else:
@@ -1365,6 +1372,285 @@ def display_audit_summary():
         
     except Exception as e:
         st.error(f"Audit summary error: {e}")
+
+def display_market_strategies():
+    """Display market-specific strategies for all 5 indices"""
+    try:
+        st.header("🎯 Market-Specific Strategies")
+        st.markdown("**Bullish, Bearish & Rangebound strategies for NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY, NIFTYNXT50**")
+        
+        # Strategy overview
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.subheader("🟢 Bullish Strategy")
+            st.markdown("""
+            **Entry Triggers:**
+            - RSI 14 > 60
+            - Price > VWAP & EMA crossover
+            - Call OI decreasing + Put OI increasing
+            - Delta ≈ 0.4-0.5 (slightly OTM)
+            
+            **Risk Management:**
+            - SL: 40% of premium or Delta < 0.2
+            - TSL: After 15% gain, trail 10%
+            - TP: 30%-50% of premium
+            """)
+        
+        with col2:
+            st.subheader("🔴 Bearish Strategy")
+            st.markdown("""
+            **Entry Triggers:**
+            - RSI 14 < 40
+            - Price < VWAP & EMA crossover down
+            - PE OI increasing + CE unwinding
+            - Delta ≈ -0.4 to -0.5
+            
+            **Risk Management:**
+            - SL: 50% of premium or Delta > -0.2
+            - TSL: After 20% gain
+            - TP: 40%-60% on momentum
+            """)
+        
+        with col3:
+            st.subheader("🟡 Rangebound Strategy")
+            st.markdown("""
+            **Entry Triggers:**
+            - RSI 45-55 zone
+            - Price in VWAP ± 0.5%
+            - High OI on both CE/PE ATM
+            - IV low and stable
+            
+            **Risk Management:**
+            - Greeks-based SL
+            - Quick breakout trades
+            - Volume + OI confirmation
+            """)
+        
+        st.divider()
+        
+        # Interactive strategy tester
+        st.subheader("🧪 Interactive Strategy Tester")
+        
+        col1, col2, col3, col4 = st.columns(4)
+        
+        with col1:
+            selected_strategy = st.selectbox("Strategy Type", ["Bullish", "Bearish", "Rangebound"])
+        
+        with col2:
+            selected_index = st.selectbox("Select Index", ["NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY", "NIFTYNXT50"])
+        
+        with col3:
+            run_backtest = st.checkbox("Include Backtest")
+        
+        with col4:
+            if st.button("🚀 Generate Signal", type="primary"):
+                with st.spinner("Generating market-specific signal..."):
+                    try:
+                        # Initialize market strategies
+                        market_strategies = MarketSpecificStrategies()
+                        
+                        # Generate sample data
+                        sample_data = generate_sample_market_data(days=100)
+                        sample_options = create_sample_options_chain(selected_index)
+                        spot_price = 23500 if selected_index == "NIFTY" else 51000
+                        
+                        # Generate signal based on strategy
+                        signal = None
+                        if selected_strategy == "Bullish":
+                            signal = market_strategies.generate_bullish_signal(
+                                sample_data, selected_index, spot_price, sample_options
+                            )
+                        elif selected_strategy == "Bearish":
+                            signal = market_strategies.generate_bearish_signal(
+                                sample_data, selected_index, spot_price, sample_options
+                            )
+                        else:
+                            signal = market_strategies.generate_rangebound_signal(
+                                sample_data, selected_index, spot_price, sample_options
+                            )
+                        
+                        if signal:
+                            st.success(f"✅ {selected_strategy} Signal Generated!")
+                            
+                            # Display signal details in columns
+                            col1, col2, col3 = st.columns(3)
+                            
+                            with col1:
+                                st.markdown("**📊 Signal Details**")
+                                st.write(f"Symbol: {signal.symbol}")
+                                st.write(f"Action: {signal.action}")
+                                st.write(f"Strike: {signal.strike}")
+                                st.write(f"Confidence: {signal.confidence:.1%}")
+                                st.write(f"Market Mode: {signal.market_mode.value.title()}")
+                            
+                            with col2:
+                                st.markdown("**💰 Risk Management**")
+                                st.write(f"Entry: ₹{signal.entry_price:.2f}")
+                                st.write(f"Stop Loss: ₹{signal.stop_loss:.2f}")
+                                st.write(f"Take Profit: ₹{signal.take_profit:.2f}")
+                                st.write(f"Capital: ₹{signal.capital_required:,.0f}")
+                                st.write(f"R:R Ratio: 1:{signal.risk_reward_ratio:.1f}")
+                            
+                            with col3:
+                                st.markdown("**🎯 Entry Triggers**")
+                                for trigger in signal.entry_triggers:
+                                    st.write(f"• {trigger}")
+                            
+                            # Greeks display
+                            st.markdown("**📈 Greeks Analysis**")
+                            greeks_col1, greeks_col2, greeks_col3, greeks_col4 = st.columns(4)
+                            
+                            with greeks_col1:
+                                st.metric("Delta", f"{signal.greeks.get('delta', 0):.3f}")
+                            with greeks_col2:
+                                st.metric("Gamma", f"{signal.greeks.get('gamma', 0):.4f}")
+                            with greeks_col3:
+                                st.metric("Theta", f"{signal.greeks.get('theta', 0):.2f}")
+                            with greeks_col4:
+                                st.metric("Vega", f"{signal.greeks.get('vega', 0):.3f}")
+                        
+                        else:
+                            st.warning(f"❌ No {selected_strategy.lower()} signal generated for {selected_index}")
+                            st.info("Market conditions may not be suitable for this strategy")
+                        
+                    except Exception as e:
+                        st.error(f"Error generating signal: {e}")
+        
+        st.divider()
+        
+        # Backtesting section
+        st.subheader("🧪 Strategy Backtesting Engine")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            num_trades = st.slider("Number of Trades", 5, 20, 10)
+        
+        with col2:
+            test_capital = st.number_input("Test Capital (₹)", 10000, 50000, 17000)
+        
+        with col3:
+            if st.button("🔄 Run Backtest", type="secondary"):
+                with st.spinner("Running comprehensive backtest..."):
+                    try:
+                        # Initialize backtesting engine
+                        backtest_engine = BacktestingEngine(initial_capital=test_capital)
+                        
+                        # Run backtest
+                        results = backtest_engine.run_backtest(num_trades=num_trades)
+                        
+                        if results['total_trades'] > 0:
+                            st.success("✅ Backtest Complete!")
+                            
+                            # Performance metrics
+                            col1, col2, col3, col4 = st.columns(4)
+                            
+                            with col1:
+                                st.metric("Total Trades", results['total_trades'])
+                                st.metric("Win Rate", f"{results['win_rate']:.1f}%")
+                            
+                            with col2:
+                                st.metric("Total P&L", f"₹{results['total_pnl']:,.0f}")
+                                st.metric("Final Capital", f"₹{results['final_capital']:,.0f}")
+                            
+                            with col3:
+                                st.metric("Max Drawdown", f"{results['max_drawdown']:.1f}%")
+                                st.metric("Sharpe Ratio", f"{results['sharpe_ratio']:.2f}")
+                            
+                            with col4:
+                                st.metric("Risk-Reward", f"1:{results['risk_reward_ratio']:.1f}")
+                                st.metric("Profit Factor", f"{results['profit_factor']:.2f}")
+                            
+                            # Exit statistics
+                            st.markdown("**📊 Exit Statistics**")
+                            exit_col1, exit_col2, exit_col3 = st.columns(3)
+                            
+                            with exit_col1:
+                                st.progress(results['sl_hit_percent'] / 100, f"Stop Loss: {results['sl_hit_percent']:.1f}%")
+                            with exit_col2:
+                                st.progress(results['tsl_hit_percent'] / 100, f"Trailing SL: {results['tsl_hit_percent']:.1f}%")
+                            with exit_col3:
+                                st.progress(results['tp_hit_percent'] / 100, f"Take Profit: {results['tp_hit_percent']:.1f}%")
+                            
+                            # Audit compliance
+                            audit_status = results.get('passed_audit', {})
+                            if audit_status.get('overall_pass', False):
+                                st.success("🎯 Strategy passed audit compliance!")
+                            else:
+                                st.warning("⚠️ Strategy needs improvement for audit compliance")
+                            
+                            # Export option
+                            if st.button("📄 Export Backtest Results"):
+                                filepath = backtest_engine.export_backtest_results()
+                                if filepath:
+                                    st.success(f"Results exported to {filepath}")
+                        
+                        else:
+                            st.error("No trades executed in backtest")
+                            
+                    except Exception as e:
+                        st.error(f"Backtest error: {e}")
+        
+        # Capital allocation table for all indices
+        st.subheader("💰 Dynamic Capital Allocation (All Indices)")
+        
+        lot_sizes = {
+            'NIFTY': 75,
+            'BANKNIFTY': 15,
+            'FINNIFTY': 25,
+            'MIDCPNIFTY': 50,
+            'NIFTYNXT50': 120
+        }
+        
+        sample_premiums = {
+            'NIFTY': 180,
+            'BANKNIFTY': 220,
+            'FINNIFTY': 160,
+            'MIDCPNIFTY': 140,
+            'NIFTYNXT50': 95
+        }
+        
+        capital_data = []
+        total_capital = 17000
+        buffer = 500
+        
+        for index, lot_size in lot_sizes.items():
+            premium = sample_premiums[index]
+            capital_req = premium * lot_size
+            within_limit = capital_req <= (total_capital - buffer)
+            
+            capital_data.append({
+                'Index': index,
+                'Lot Size': lot_size,
+                'Sample Premium (₹)': premium,
+                'Capital Required (₹)': f"{capital_req:,}",
+                'Within Daily Limit': "✅" if within_limit else "❌",
+                'Capital Utilization (%)': f"{(capital_req / total_capital) * 100:.1f}%",
+                'Max Trades/Day': max(1, int(3400 / capital_req))  # Based on daily limit
+            })
+        
+        df_capital = pd.DataFrame(capital_data)
+        st.dataframe(df_capital, use_container_width=True)
+        
+        # Strategy recommendations
+        st.subheader("💡 Strategy Recommendations")
+        
+        recommendations = [
+            "Start with 1-2 positions to validate system",
+            "Use ATM/near ATM strikes for higher success probability",
+            "Respect Greeks-based SL rules strictly (Delta < 0.05)",
+            "Monitor TSL activation after 15% profit",
+            "Avoid trades with expiry < 2 days",
+            "Check volume > 1000 and healthy OI before entry",
+            "Use market mode detection for strategy selection"
+        ]
+        
+        for i, rec in enumerate(recommendations, 1):
+            st.write(f"{i}. {rec}")
+        
+    except Exception as e:
+        st.error(f"Error in market strategies display: {e}")
 
 if __name__ == "__main__":
     import numpy as np

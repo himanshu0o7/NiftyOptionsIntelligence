@@ -37,8 +37,15 @@ class TradingSettings:
     VWAP_PERIOD: int = 20
     
     # Options Trading
+    # Lot sizes for all supported indices (updated values)
     NIFTY_LOT_SIZE: int = 75
-    BANKNIFTY_LOT_SIZE: int = 35
+    BANKNIFTY_LOT_SIZE: int = 15  # Updated from 35
+    FINNIFTY_LOT_SIZE: int = 25
+    MIDCPNIFTY_LOT_SIZE: int = 50
+    NIFTYNXT50_LOT_SIZE: int = 120
+    
+    # Supported indices mapping
+    SUPPORTED_INDICES: Dict[str, int] = None
     
     OPTION_EXPIRY_DAYS: List[str] = None
     
@@ -52,6 +59,15 @@ class TradingSettings:
     def __post_init__(self):
         if self.OPTION_EXPIRY_DAYS is None:
             self.OPTION_EXPIRY_DAYS = ["Thursday"]  # Weekly expiry
+        
+        if self.SUPPORTED_INDICES is None:
+            self.SUPPORTED_INDICES = {
+                'NIFTY': 75,
+                'BANKNIFTY': 15,
+                'FINNIFTY': 25,
+                'MIDCPNIFTY': 50,
+                'NIFTYNXT50': 120
+            }
     
     @classmethod
     def from_env(cls) -> 'TradingSettings':

@@ -1,0 +1,1 @@
+id,trade_id,symbol,entry_time,exit_time,entry_price,exit_price,quantity,pnl,pnl_percentage,trade_result,exit_reason,confidence_score,strategy_type,market_mode,created_at
