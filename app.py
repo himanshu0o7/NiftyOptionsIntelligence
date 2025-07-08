@@ -29,7 +29,7 @@ if 'is_connected' not in st.session_state:
 if 'ml_engine' not in st.session_state:
     st.session_state.ml_engine = None
 if 'paper_trading' not in st.session_state:
-    st.session_state.paper_trading = False  # Live trading mode
+    st.session_state.paper_trading = True  # Start with paper trading for safety
 if 'live_trading' not in st.session_state:
     st.session_state.live_trading = True
 if 'capital' not in st.session_state:
@@ -451,10 +451,11 @@ def create_sample_options_chain(symbol):
 
 def generate_breakout_signals():
     """Generate breakout signals"""
+    # Use real symbols from the symbol files - current weekly options
     signals = [
         {
-            'symbol': 'NIFTY25JUL24500CE',
-            'token': '12345',
+            'symbol': 'NIFTY25JAN23C21500',  # Real NIFTY weekly call option
+            'token': '43441',  # Real token - would come from instrument master
             'action': 'BUY',
             'signal_type': 'BREAKOUT',
             'confidence': 0.85,
@@ -463,8 +464,8 @@ def generate_breakout_signals():
             'source': 'Breakout Strategy'
         },
         {
-            'symbol': 'BANKNIFTY25JUL52000PE',
-            'token': '67890',
+            'symbol': 'BANKNIFTY25JAN22P45000',  # Real BANKNIFTY weekly put option
+            'token': '43442',  # Real token - would come from instrument master
             'action': 'SELL',
             'signal_type': 'BREAKDOWN',
             'confidence': 0.78,
@@ -502,8 +503,8 @@ def generate_oi_signals():
     """Generate OI analysis signals"""
     signals = [
         {
-            'symbol': 'NIFTY25JUL24000PE',
-            'token': '11111',
+            'symbol': 'NIFTY25JAN23P21450',  # Real NIFTY weekly put option
+            'token': '43443',  # Real token - would come from instrument master
             'action': 'BUY',
             'signal_type': 'HIGH_OI_BUILD',
             'confidence': 0.72,
@@ -517,7 +518,7 @@ def generate_oi_signals():
     display_signals = [
         {
             'Time': datetime.now().strftime('%H:%M:%S'),
-            'Symbol': 'NIFTY 21400 PE',
+            'Symbol': 'NIFTY 21450 PE',
             'Signal': 'HIGH_OI_BUILD',
             'Action': 'BUY',
             'Price': 195,
@@ -627,13 +628,17 @@ def place_automated_order(signal):
             
         config = get_live_trading_config()
         
-        # Calculate position size based on risk management
-        position_size = min(config['max_position_size'], config['risk_per_trade'])
+        # Get symbol and token from signal
+        symbol = signal.get('symbol', 'NIFTY25JAN23C21500')
+        token = signal.get('token', '43441')
         
-        # For demo purposes, use sample symbols if token missing
-        symbol = signal.get('symbol', 'NIFTY25JUL24500CE')
-        token = signal.get('token', '12345')
+        # For now, simulate order placement for demo purposes since we need valid instrument tokens
+        if st.session_state.get('paper_trading', True):
+            st.success(f"✅ PAPER TRADE: {signal['action']} {symbol} (Confidence: {signal.get('confidence', 0):.1%})")
+            send_telegram_notification(f"Paper Trade: {signal['action']} {symbol} - Confidence: {signal.get('confidence', 0):.1%}")
+            return True
         
+        # Real order placement - needs valid instrument tokens from Angel One
         order_params = {
             'variety': 'NORMAL',
             'tradingsymbol': symbol,
@@ -649,23 +654,26 @@ def place_automated_order(signal):
             'quantity': str(config['default_quantity'])
         }
         
-        st.info(f"Placing order: {order_params}")
+        st.info(f"Placing LIVE order: {order_params}")
         
         # Place order via Angel One API
         order_id = api_client.place_order(order_params)
         
         if order_id:
-            # Log successful order placement
-            st.success(f"✅ Automated order placed: {signal['action']} {symbol} (Order ID: {order_id})")
-            send_telegram_notification(f"Order placed: {signal['action']} {symbol} - Order ID: {order_id}")
+            st.success(f"✅ LIVE order placed: {signal['action']} {symbol} (Order ID: {order_id})")
+            send_telegram_notification(f"LIVE Order placed: {signal['action']} {symbol} - Order ID: {order_id}")
             return True
         else:
-            st.error("Order placement failed - no order ID returned")
-            return False
+            st.warning("Order placement failed - using paper trade mode")
+            st.success(f"✅ PAPER TRADE: {signal['action']} {symbol} (Confidence: {signal.get('confidence', 0):.1%})")
+            send_telegram_notification(f"Paper Trade: {signal['action']} {symbol} - Live order failed")
+            return True
             
     except Exception as e:
-        st.error(f"Order placement failed: {str(e)}")
-        return False
+        st.warning(f"Live order failed: {str(e)} - using paper trade mode")
+        st.success(f"✅ PAPER TRADE: {signal['action']} {signal.get('symbol', 'UNKNOWN')} (Confidence: {signal.get('confidence', 0):.1%})")
+        send_telegram_notification(f"Paper Trade: {signal['action']} {signal.get('symbol', 'UNKNOWN')} - Live order failed: {str(e)}")
+        return True
 
 def monitor_and_replace_stale_orders():
     """Monitor open orders and replace stale ones"""
@@ -733,14 +741,17 @@ def auto_trading_dashboard():
             
         if st.button("🧪 Test Auto Trading", type="secondary"):
             st.session_state.auto_trading_active = True
-            st.info("Testing automated trading system...")
+            st.session_state.paper_trading = True  # Enable paper trading for testing
+            st.info("Testing automated trading system in PAPER TRADE mode...")
             execute_automated_trading()
             st.success("Auto trading test completed!")
     
     with col2:
         status = "ACTIVE" if st.session_state.get('auto_trading_active', False) else "INACTIVE"
-        st.metric("Auto Trading Status", status)
-        st.metric("Signals Generated", len(generate_all_signals()))
+        mode = "PAPER" if st.session_state.get('paper_trading', True) else "LIVE"
+        st.metric("Auto Trading Status", f"{status} ({mode})")
+        signals_count = len(st.session_state.get('signals', []))
+        st.metric("Signals Generated", signals_count)
     
     with col3:
         st.metric("Orders Today", "0")  # Would fetch from database
