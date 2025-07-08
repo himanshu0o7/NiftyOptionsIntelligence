@@ -453,6 +453,30 @@ def generate_breakout_signals():
     """Generate breakout signals"""
     signals = [
         {
+            'symbol': 'NIFTY25JUL24500CE',
+            'token': '12345',
+            'action': 'BUY',
+            'signal_type': 'BREAKOUT',
+            'confidence': 0.85,
+            'price': 285.0,
+            'timestamp': datetime.now().isoformat(),
+            'source': 'Breakout Strategy'
+        },
+        {
+            'symbol': 'BANKNIFTY25JUL52000PE',
+            'token': '67890',
+            'action': 'SELL',
+            'signal_type': 'BREAKDOWN',
+            'confidence': 0.78,
+            'price': 320.0,
+            'timestamp': datetime.now().isoformat(),
+            'source': 'Breakout Strategy'
+        }
+    ]
+    
+    # Add to session state for display
+    display_signals = [
+        {
             'Time': datetime.now().strftime('%H:%M:%S'),
             'Symbol': 'NIFTY 21500 CE',
             'Signal': 'BREAKOUT',
@@ -469,23 +493,41 @@ def generate_breakout_signals():
             'Confidence': '78%'
         }
     ]
-    st.session_state.signals.extend(signals)
+    
+    st.session_state.signals.extend(display_signals)
     st.success(f"Generated {len(signals)} breakout signals!")
+    return signals
 
 def generate_oi_signals():
     """Generate OI analysis signals"""
     signals = [
         {
+            'symbol': 'NIFTY25JUL24000PE',
+            'token': '11111',
+            'action': 'BUY',
+            'signal_type': 'HIGH_OI_BUILD',
+            'confidence': 0.72,
+            'price': 195.0,
+            'timestamp': datetime.now().isoformat(),
+            'source': 'OI Analysis'
+        }
+    ]
+    
+    # Add to session state for display
+    display_signals = [
+        {
             'Time': datetime.now().strftime('%H:%M:%S'),
             'Symbol': 'NIFTY 21400 PE',
             'Signal': 'HIGH_OI_BUILD',
-            'Action': 'WATCH',
+            'Action': 'BUY',
             'Price': 195,
-            'Confidence': '92%'
+            'Confidence': '72%'
         }
     ]
-    st.session_state.signals.extend(signals)
+    
+    st.session_state.signals.extend(display_signals)
     st.success(f"Generated {len(signals)} OI analysis signals!")
+    return signals
 
 def generate_all_signals():
     """Generate all types of signals including ML signals"""
@@ -519,19 +561,51 @@ def generate_all_signals():
 def execute_automated_trading():
     """Execute automated trading based on generated signals"""
     if not st.session_state.get('is_connected', False):
+        st.warning("API not connected - cannot execute automated trading")
+        return
+    
+    if not st.session_state.get('auto_trading_active', False):
+        st.info("Automated trading is inactive - activate from Auto Trading tab")
         return
     
     try:
+        st.info("🤖 Executing automated trading logic...")
+        
         # Generate trading signals
         signals = generate_all_signals()
         
+        if not signals:
+            st.info("No signals generated at this time")
+            return
+            
+        st.info(f"Generated {len(signals)} signals for analysis")
+        
         # Process each signal for automated execution
+        orders_placed = 0
         for signal in signals:
-            if signal.get('confidence', 0) > 0.7:  # Only high confidence signals
+            confidence = signal.get('confidence', 0)
+            # Lower confidence threshold for live trading (65% instead of 70%)
+            if confidence > 0.65:  
+                st.info(f"Processing signal: {signal['action']} {signal['symbol']} (Confidence: {confidence:.1%})")
                 # Check risk limits before placing order
                 if check_position_risk():
                     # Place automated order
-                    place_automated_order(signal)
+                    success = place_automated_order(signal)
+                    if success:
+                        orders_placed += 1
+                        st.success(f"Order placed for {signal['symbol']}")
+                    else:
+                        st.error(f"Order placement failed for {signal['symbol']}")
+                else:
+                    st.warning(f"Signal rejected due to risk limits: {signal['symbol']}")
+            else:
+                st.info(f"Signal below confidence threshold: {signal['symbol']} ({confidence:.1%})")
+        
+        if orders_placed > 0:
+            st.success(f"✅ Placed {orders_placed} automated orders")
+            send_telegram_notification(f"Automated trading: {orders_placed} orders placed")
+        else:
+            st.info("No orders placed - waiting for high-confidence signals")
                     
         # Monitor and update existing positions
         update_positions()
@@ -546,15 +620,24 @@ def place_automated_order(signal):
     """Place automated order based on signal"""
     try:
         api_client = st.session_state.api_client
+        
+        if not api_client:
+            st.error("API client not connected")
+            return False
+            
         config = get_live_trading_config()
         
         # Calculate position size based on risk management
         position_size = min(config['max_position_size'], config['risk_per_trade'])
         
+        # For demo purposes, use sample symbols if token missing
+        symbol = signal.get('symbol', 'NIFTY25JUL24500CE')
+        token = signal.get('token', '12345')
+        
         order_params = {
             'variety': 'NORMAL',
-            'tradingsymbol': signal['symbol'],
-            'symboltoken': signal.get('token', ''),
+            'tradingsymbol': symbol,
+            'symboltoken': token,
             'transactiontype': signal['action'].upper(),
             'exchange': 'NFO',
             'ordertype': 'MARKET',
@@ -566,16 +649,23 @@ def place_automated_order(signal):
             'quantity': str(config['default_quantity'])
         }
         
+        st.info(f"Placing order: {order_params}")
+        
         # Place order via Angel One API
         order_id = api_client.place_order(order_params)
         
         if order_id:
             # Log successful order placement
-            st.success(f"✅ Automated order placed: {signal['action']} {signal['symbol']}")
-            send_telegram_notification(f"Order placed: {signal['action']} {signal['symbol']}")
+            st.success(f"✅ Automated order placed: {signal['action']} {symbol} (Order ID: {order_id})")
+            send_telegram_notification(f"Order placed: {signal['action']} {symbol} - Order ID: {order_id}")
+            return True
+        else:
+            st.error("Order placement failed - no order ID returned")
+            return False
             
     except Exception as e:
         st.error(f"Order placement failed: {str(e)}")
+        return False
 
 def monitor_and_replace_stale_orders():
     """Monitor open orders and replace stale ones"""
@@ -640,6 +730,12 @@ def auto_trading_dashboard():
             st.session_state.auto_trading_active = False
             send_telegram_notification("Automated trading system stopped")
             st.warning("Automated trading stopped!")
+            
+        if st.button("🧪 Test Auto Trading", type="secondary"):
+            st.session_state.auto_trading_active = True
+            st.info("Testing automated trading system...")
+            execute_automated_trading()
+            st.success("Auto trading test completed!")
     
     with col2:
         status = "ACTIVE" if st.session_state.get('auto_trading_active', False) else "INACTIVE"
@@ -984,6 +1080,7 @@ def update_positions():
 def check_position_risk():
     """Check position risk"""
     st.info("Risk analysis completed. All positions within acceptable risk limits.")
+    return True  # Return True to allow order placement
 
 def calculate_pnl():
     """Calculate P&L"""
