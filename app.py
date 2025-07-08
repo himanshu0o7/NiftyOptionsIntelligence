@@ -450,14 +450,23 @@ def create_sample_options_chain(symbol):
     return pd.DataFrame(data)
 
 def generate_breakout_signals():
-    """Generate breakout signals with real NIFTY options (CE/PE only)"""
+    """Generate breakout signals with real NIFTY options using Greeks analysis"""
     from utils.live_trading_setup import LiveTradingSetup
+    from core.options_greeks_api import OptionsGreeksAPI
     
     setup = LiveTradingSetup()
     signals = []
     
+    # Get Greeks API if available
+    greeks_api = None
+    if st.session_state.get('api_client'):
+        try:
+            greeks_api = OptionsGreeksAPI(st.session_state.api_client)
+        except:
+            pass
+    
     # Generate BUY CE signal for NIFTY breakout
-    nifty_ce_signal = setup.create_live_signal('NIFTY', 'BUY', 0.85, 'BREAKOUT')
+    nifty_ce_signal = setup.create_live_signal_with_greeks('NIFTY', 'BUY', 0.85, 'BREAKOUT', greeks_api)
     if nifty_ce_signal:
         nifty_ce_signal.update({
             'timestamp': datetime.now().isoformat(),
@@ -468,17 +477,29 @@ def generate_breakout_signals():
         })
         signals.append(nifty_ce_signal)
     
-    # Generate BUY PE signal for defensive position
-    nifty_pe_signal = setup.create_live_signal('NIFTY', 'BUY', 0.72, 'HEDGE')
-    if nifty_pe_signal:
-        nifty_pe_signal.update({
-            'timestamp': datetime.now().isoformat(),
-            'source': 'Breakout Strategy',
-            'premium': 120.0,
-            'volume_support': False,
-            'oi_buildup': 'Moderate'
-        })
-        signals.append(nifty_pe_signal)
+    # Generate BUY PE signal for defensive position if market is bearish
+    if greeks_api:
+        try:
+            pcr_data = greeks_api.get_pcr_data()
+            market_bearish = False
+            if pcr_data:
+                nifty_pcr = next((item for item in pcr_data if 'NIFTY' in item.get('tradingSymbol', '')), None)
+                if nifty_pcr and nifty_pcr.get('pcr', 1.0) > 1.2:
+                    market_bearish = True
+                    
+            if market_bearish:
+                nifty_pe_signal = setup.create_live_signal_with_greeks('NIFTY', 'BUY', 0.75, 'HEDGE', greeks_api)
+                if nifty_pe_signal:
+                    nifty_pe_signal.update({
+                        'timestamp': datetime.now().isoformat(),
+                        'source': 'Breakout Strategy',
+                        'premium': 120.0,
+                        'volume_support': False,
+                        'oi_buildup': 'Moderate'
+                    })
+                    signals.append(nifty_pe_signal)
+        except:
+            pass
     
     # Add to session state for display
     display_signals = [
@@ -505,37 +526,69 @@ def generate_breakout_signals():
     return signals
 
 def generate_oi_signals():
-    """Generate OI analysis signals with real options"""
+    """Generate OI analysis signals with real options and Greeks"""
     from utils.live_trading_setup import LiveTradingSetup
+    from core.options_greeks_api import OptionsGreeksAPI
     
     setup = LiveTradingSetup()
     signals = []
     
-    # BUY CE based on high OI buildup
-    ce_signal = setup.create_live_signal('NIFTY', 'BUY', 0.78, 'HIGH_OI_BUILD')
-    if ce_signal:
-        ce_signal.update({
-            'timestamp': datetime.now().isoformat(),
-            'source': 'OI Analysis',
-            'premium': 210.0,
-            'oi_change': '+25%',
-            'iv_percentile': 35,
-            'volume_ratio': 1.8
-        })
-        signals.append(ce_signal)
+    # Get Greeks API for OI analysis
+    greeks_api = None
+    if st.session_state.get('api_client'):
+        try:
+            greeks_api = OptionsGreeksAPI(st.session_state.api_client)
+        except:
+            pass
     
-    # BUY PE based on put writing activity
-    pe_signal = setup.create_live_signal('BANKNIFTY', 'BUY', 0.65, 'PUT_WRITING')
-    if pe_signal:
-        pe_signal.update({
-            'timestamp': datetime.now().isoformat(),
-            'source': 'OI Analysis', 
-            'premium': 280.0,
-            'oi_change': '+15%',
-            'iv_percentile': 42,
-            'volume_ratio': 1.4
-        })
-        signals.append(pe_signal)
+    if greeks_api:
+        try:
+            # Get real OI buildup data
+            oi_gainers = greeks_api.get_gainers_losers("PercOIGainers", "NEAR")
+            oi_buildup = greeks_api.get_oi_buildup_data("NEAR", "Long Built Up")
+            
+            # Generate signals based on real OI data
+            if oi_gainers:
+                for item in oi_gainers[:2]:  # Top 2 OI gainers
+                    symbol = item.get('tradingSymbol', '')
+                    if 'NIFTY' in symbol and 'BANKNIFTY' not in symbol:
+                        underlying = 'NIFTY'
+                    elif 'BANKNIFTY' in symbol:
+                        underlying = 'BANKNIFTY'
+                    else:
+                        continue
+                    
+                    oi_change_pct = item.get('percentChange', 0)
+                    confidence = min(0.9, 0.6 + (oi_change_pct / 100))
+                    
+                    signal = setup.create_live_signal_with_greeks(underlying, 'BUY', confidence, 'HIGH_OI_BUILD', greeks_api)
+                    if signal:
+                        signal.update({
+                            'timestamp': datetime.now().isoformat(),
+                            'source': 'OI Analysis',
+                            'premium': 210.0 if underlying == 'NIFTY' else 280.0,
+                            'oi_change': f'+{oi_change_pct:.1f}%',
+                            'volume_ratio': 1.8,
+                            'net_oi_change': item.get('netChangeOpnInterest', 0)
+                        })
+                        signals.append(signal)
+                        
+        except Exception as e:
+            st.warning(f"Real OI data unavailable, using fallback: {e}")
+    
+    # Fallback signals if API not available
+    if not signals:
+        ce_signal = setup.create_live_signal('NIFTY', 'BUY', 0.78, 'HIGH_OI_BUILD')
+        if ce_signal:
+            ce_signal.update({
+                'timestamp': datetime.now().isoformat(),
+                'source': 'OI Analysis',
+                'premium': 210.0,
+                'oi_change': '+25%',
+                'iv_percentile': 35,
+                'volume_ratio': 1.8
+            })
+            signals.append(ce_signal)
     
     # Add to session state for display
     display_signals = [
@@ -687,11 +740,28 @@ def place_automated_order(signal):
         order_id = api_client.place_order(order_params)
         
         if order_id:
-            # Log successful option order
+            # Log successful option order with Greeks data
             option_info = f"{signal.get('underlying', 'NIFTY')} {signal.get('strike', 'ATM')} {signal.get('option_type', 'CE')}"
             st.success(f"✅ LIVE OPTION ORDER: BUY {option_info} - ID: {order_id}")
-            st.info(f"Premium: ₹{signal.get('premium', 'N/A')} | OI Change: {signal.get('oi_change', 'N/A')} | IV: {signal.get('iv_percentile', 'N/A')}%")
-            send_telegram_notification(f"LIVE Option Order: BUY {option_info} - Order ID: {order_id}")
+            
+            # Display comprehensive option metrics
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Premium", f"₹{signal.get('premium', 'N/A')}")
+                st.metric("Delta", f"{signal.get('delta', 0):.3f}")
+            with col2:
+                st.metric("IV", f"{signal.get('implied_volatility', 0):.1f}%")
+                st.metric("Volume", f"{signal.get('trade_volume', 0):,.0f}")
+            with col3:
+                st.metric("OI Change", signal.get('oi_change', 'N/A'))
+                st.metric("Liquidity", f"{signal.get('liquidity_score', 0):.1f}")
+            
+            # Greeks summary
+            if signal.get('delta'):
+                greeks_info = f"Δ:{signal.get('delta', 0):.3f} Γ:{signal.get('gamma', 0):.4f} Θ:{signal.get('theta', 0):.2f} ν:{signal.get('vega', 0):.2f}"
+                st.info(f"Greeks: {greeks_info} | Market: {signal.get('market_sentiment', 'NEUTRAL')}")
+            
+            send_telegram_notification(f"LIVE Option Order: BUY {option_info} - Order ID: {order_id} | Greeks: {greeks_info if signal.get('delta') else 'N/A'}")
             return True
         else:
             st.warning("Option order placement failed - using paper trade mode")

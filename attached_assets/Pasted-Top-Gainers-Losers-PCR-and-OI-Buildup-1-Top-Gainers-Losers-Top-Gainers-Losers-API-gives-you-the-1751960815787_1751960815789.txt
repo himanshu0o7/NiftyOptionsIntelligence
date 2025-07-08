@@ -1,0 +1,220 @@
+Top Gainers/Losers, PCR and OI Buildup
+1. Top Gainers/ Losers
+Top Gainers/Losers API gives you the Top gainers and Losers in the derivatives segment for the day. You can choose from which types of data you want. The data is available for three time periods, i.e. near(Current Month), next(Next Month), Far (The month after next month).
+
+The API endpoint for the same is :
+
+https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/gainersLosers
+
+Headers are same as for all other requests.
+
+HTTP Method: POST
+The Request packet is as follows:
+
+{
+    "datatype":"PercOIGainers", // Type of Data you want(PercOILosers/PercOIGainers/PercPriceGainers/PercPriceLosers)
+    "expirytype":"NEAR" // Expiry Type (NEAR/NEXT/FAR)
+} 
+The response received for the request is as follows:
+
+{
+    "status": true,
+    "message": "SUCCESS",
+    "errorcode": "",
+    "data": [
+        {
+            "tradingSymbol": "HDFCBANK25JAN24FUT",
+            "percentChange": 20.02,
+            "symbolToken": 55394,
+            "opnInterest": 118861600,
+            "netChangeOpnInterest": 1.98253E7
+        },
+        {
+            "tradingSymbol": "IEX25JAN24FUT",
+            "percentChange": 15.57,
+            "symbolToken": 55409,
+            "opnInterest": 77827500,
+            "netChangeOpnInterest": 1.0485E7
+        },
+        {
+            "tradingSymbol": "KOTAKBANK25JAN24FUT",
+            "percentChange": 11.07,
+            "symbolToken": 55428,
+            "opnInterest": 30164800,
+            "netChangeOpnInterest": 3007600.0
+        },
+        {
+            "tradingSymbol": "ICICIGI25JAN24FUT",
+            "percentChange": 7.91,
+            "symbolToken": 55402,
+            "opnInterest": 3954500,
+            "netChangeOpnInterest": 290000.0
+        },
+        {
+            "tradingSymbol": "DRREDDY25JAN24FUT",
+            "percentChange": 7.17,
+            "symbolToken": 55376,
+            "opnInterest": 2211625,
+            "netChangeOpnInterest": 148000.0
+        },
+        {
+            "tradingSymbol": "TATASTEEL25JAN24FUT",
+            "percentChange": 6.73,
+            "symbolToken": 55503,
+            "opnInterest": 234679500,
+            "netChangeOpnInterest": 1.4795E7
+        },
+        {
+            "tradingSymbol": "OFSS25JAN24FUT",
+            "percentChange": 6.5,
+            "symbolToken": 55462,
+            "opnInterest": 770400,
+            "netChangeOpnInterest": 47000.0
+        },
+        {
+            "tradingSymbol": "INDUSINDBK25JAN24FUT",
+            "percentChange": 6.23,
+            "symbolToken": 55417,
+            "opnInterest": 16300000,
+            "netChangeOpnInterest": 956500.0
+        },
+        {
+            "tradingSymbol": "CUB25JAN24FUT",
+            "percentChange": 5.99,
+            "symbolToken": 55367,
+            "opnInterest": 32735000,
+            "netChangeOpnInterest": 1850000.0
+        },
+        {
+            "tradingSymbol": "GUJGASLTD25JAN24FUT",
+            "percentChange": 5.98,
+            "symbolToken": 55389,
+            "opnInterest": 6023750,
+            "netChangeOpnInterest": 340000.0
+        }
+    ]
+}  
+
+This lists down all the OI Gainers for the day. Please note that this data is cumulative of OI of all strike prices for the Option Contracts, hence maps all the data to the futures token of the same expiry date. Futures Token here just denotes expiry date and the underlying stock. OI Gainers/ Losers or Price Gainers/ Losers data is for options contracts only.
+
+Key	Possible Values
+DataType	
+PercPriceGainers
+
+PercPriceLosers
+
+PercOILosers
+
+PercOIGainers
+
+ExpiryType	
+NEAR
+
+FAR
+
+NEXT
+
+2. PCR Volume API
+PCR Volume API gives the ratio of Put - Call Ratio for Options Contracts in the market using which you can gauge the market sentiments and make you trading decisions.
+
+The API endpoint is:
+
+https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/putCallRatio
+HTTP Method: GET
+Headers remain same as in all other requests.
+
+Request Body:
+
+//No request Body
+Response from the API:
+
+{
+    "status": true,
+    "message": "SUCCESS",
+    "errorcode": "",
+    "data": [
+        {
+            "pcr": 1.04,
+            "tradingSymbol": "NIFTY25JAN24FUT"
+        },
+        {
+            "pcr": 0.58,
+            "tradingSymbol": "HEROMOTOCO25JAN24FUT"
+        },
+        {
+            "pcr": 0.65,
+            "tradingSymbol": "ADANIPORTS25JAN24FUT"
+        },
+    ]
+}
+
+Please note that PCR here represents the cumulative PCR of Options Contracts for all strike prices, hence the Trading Symbol has been mapped to the corresponding futures instrument for each underlying stock. It represents PCR for Options only.
+
+3. OI BuildUp
+Using this API, you can check for Long Buildup, Short Buildup, Short Covering and Long Unwinding. Pass the requisite keys in the API and you'd get the appropriate list for your usage.
+
+The API end point is:
+
+https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/OIBuildup
+HTTP Method: POST
+Headers will be same as all the other APIs
+
+The request Body will be as follows:
+
+{
+    "expirytype":"NEAR",
+    "datatype":"Long Built Up"
+}
+Similar to Top Gainers/ Losers API, we can pass multiple values in the data_type and expiry_type keys.
+
+The values are as follows:
+
+Key	Possible Values
+DataType	
+Long Built Up
+
+Short Built Up
+
+Short Covering
+
+Long Unwinding
+
+ExpiryType	
+NEAR
+
+FAR
+
+NEXT
+
+
+Please note that there is a single space between the different words in datatype, i.e. Long<single space>Built<single-space>Up
+
+The response will be as follows:
+
+{
+    "status": true,
+    "message": "SUCCESS",
+    "errorcode": "",
+    "data": [
+        {
+            "symbolToken": "55424",
+            "ltp": "723.8",
+            "netChange": "-28.25",
+            "percentChange": "-3.76",
+            "opnInterest": "24982.5",
+            "netChangeOpnInterest": "-76.25",
+            "tradingSymbol": "JINDALSTEL25JAN24FUT"
+        },
+        {
+            "symbolToken": "55452",
+            "ltp": "134.25",
+            "netChange": "-5.05",
+            "percentChange": "-3.63",
+            "opnInterest": "67965.0",
+            "netChangeOpnInterest": "-3120.0",
+            "tradingSymbol": "NATIONALUM25JAN24FUT"
+        }
+    ]
+}
+You will get all the responses on passing the correct values for data type and expiry time.
+

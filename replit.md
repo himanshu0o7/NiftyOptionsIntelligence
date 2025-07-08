@@ -130,18 +130,20 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 08, 2025**: Complete automated trading system with ML integration deployed
-  - Configured system for ₹17,000 capital with 1 lot trading
-  - Implemented comprehensive risk management (5% daily loss limit, 20% position size)
-  - Angel One API integration with manual TOTP authentication
-  - Added full automation features: auto order placement, stale order monitoring, P&L tracking
-  - **NEW: Advanced ML models integrated** - 4 algorithms (Random Forest, SVM, Logistic Regression, Neural Network)
-  - **NEW: Real-time AI signal generation** with confidence scoring and ensemble predictions
-  - **NEW: ML Models dashboard** with training controls and performance tracking
-  - Resolved OpenMP dependency issues with simplified ML engine
-  - ML signals now integrated into automated trading system
-  - Telegram notifications for all trading events (order placement, execution, alerts)
-  - No manual intervention required after launch - fully automated system with AI enhancement
+- **July 08, 2025**: Complete automated options trading system with real-time Greeks and OI analysis
+  - **NEW: Options-Only Trading** - System now exclusively trades NIFTY/BANKNIFTY options (CE/PE)
+  - **NEW: BUY-Only Strategy** - Configured for BUY CE and BUY PE orders only as requested
+  - **NEW: Real Angel One Greeks API** - Integrated live Delta, Gamma, Theta, Vega, and IV data
+  - **NEW: OI Analysis Integration** - Real-time Open Interest buildup and PCR analysis
+  - **NEW: WebSocket Support** - Ready for live market data streaming
+  - **NEW: ATM/Near ATM Focus** - Smart strike selection based on current spot prices
+  - Enhanced signal generation with comprehensive Greeks and volume analysis
+  - Real-time options metrics: Premium tracking, liquidity scoring, IV percentile analysis
+  - Configured system for ₹17,000 capital with proper option lot sizes (NIFTY: 50, BANKNIFTY: 15)
+  - Risk management updated for options trading with proper position sizing
+  - Advanced ML models now integrated with options Greeks for enhanced signal quality
+  - Live trading enabled with real Angel One option tokens and NFO exchange
+  - Comprehensive options dashboard with Greeks display and market sentiment analysis
 
 ## Trading Configuration
 

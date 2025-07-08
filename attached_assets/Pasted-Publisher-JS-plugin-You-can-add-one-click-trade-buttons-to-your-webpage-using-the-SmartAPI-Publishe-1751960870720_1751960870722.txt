@@ -1,0 +1,236 @@
+Publisher JS plugin
+You can add one-click trade buttons to your webpage using the SmartAPI Publisher JavaScript plugin. It has a payment gateway, where an inline popup opens on your webpage, guides the user through a trade, and lands the user back on your page.
+
+The JavaScript plugin, or embed simple static buttons plain HTML can be used to add one or more stocks to the basket not more than 10.
+
+Getting Started
+<script src="https://smartapi.angelone.in/common/v1.js"></script>
+Include SmartAPI Publisher on your webpage by passing the following script tag at the end of your webpage, just before the closing </body> tag. You only need to include this once to render any number of buttons on a page.
+
+Branded HTML5 buttons
+You can use the custom <smartapi-button > HTML5 tag to use branded SmartAPI buttons. You can initiate a trade with a single click using these buttons. The branded buttons work in a similar fashion to social media buttons, and you can include as many as you want on a page.
+
+
+<!--  A link that initiates a buy (market) of the RELAINCE-EQ stock //--> 
+
+<smartapi-button href="#" data-smartapi="smartapi_key"  
+
+                 data-exchange="NSE" 
+
+                 data-tradingsymbol="RELIANCE-EQ"  
+
+                 data-transactiontype="BUY"  
+
+                 data-quantity="1"  
+
+                 data-price="100" 
+
+                 data-producttype="DELIVERY"  
+
+                 data-ordertype="LIMIT">Buy Reliance stock</smartapi-button> 
+Custom HTML5 buttons
+You can use the HTML5 data attributes on any HTML element and turn it into a trade button which gets invoked with a single click.
+
+
+<!--  A link that initiates a buy (market) of the RELAINCE-EQ stock //--> 
+
+<a href="#" data-smartapi="smartapi_key"  
+
+                 data-exchange="NSE" 
+
+                 data-tradingsymbol="RELIANCE-EQ"  
+
+                 data-transactiontype="BUY"  
+
+                 data-quantity="1"  
+
+                 data-price="100" 
+
+                 data-producttype="DELIVERY"  
+
+                 data-ordertype="LIMIT">Buy Reliance stock</a> 
+
+ 
+
+<!--  A button that initiates a sell (LIMIT) of the RELAINCE-EQ stock //--> 
+
+<button data-smartapi="smartapi_key"  
+
+                 data-exchange="NSE" 
+
+                 data-tradingsymbol="RELIANCE-EQ"  
+
+                 data-transactiontype="SELL"  
+
+                 data-quantity="1"  
+
+                 data-price="100" 
+
+                 data-producttype="DELIVERY"  
+
+                 data-ordertype="LIMIT">Buy Reliance stock</button> 
+
+ 
+
+<!--  A button that initiates a BO of the RELIANCE-EQ stock //--> 
+
+<button data-smartapi="smartapi_key"  
+
+                 data-exchange="NSE" 
+
+                 data-tradingsymbol="RELIANCE-EQ"  
+
+                 data-transactiontype="BUY"  
+
+                 data-quantity="1"  
+
+                 data-price="100" 
+
+                 data-producttype="DELIVERY"  
+
+                 data-ordertype="LIMIT">Buy Reliance stock (Bracket Order)</button> 
+
+ 
+Generating dynamic buttons with JavaScript
+You can create a basket of stocks and get the plugin to use a SmartAPI button that executes it, or link the basket to your own button (or any HTML element).
+
+The plugin loads it's assets asynchronously, so it's important that you initialise your custom SmartApiConnect calls after it has fully loaded. You need to use the SmartApiConnect.ready() function to achieve this.
+
+Parameters
+Parameter	Description
+variety	Order variety (NORMAL & STOPLOSS . Defaults to NORMAL).
+tradingsymbol	Trading symbol of the instrument
+exchange	Name of the exchange (BSE, NSE or NFO)
+transactiontype	BUY or SELL
+ordertype	Order type (MARKET, LIMIT, STOPLOSS_MARKET, & STOPLOSS_LIMIT)
+quantity	Quantity to transact
+producttype	For BSE & NSE, product type can be INTRADAY, MARGIN, DELIVERY, AMO_DELIVERY or AMO_MARGIN.For NFO type, product type can be CARRYFORWARD, AMO_CARRYFORWARD or INTRADAY.
+price	For LIMIT orders.
+triggerprice	For STOPLOSS_MARKET & STOPLOSS_LIMIT ordertype only.
+stoploss (TBA later)	Stoploss price (for ROBO).
+squareoff (TBA later)	Squareoff price / target price (for ROBO)
+trailingstoploss (TBA later)	Trailing stoploss price (for ROBO)
+disclosequantity	Quantity to disclose publicly (for equity trades)
+validity	Order validity (DAY or IOC)
+readonly	Default is false. If set to true, the UI does not allow the user to edit values such as quantity, price etc., and they can only review and execute.
+
+Methods
+Method	Arguments	Description
+SmartApiConnect.ready()	function()	Safe wrapper for all API calls that waits asynchronously for all assets to load.
+add()	entry	Adds an object literal {} with the parameters mentioned in the previous section represeting a single trading entry to the basket.
+get()		Returns an array[] of all added entries.
+count()		Returns the number of added entries.
+setOption()	key, value	Sets the value for certain supported keys.
+redirect_url	A redirect URL to override the registered SmartApi Connect redirect URL (using setOption()). The value can be a single '#', a 127.0.0.1 url for testing, or a fully qualified URL belonging to the same domain as the registered URL.
+renderButton()	element_selector	Renders a branded SmartApi button in the given target element, which when clicked, will start the transaction in an overlay popup. element_selector is an HTML selector, for example, #buy-button, .buttons etc.
+link()	element_selector	Links the basket to the given HTML element, which when clicked, will start the transaction in an overlay popup. element_selector is an HTML selector, for example, #buy-button, .buttons etc.
+finished()	function(status, acess_token)	Register a callback which is triggered after order placement is finished.
+
+<!-- A SmartAPI button will be generated inside this container //--> 
+
+<p id="default-button"> </p> 
+
+ 
+
+<!-- The basket will be linked to this element's onClick //--> 
+
+<button id="custom-button">Buy the basket</button> 
+
+ 
+
+<!-- Include the plugin //--> 
+
+<script src="https://smartapi.angelone.in/common/v1.js"></script>  
+
+ 
+
+<script> 
+
+// Only run your custom code once SmartApiConnect has fully initialised. 
+
+// Use SmartApiConnect.ready() to achieve this. 
+
+SmartApiConnect.ready(function () { 
+
+// Initialize a new SmartAPI instance. 
+
+      // You can initialize multiple instances if you need. 
+
+var smartApi = new SmartApiConnect("your_api_key"); 
+
+// Add a stock to the basket 
+
+smartApi.add({ 
+
+"exchange": "NSE", 
+
+"tradingsymbol": "INFY-EQ", 
+
+"quantity": 5, 
+
+"disclosedquantity": 3, 
+
+"transactiontype": "BUY", 
+
+"ordertype": "STOPLOSS_MARKET", 
+
+"variety": "STOPLOSS", 
+
+"producttype": "AMO_MARGIN", 
+
+}); 
+
+// Add another stock 
+
+smartApi.add({ 
+
+"exchange": "NSE", 
+
+"tradingsymbol": "SBIN-EQ", 
+
+"quantity": 1, 
+
+"ordertype": "LIMIT", 
+
+"transactiontype": "SELL", 
+
+"price": 105, 
+
+"producttype": "MARGIN", 
+
+}); 
+
+ 
+
+smartApi.add({ 
+
+"tradingsymbol": "RELIANCE-EQ", 
+
+"exchange": "NSE", 
+
+"transactiontype": "BUY", 
+
+"ordertype": "LIMIT", 
+
+"producttype": "AMO_DELIVERY", 
+
+"price": 915.15, 
+
+"quantity": 1, 
+
+"variety": "NORMAL", 
+
+"readonly": true 
+
+}); 
+
+smartApi.link("#type-one"); 
+
+smartApi.finished(function (status,acess_token) {
+    console.log('smartApi.finished  Status',status);
+    console.log('smartApi.finished  Tokens',acess_token);
+});
+
+}); 
+
+</script> 

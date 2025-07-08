@@ -181,8 +181,9 @@ class LiveTradingSetup:
         best_option = min(options, key=lambda x: abs(x['strike'] - target_strike))
         return best_option
     
-    def create_live_signal(self, underlying: str, action: str, confidence: float, signal_type: str) -> Dict:
-        """Create a live trading signal with valid option data"""
+    def create_live_signal_with_greeks(self, underlying: str, action: str, confidence: float, 
+                                      signal_type: str, greeks_api=None) -> Dict:
+        """Create a live trading signal with Greeks and OI analysis"""
         # Only BUY CE and BUY PE as per requirements
         if action.upper() not in ['BUY']:
             action = 'BUY'
@@ -200,7 +201,7 @@ class LiveTradingSetup:
             self.logger.error(f"No suitable option found for {underlying} {option_type}")
             return None
         
-        return {
+        signal = {
             'symbol': option['symbol'],
             'name': option['name'],
             'token': option['token'],
@@ -215,6 +216,46 @@ class LiveTradingSetup:
             'lot_size': option['lotsize'],
             'ready_for_live_trading': True
         }
+        
+        # Add Greeks and OI analysis if API is available
+        if greeks_api:
+            try:
+                analysis = greeks_api.analyze_option_for_trading(
+                    underlying, option['expiry'], option['strike'], option_type
+                )
+                
+                if 'error' not in analysis:
+                    signal.update({
+                        'delta': analysis.get('delta', 0),
+                        'gamma': analysis.get('gamma', 0),
+                        'theta': analysis.get('theta', 0),
+                        'vega': analysis.get('vega', 0),
+                        'implied_volatility': analysis.get('implied_volatility', 0),
+                        'iv_percentile': analysis.get('iv_percentile', 50),
+                        'trade_volume': analysis.get('trade_volume', 0),
+                        'liquidity_score': analysis.get('liquidity_score', 0.5),
+                        'time_decay_risk': analysis.get('time_decay_risk', 0),
+                        'volatility_sensitivity': analysis.get('volatility_sensitivity', 0),
+                        'market_sentiment': analysis.get('market_sentiment', 'NEUTRAL'),
+                        'pcr': analysis.get('pcr', 1.0),
+                        'greeks_recommendation': analysis.get('trade_recommendation', 'HOLD'),
+                        'greeks_confidence': analysis.get('confidence', 0.5)
+                    })
+                    
+                    # Adjust overall confidence based on Greeks
+                    if analysis.get('trade_recommendation') == 'BUY':
+                        signal['confidence'] = min(0.95, signal['confidence'] + 0.15)
+                    elif analysis.get('trade_recommendation') == 'AVOID':
+                        signal['confidence'] = max(0.1, signal['confidence'] - 0.2)
+                        
+            except Exception as e:
+                self.logger.error(f"Error adding Greeks analysis: {e}")
+        
+        return signal
+    
+    def create_live_signal(self, underlying: str, action: str, confidence: float, signal_type: str) -> Dict:
+        """Create a live trading signal with valid option data (backward compatibility)"""
+        return self.create_live_signal_with_greeks(underlying, action, confidence, signal_type)
     
     def get_tradeable_symbols(self) -> List[Dict]:
         """Get list of symbols ready for live trading"""

@@ -1,0 +1,143 @@
+Historical API
+Historical API provides past data of the indices and instruments. When a successful request is placed, corresponding data is returned. A single API endpoint provides the data for all segments. The exchange parameter in the request body is used to specify the segment whose data is required.
+
+https://apiconnect.angelone.in/rest/secure/angelbroking/historical/v1/getCandleData
+Exchange Constants
+Param	Value	Description
+exchange	NSE	NSE Stocks and Indices
+NFO	NSE Futures and Options
+BSE	BSE Stocks and Indices
+BFO	BSE Future and Options
+CDS	Currency Derivatives
+MCX	Commodities Exchange
+Interval Constants
+Interval	Description
+ONE_MINUTE	1 Minute
+THREE_MINUTE	3 Minute
+FIVE_MINUTE	5 Minute
+TEN_MINUTE	10 Minute
+FIFTEEN_MINUTE	15 Minute
+THIRTY_MINUTE	30 Minute
+ONE_HOUR	1 Hour
+ONE_DAY	1 Day
+Max Days in one Request
+The API can provide data of multiple days in one request. Below is the list of Max no of days upto which data can be provided for the requested intervals:
+
+Interval	Max Days in one Request
+ONE_MINUTE	30
+THREE_MINUTE	60
+FIVE_MINUTE	100
+TEN_MINUTE	100
+FIFTEEN_MINUTE	200
+THIRTY_MINUTE	200
+ONE_HOUR	400
+ONE_DAY	2000
+Get Candle Data
+All requests and its response structure is as below.
+Get Candle Data Request
+{
+     "exchange": "NSE",
+     "symboltoken": "99926000",
+     "interval": "ONE_HOUR",
+     "fromdate": "2023-09-06 11:15",
+     "todate": "2023-09-06 12:00"
+}
+Get Candle Data Response
+{
+     "status": true,
+     "message": "SUCCESS",
+     "errorcode": "",
+     "data": [
+          [
+               "2023-09-06T11:15:00+05:30",
+               19571.2,
+               19573.35,
+               19534.4,
+               19552.05,
+               0
+          ]
+     ]
+}
+
+NOTE:
+In Get Candle Data Request fromdate and todate format should be "yyyy-MM-dd hh:mm"
+The response is an array of records, where each record in turn is an array of the following values — [timestamp, open, high, low, close, volume].
+
+PythonNodeJsJavaRGO
+
+import http.client
+
+conn = http.client.HTTPSConnection("apiconnect.angelone.in")
+payload = "{\r\n     \"exchange\": \"NSE\",\r\n    
+ \"symboltoken\": \"3045\",\r\n     \"interval\": \"ONE_MINUTE\",\r\n  
+    \"fromdate\": \"2021-02-08 09:00\",\r\n     \"todate\": \"2021-02-08 09:16\"\r\n}"
+headers = {
+  'X-PrivateKey': 'API_KEY',
+  'Accept': 'application/json',
+  'X-SourceID': 'WEB',
+  'X-ClientLocalIP': 'CLIENT_LOCAL_IP',
+  'X-ClientPublicIP': 'CLIENT_PUBLIC_IP',
+  'X-MACAddress': 'MAC_ADDRESS',
+  'X-UserType': 'USER',
+  'Authorization': 'Bearer AUTHORIZATION_TOKEN',
+  'Accept': 'application/json',
+  'X-SourceID': 'WEB',
+  'Content-Type': 'application/json'
+}
+conn.request("POST", "/rest/secure/angelbroking/historical/v1/getCandleData", payload, headers)
+res = conn.getresponse()
+data = res.read()
+print(data.decode("utf-8"))
+    
+ 
+Get Historical OI Data
+Historical OI Data is available for live F&O contracts. Historical OI can be fetched using the token from the scrip master and passing it into the request body.
+
+https://apiconnect.angelone.in/rest/secure/angelbroking/historical/v1/getOIData
+Get OI Data Request
+{
+     "exchange": "NFO",
+     "symboltoken": "46823",
+     "interval": "THREE_MINUTE",
+     "fromdate": "2024-06-07 09:15",
+     "todate": "2024-06-07 15:30"
+}
+Get OI Data Response
+{
+     "status": true,
+     "message": "SUCCESS",
+     "errorcode": "",
+     "data": [
+          {
+               "time": "2024-08-19T12:24:00+05:30",
+               "oi": 166100
+          }
+     ]
+}
+
+
+import http.client
+
+conn = http.client.HTTPSConnection("apiconnect.angelone.in")
+payload = "{\r\n     \"exchange\": \"NFO\",\r\n    
+ \"symboltoken\": \"46823\",\r\n     \"interval\": \"ONE_MINUTE\",\r\n  
+    \"fromdate\": \"2021-02-08 09:00\",\r\n     \"todate\": \"2021-02-08 09:16\"\r\n}"
+headers = {
+  'X-PrivateKey': 'API_KEY',
+  'Accept': 'application/json',
+  'X-SourceID': 'WEB',
+  'X-ClientLocalIP': 'CLIENT_LOCAL_IP',
+  'X-ClientPublicIP': 'CLIENT_PUBLIC_IP',
+  'X-MACAddress': 'MAC_ADDRESS',
+  'X-UserType': 'USER',
+  'Authorization': 'Bearer AUTHORIZATION_TOKEN',
+  'Accept': 'application/json',
+  'X-SourceID': 'WEB',
+  'Content-Type': 'application/json'
+}
+conn.request("POST", "/rest/secure/angelbroking/historical/v1/getOIData", payload, headers)
+res = conn.getresponse()
+data = res.read()
+print(data.decode("utf-8"))
+    
+ 
