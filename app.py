@@ -26,6 +26,8 @@ from strategies.market_specific_strategies import MarketSpecificStrategies, Mark
 from utils.backtesting_engine import BacktestingEngine
 from utils.telegram_notifier import TelegramNotifier
 from utils.live_data_demo import LiveDataDemo
+from ml_models.ensemble_predictor import EnsemblePredictor
+from ml_models.simple_ml import SimplifiedMLEngine
 
 # Initialize session state
 if 'api_client' not in st.session_state:
@@ -36,6 +38,8 @@ if 'is_connected' not in st.session_state:
     st.session_state.is_connected = False
 if 'ml_engine' not in st.session_state:
     st.session_state.ml_engine = None
+if 'ensemble_predictor' not in st.session_state:
+    st.session_state.ensemble_predictor = None
 if 'paper_trading' not in st.session_state:
     st.session_state.paper_trading = False  # Enable live trading as requested
 if 'live_trading' not in st.session_state:

@@ -151,6 +151,9 @@ Preferred communication style: Simple, everyday language.
   - **ENHANCED: Interactive Demo** - Added Live Data tab with WebSocket testing, historical analysis, and OI monitoring
   - **FIXED: VWAP Calculation** - Resolved technical indicator errors for proper market analysis
   - **INTEGRATED: Real-time Monitoring** - Live prices (100ms), Greeks (30s), OI data (60s) from authentic Angel One APIs
+  - **FIXED: ML Model Performance** - Improved ensemble predictor with better error handling, eliminated sklearn warnings
+  - **ENHANCED: Model Training** - Advanced feature engineering, ensemble voting, class balancing for higher accuracy
+  - **OPTIMIZED: Performance** - Better convergence, regularization, and validation for stable ML predictions
 
 ## Trading Configuration
 

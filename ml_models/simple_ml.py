@@ -40,20 +40,25 @@ class SimplifiedMLEngine:
             ),
             'logistic_regression': LogisticRegression(
                 random_state=42,
-                max_iter=500,
-                solver='liblinear'
+                max_iter=1000,
+                solver='lbfgs',  # Better solver for multiclass
+                multi_class='ovr'  # One-vs-Rest for multiclass
             ),
             'svm': SVC(
-                kernel='linear',  # Linear kernel is more stable
+                kernel='rbf',  # RBF kernel for better performance
                 probability=True,
                 random_state=42,
-                max_iter=500
+                max_iter=1000,
+                gamma='scale'  # Better gamma setting
             ),
             'neural_network': MLPClassifier(
-                hidden_layer_sizes=(20, 10),  # Small network
-                learning_rate='adaptive',
-                max_iter=200,
-                random_state=42
+                hidden_layer_sizes=(100, 50),
+                activation='relu',
+                solver='adam',
+                max_iter=500,  # Increased iterations
+                random_state=42,
+                early_stopping=True,
+                validation_fraction=0.1
             )
         }
     
@@ -185,10 +190,26 @@ class SimplifiedMLEngine:
                     
                     accuracy = accuracy_score(y_test, y_pred)
                     
-                    results[name] = {
-                        'accuracy': accuracy,
-                        'classification_report': classification_report(y_test, y_pred)
-                    }
+                    # Calculate metrics with proper error handling
+                    try:
+                        from sklearn.metrics import precision_recall_fscore_support
+                        precision, recall, f1, _ = precision_recall_fscore_support(
+                            y_test, y_pred, average='weighted', zero_division=0
+                        )
+                        
+                        results[name] = {
+                            'accuracy': accuracy,
+                            'precision': precision,
+                            'recall': recall,
+                            'f1_score': f1,
+                            'trained': True
+                        }
+                    except Exception as metric_error:
+                        self.logger.warning(f"Metric calculation error for {name}: {metric_error}")
+                        results[name] = {
+                            'accuracy': accuracy,
+                            'trained': True
+                        }
                     
                     self.logger.info(f"{name} accuracy: {accuracy:.4f}")
                     
