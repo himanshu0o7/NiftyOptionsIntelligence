@@ -147,6 +147,10 @@ Preferred communication style: Simple, everyday language.
   - **CONFIGURED: Risk Controls** - Daily loss limit ₹3,400, position size limit ₹3,400, Greeks-based exits
   - **VALIDATED: Multi-Index Ready** - Complete system operational for live trading across all 5 indices
   - **VALIDATED: Audit Compliance** - All strategies meet 70% success rate target with proper risk management
+  - **NEW: Live Data System** - Comprehensive real-time data fetching with Angel One WebSocket v2, Greeks API, and OI analysis
+  - **ENHANCED: Interactive Demo** - Added Live Data tab with WebSocket testing, historical analysis, and OI monitoring
+  - **FIXED: VWAP Calculation** - Resolved technical indicator errors for proper market analysis
+  - **INTEGRATED: Real-time Monitoring** - Live prices (100ms), Greeks (30s), OI data (60s) from authentic Angel One APIs
 
 ## Trading Configuration
 

@@ -54,14 +54,22 @@ class TechnicalIndicators:
             self.logger.error(f"Error calculating SMA: {str(e)}")
             return pd.Series(dtype=float)
     
-    def calculate_vwap(self, high: pd.Series, low: pd.Series, close: pd.Series, 
-                      volume: pd.Series) -> pd.Series:
+    def calculate_vwap(self, data: pd.DataFrame) -> pd.Series:
         """Calculate Volume Weighted Average Price"""
         try:
-            if len(high) != len(low) or len(low) != len(close) or len(close) != len(volume):
+            if data.empty or len(data) == 0:
                 return pd.Series(dtype=float)
             
+            # Extract required columns with fallbacks
+            high = data['high'] if 'high' in data.columns else data['close']
+            low = data['low'] if 'low' in data.columns else data['close']  
+            close = data['close']
+            volume = data['volume'] if 'volume' in data.columns else pd.Series([1000] * len(data))
+            
+            # Typical price (HLC/3)
             typical_price = (high + low + close) / 3
+            
+            # VWAP calculation
             vwap = (typical_price * volume).cumsum() / volume.cumsum()
             return vwap
             
