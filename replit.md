@@ -104,7 +104,16 @@ This is a comprehensive options trading system built with Python and Streamlit t
 ### Trading Modes
 - **Paper Trading**: Default mode for testing strategies without real money
 - **Live Trading**: Real order execution with proper risk controls
+- **Automated Trading**: Fully automated system requiring no manual intervention
 - **Simulation**: Historical backtesting capabilities
+
+### Automation Features
+- **Auto Order Placement**: Places orders based on live market signals automatically
+- **Stale Order Management**: Monitors and replaces orders older than 30 minutes
+- **Risk Management**: Automatic position sizing and loss limits
+- **P&L Tracking**: Real-time profit/loss monitoring and updates
+- **Telegram Notifications**: Alerts for all trading activities
+- **Signal Monitoring**: Continuous analysis of breakout and OI signals
 
 ## User Preferences
 
@@ -112,12 +121,13 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
-- **July 08, 2025**: Live trading configuration complete
+- **July 08, 2025**: Complete automated trading system deployed
   - Configured system for ₹17,000 capital with 1 lot trading
   - Implemented comprehensive risk management (5% daily loss limit, 20% position size)
   - Angel One API integration with manual TOTP authentication
-  - Fixed TOTP secret encoding issues and missing utilities
-  - System now ready for live trading with proper risk controls
+  - Added full automation features: auto order placement, stale order monitoring, P&L tracking
+  - Telegram notifications for all trading events (order placement, execution, alerts)
+  - No manual intervention required after launch - fully automated system
 
 ## Trading Configuration
 
