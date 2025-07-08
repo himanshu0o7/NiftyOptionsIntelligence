@@ -1,0 +1,144 @@
+
+
+
+
+CE BUY (Call Option Buying)
+
+> You expect the market to go up (bullish view)
+
+
+
+🔹 Ideal Strike for CE Buy:
+
+Market Sentiment	Recommended Strike
+
+Strong Uptrend	ATM or 1 step ITM 
+
+Slow Uptrend / Pullback	ATM or 1 step OTM
+Trending After News	ATM or 1 step OTM (avoid deep OTM unless breakout confirmed)
+PE BUY (Put Option Buying)
+
+> You expect the market to go down (bearish view)
+
+
+
+🔹 Ideal Strike for PE Buy:
+
+Market Sentiment	Recommended Strike
+
+Strong Downtrend	ATM or 1 step ITM
+Consolidation Breakdown	ATM or 1 step OTM
+Gap Down Opening	ATM or 1 step OTM, avoid deep OTM in morning
+
+
+
+---
+
+📊 Recommended: Real-Time Logic (for bot setup)
+
+def get_recommended_strike(current_price, direction, step=50):
+    if direction == 'CE':
+        return round(current_price / step) * step  # ATM CE
+    elif direction == 'PE':
+        return round(current_price / step) * step  # ATM PE
+For CE Buy
+if trend == 'strong_up':
+    strike = ATM - 50   # 1 step ITM
+elif trend == 'sideways_to_up':
+    strike = ATM        # ATM
+
+# For PE Buy
+if trend == 'strong_down':
+    strike = ATM + 50   # 1 step ITM
+elif trend == 'breakdown_expected':
+    strike = ATM
+
+
+---
+
+🔍 Additional Filters for Best Strikes:
+
+Parameter	Range to Watch
+
+Delta	0.45–0.55 preferred for buying (ATM)
+Open Interest	Choose strikes with high OI or OI buildup
+Volume	Ensure strike has liquidity (avoid illiquid strikes)
+IV (Implied Volatility)	Buy when IV is low-to-normal, not high
+Quick Thumb Rules:
+
+📌 Buy ATM if:
+
+High momentum
+
+Quick scalp or breakout/breakdown expected
+
+
+📌 Buy 1 step ITM if:
+
+You want faster movement
+
+Safer entry with lower theta decay
+
+
+⚠️ Avoid deep OTM options unless it's expiry day or news-based trade
+Fetches live NIFTY/BANKNIFTY price
+
+Detects trend direction (e.g., using RSI, Supertrend, 5EMA crossover)
+
+Picks ideal strike (ATM or ±50/100)
+
+Filters by Greeks (Delta/IV) and OI
+
+Bullish Market (for CE Buy)
+
+Greek	Best Value / Range	Why It Matters
+
+Delta	✅ +0.45 to +0.65	Higher delta = faster gain in premium as spot rises
+Gamma	✅ High (0.04+)	Ensures delta changes rapidly — good for momentum
+Theta	⚠️ Low (–0.5 to –1.5)	You lose less premium due to time decay
+Vega	✅ Neutral to rising	Slight IV increase boosts premium
+OI	✅ CE OI Decreasing / PE OI Increasing	Indicates call writers covering = bullish confirmation
+
+
+✅ Ideal Option: ATM or 1-step ITM CE with delta ~0.5, gamma high, theta low
+
+📉 2. Bearish Market (for PE Buy)
+
+Greek	Best Value / Range	Why It Matters
+
+Delta	✅ –0.45 to –0.65	More price movement in your favor as market falls
+Gamma	✅ High	Helps increase Delta rapidly in momentum
+Theta	⚠️ Low (–0.5 to –1.5)	Avoids rapid time decay in sideways phase
+Vega	✅ Slightly rising	Falling markets increase IV → good for PE
+OI	✅ PE OI decreasing / CE OI increasing	Sign of bearish trend strength
+
+
+✅ Ideal Option: ATM or ITM PE with ~–0.5 delta, high gamma, IV rising
+
+🤝 3. Range-Bound / Sideways Market
+
+> You shouldn’t buy options in this phase unless breakout/breakdown is expected.
+
+
+
+Greek	Best Value / Range	Why It Matters
+
+Delta	⛔ ~0.3 or lower	Not suitable — premiums don’t move much
+Gamma	❌ Low	Minimal delta change = flat premiums
+Theta	❌ High decay (–2.0 or worse)	You’ll bleed premium in time decay
+Vega	❌ Falling	No IV expansion to help premium
+OI	✅ Both CE & PE OI Increasing	Option writers dominating – wait & watch
+
+
+✅ Best Action: Avoid option buying. Better to:
+
+Wait for breakout (then CE buy)
+
+Wait for breakdown (then PE buy)
+
+OR sell options if experienced (range play)
+Market Trend	Delta	Gamma	Theta	Vega	Strategy
+
+Bullish	+0.5 to +0.6	High	Low decay	Neutral↑	CE Buy
+Bearish	–0.5 to –0.6	High	Low decay	IV rising	PE Buy
+Sideways	±0.2 to ±0.3	Low	High decay	Falling	Wait / Sell
