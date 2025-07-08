@@ -20,24 +20,35 @@ class OptionsGreeksAPI:
         try:
             url = f"{self.base_url}/rest/secure/angelbroking/marketData/v1/optionGreek"
             
+            # Convert expiry date format from "10JUL25" to "10JUL2025" 
+            if len(expiry_date) == 7:  # "10JUL25" format
+                day_month = expiry_date[:5]  # "10JUL"
+                year = "20" + expiry_date[5:]  # "2025"
+                formatted_expiry = day_month + year
+            else:
+                formatted_expiry = expiry_date
+            
             payload = {
                 "name": underlying,
-                "expirydate": expiry_date
+                "expirydate": formatted_expiry
             }
             
             headers = self._get_headers()
             
-            response = requests.post(url, json=payload, headers=headers)
+            self.logger.info(f"Greeks API request: {underlying} expiry {formatted_expiry}")
+            
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
                 if data.get('status'):
+                    self.logger.info(f"Retrieved {len(data.get('data', []))} Greeks for {underlying}")
                     return data.get('data', [])
                 else:
                     self.logger.error(f"Greeks API error: {data.get('message')}")
                     return None
             else:
-                self.logger.error(f"Greeks API HTTP error: {response.status_code}")
+                self.logger.error(f"Greeks API HTTP error: {response.status_code} - {response.text}")
                 return None
                 
         except Exception as e:

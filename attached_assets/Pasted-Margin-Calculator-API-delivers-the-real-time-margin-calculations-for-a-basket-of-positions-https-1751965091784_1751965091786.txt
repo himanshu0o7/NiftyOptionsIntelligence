@@ -1,0 +1,186 @@
+Margin Calculator API delivers the real time margin calculations for a basket of positions.
+
+https://apiconnect.angelone.in/rest/secure/angelbroking/margin/v1/batch
+HTTP Method: POST
+Access Rate Limit: 10 request per second
+Number of positions input in a request: Upto 50 positions in a single request
+Field Description
+Field	Data type	Description
+exchange	
+BSE
+
+NSE
+
+NFO
+
+MCX
+
+BFO
+
+CDS
+
+BSE Equity
+
+NSE Equity
+
+NSE Future and Options
+
+MCX Commodity
+
+BSE Futures and Options
+
+Currency Derivate Segment
+
+qty	
+int
+
+Quantity. Pls note that in the NFO segment it denotes the no. of units in a lot.
+
+price	
+int
+
+Price
+
+producttype	
+DELIVERY
+
+CARRYFORWARD
+
+MARGIN
+
+INTRADAY
+
+BO
+
+Cash & Carry for equity (CNC)
+
+Normal for futures and options (NRML)
+
+Margin Delivery
+
+Margin Intraday Squareoff (MIS)
+
+Bracket Order (Only for ROBO)
+
+token	
+String
+
+Symbol/token being traded
+
+tradetype	
+BUY
+
+SELL
+
+Buy
+
+Sell
+
+ordertype	
+LIMIT
+
+MARKET
+
+STOPLOSS_LIMIT
+
+STOPLOSS_MARKET
+
+Limit Order
+
+Market order
+
+Stoploss Limit Order
+
+Stoploss Market Order
+
+Margin Calculator
+Request and its response structure is as below.
+The default value for orderType field is "LIMIT"
+
+Margin Calculator Request
+{
+     "positions": [
+          {
+               "exchange": "NFO",
+               "qty": 50,
+               "price": 0,
+               "productType": "INTRADAY",
+               "token": "67300",
+               "tradeType": "BUY",
+               "orderType": "LIMIT"
+          },
+          {
+               "exchange": "NFO",
+               "qty": 50,
+               "price": 0,
+               "productType": "INTRADAY",
+               "token": "67308",
+               "tradeType": "SELL",
+               "orderType": "MARKET"
+          }
+     ]
+}
+Margin Calculator Response
+{
+     "status": true,
+     "message": "SUCCESS",
+     "errorcode": "",
+     "data": {
+          "totalMarginRequired": 29612.35,
+          "marginComponents": {
+               "netPremium": 5060,
+               "spanMargin": 0,
+               "marginBenefit": 79876.5,
+               "deliveryMargin": 0,
+               "nonNFOMargin": 0,
+               "totOptionsPremium": 10100
+          }
+     }
+}
+
+PythonNodeJsJavaRGO
+
+import http.client
+
+conn = http.client.HTTPSConnection("apiconnect.angelone.in")
+payload = "{\n" +
+  "  \"positions\": [\n" +
+  "    {\n" +
+  "      \"exchange\": \"NFO\",\n" +
+  "      \"qty\": 50,\n" +
+  "      \"price\": 0,\n" +
+  "      \"productType\": \"INTRADAY\",\n" +
+  "      \"orderType\" : \"MARKET\",\n +
+  "      \"token\": \"67300\",\n" +
+  "      \"tradeType\": \"BUY\"\n" +
+  "    },\n" +
+  "    {\n" +
+  "      \"exchange\": \"NFO\",\n" +
+  "      \"qty\": 50,\n" +
+  "      \"price\": 0,\n" +
+  "      \"productType\": \"INTRADAY\",\n" +
+  "      \"orderType\" : \"LIMIT\",\n +
+  "      \"token\": \"67308\",\n" +
+  "      \"tradeType\": \"SELL\"\n" +
+  "    }\n" +
+  "  ]\n" +
+  "}"
+headers = {
+  'X-PrivateKey': 'API_KEY',
+  'Accept': 'application/json',
+  'X-SourceID': 'WEB',
+  'X-ClientLocalIP': 'CLIENT_LOCAL_IP',
+  'X-ClientPublicIP': 'CLIENT_PUBLIC_IP',
+  'X-MACAddress': 'MAC_ADDRESS',
+  'X-UserType': 'USER',
+  'Authorization': 'Bearer AUTHORIZATION_TOKEN',
+  'Accept': 'application/json',
+  'X-SourceID': 'WEB',
+  'Content-Type': 'application/json'
+}
+conn.request("POST", "/rest/secure/angelbroking/margin/v1/batch", payload, headers)
+res = conn.getresponse()
+data = res.read()
+print(data.decode("utf-8"))
+    
+ 
