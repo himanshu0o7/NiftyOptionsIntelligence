@@ -7,11 +7,26 @@ from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split, cross_val_score, GridSearchCV
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-import xgboost as xgb
-import lightgbm as lgb
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
+# Use simpler alternatives to avoid OpenMP dependency issues
+try:
+    import xgboost as xgb
+    XGB_AVAILABLE = True
+except ImportError:
+    XGB_AVAILABLE = False
+
+try:
+    import lightgbm as lgb
+    LGB_AVAILABLE = True
+except ImportError:
+    LGB_AVAILABLE = False
+
+try:
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras import layers
+    TF_AVAILABLE = True
+except ImportError:
+    TF_AVAILABLE = False
 import joblib
 import os
 from datetime import datetime
@@ -36,71 +51,94 @@ class MLSignalGenerator:
         """Initialize different ML models"""
         self.models = {
             'random_forest': RandomForestClassifier(
-                n_estimators=100,
-                max_depth=10,
+                n_estimators=50,  # Reduced for performance
+                max_depth=8,
                 min_samples_split=5,
                 min_samples_leaf=2,
-                random_state=42
-            ),
-            'xgboost': xgb.XGBClassifier(
-                n_estimators=100,
-                max_depth=6,
-                learning_rate=0.1,
-                subsample=0.8,
-                colsample_bytree=0.8,
-                random_state=42
-            ),
-            'lightgbm': lgb.LGBMClassifier(
-                n_estimators=100,
-                max_depth=6,
-                learning_rate=0.1,
-                subsample=0.8,
-                colsample_bytree=0.8,
                 random_state=42,
-                verbose=-1
+                n_jobs=1  # Avoid OpenMP issues
             ),
             'gradient_boost': GradientBoostingClassifier(
-                n_estimators=100,
-                max_depth=6,
+                n_estimators=50,  # Reduced for performance
+                max_depth=4,
                 learning_rate=0.1,
                 random_state=42
             ),
             'logistic_regression': LogisticRegression(
                 random_state=42,
-                max_iter=1000
+                max_iter=1000,
+                solver='liblinear'  # More stable solver
             ),
             'svm': SVC(
                 kernel='rbf',
                 probability=True,
-                random_state=42
+                random_state=42,
+                gamma='scale'
             ),
             'neural_network': MLPClassifier(
-                hidden_layer_sizes=(100, 50),
+                hidden_layer_sizes=(50, 25),  # Reduced complexity
                 learning_rate='adaptive',
-                max_iter=1000,
+                max_iter=500,
                 random_state=42
             )
         }
+        
+        # Add XGBoost if available
+        if XGB_AVAILABLE:
+            try:
+                self.models['xgboost'] = xgb.XGBClassifier(
+                    n_estimators=50,
+                    max_depth=4,
+                    learning_rate=0.1,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    random_state=42,
+                    nthread=1  # Single thread to avoid OpenMP
+                )
+            except Exception as e:
+                self.logger.warning(f"XGBoost initialization failed: {str(e)}")
+        
+        # Add LightGBM if available
+        if LGB_AVAILABLE:
+            try:
+                self.models['lightgbm'] = lgb.LGBMClassifier(
+                    n_estimators=50,
+                    max_depth=4,
+                    learning_rate=0.1,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    random_state=42,
+                    verbose=-1,
+                    num_threads=1  # Single thread to avoid OpenMP
+                )
+            except Exception as e:
+                self.logger.warning(f"LightGBM initialization failed: {str(e)}")
     
-    def _create_deep_learning_model(self, input_shape: int) -> keras.Model:
+    def _create_deep_learning_model(self, input_shape: int):
         """Create deep learning model using TensorFlow/Keras"""
-        model = keras.Sequential([
-            layers.Dense(128, activation='relu', input_shape=(input_shape,)),
-            layers.Dropout(0.3),
-            layers.Dense(64, activation='relu'),
-            layers.Dropout(0.2),
-            layers.Dense(32, activation='relu'),
-            layers.Dropout(0.1),
-            layers.Dense(3, activation='softmax')  # BUY, SELL, HOLD
-        ])
-        
-        model.compile(
-            optimizer='adam',
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
-        
-        return model
+        if not TF_AVAILABLE:
+            self.logger.warning("TensorFlow not available, skipping deep learning model")
+            return None
+            
+        try:
+            model = keras.Sequential([
+                layers.Dense(64, activation='relu', input_shape=(input_shape,)),
+                layers.Dropout(0.2),
+                layers.Dense(32, activation='relu'),
+                layers.Dropout(0.1),
+                layers.Dense(3, activation='softmax')  # BUY, SELL, HOLD
+            ])
+            
+            model.compile(
+                optimizer='adam',
+                loss='sparse_categorical_crossentropy',
+                metrics=['accuracy']
+            )
+            
+            return model
+        except Exception as e:
+            self.logger.error(f"Deep learning model creation failed: {str(e)}")
+            return None
     
     def prepare_training_data(self, market_data: pd.DataFrame, 
                             options_data: pd.DataFrame = None,
@@ -190,44 +228,48 @@ class MLSignalGenerator:
                     self.logger.error(f"Error training {name}: {str(e)}")
                     continue
             
-            # Train deep learning model
-            try:
-                self.logger.info("Training deep learning model...")
-                dl_model = self._create_deep_learning_model(len(self.feature_engineer.feature_names))
-                
-                # Prepare data for DL model
-                X_train_dl = X_train_scaled[self.feature_engineer.feature_names].values
-                X_test_dl = X_test_scaled[self.feature_engineer.feature_names].values
-                
-                # Train with early stopping
-                early_stopping = keras.callbacks.EarlyStopping(
-                    monitor='val_loss', patience=10, restore_best_weights=True
-                )
-                
-                history = dl_model.fit(
-                    X_train_dl, y_train,
-                    epochs=100,
-                    batch_size=32,
-                    validation_split=0.2,
-                    callbacks=[early_stopping],
-                    verbose=0
-                )
-                
-                if validate:
-                    y_pred_dl = dl_model.predict(X_test_dl)
-                    y_pred_dl_classes = np.argmax(y_pred_dl, axis=1)
-                    dl_accuracy = accuracy_score(y_test, y_pred_dl_classes)
+            # Train deep learning model if TensorFlow is available
+            if TF_AVAILABLE:
+                try:
+                    self.logger.info("Training deep learning model...")
+                    dl_model = self._create_deep_learning_model(len(self.feature_engineer.feature_names))
                     
-                    training_results['deep_learning'] = {
-                        'accuracy': dl_accuracy,
-                        'classification_report': classification_report(y_test, y_pred_dl_classes)
-                    }
-                    self.logger.info(f"Deep learning accuracy: {dl_accuracy:.4f}")
-                
-                self.models['deep_learning'] = dl_model
-                
-            except Exception as e:
-                self.logger.error(f"Error training deep learning model: {str(e)}")
+                    if dl_model is not None:
+                        # Prepare data for DL model
+                        X_train_dl = X_train_scaled[self.feature_engineer.feature_names].values
+                        X_test_dl = X_test_scaled[self.feature_engineer.feature_names].values
+                        
+                        # Train with early stopping
+                        early_stopping = keras.callbacks.EarlyStopping(
+                            monitor='val_loss', patience=5, restore_best_weights=True
+                        )
+                        
+                        history = dl_model.fit(
+                            X_train_dl, y_train,
+                            epochs=50,  # Reduced epochs
+                            batch_size=32,
+                            validation_split=0.2,
+                            callbacks=[early_stopping],
+                            verbose=0
+                        )
+                        
+                        if validate:
+                            y_pred_dl = dl_model.predict(X_test_dl, verbose=0)
+                            y_pred_dl_classes = np.argmax(y_pred_dl, axis=1)
+                            dl_accuracy = accuracy_score(y_test, y_pred_dl_classes)
+                            
+                            training_results['deep_learning'] = {
+                                'accuracy': dl_accuracy,
+                                'classification_report': classification_report(y_test, y_pred_dl_classes)
+                            }
+                            self.logger.info(f"Deep learning accuracy: {dl_accuracy:.4f}")
+                        
+                        self.models['deep_learning'] = dl_model
+                    
+                except Exception as e:
+                    self.logger.error(f"Error training deep learning model: {str(e)}")
+            else:
+                self.logger.info("TensorFlow not available, skipping deep learning model")
             
             self.model_performance = training_results
             self.is_trained = True

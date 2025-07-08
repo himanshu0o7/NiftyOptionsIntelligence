@@ -1,10 +1,14 @@
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple, Optional
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+try:
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras import layers
+    from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
+    TF_AVAILABLE = True
+except ImportError:
+    TF_AVAILABLE = False
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 import joblib
@@ -173,6 +177,10 @@ class LSTMSignalGenerator:
                    validation_split: float = 0.2, epochs: int = 100) -> Dict:
         """Train LSTM model"""
         try:
+            if not TF_AVAILABLE:
+                self.logger.warning("TensorFlow not available, cannot train LSTM")
+                return {'error': 'TensorFlow not available'}
+            
             # Prepare data
             X, y = self._prepare_lstm_data(data)
             

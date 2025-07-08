@@ -687,9 +687,9 @@ def display_ml_dashboard():
     # Initialize ML engine if not exists
     if st.session_state.ml_engine is None:
         try:
-            from ml_models.ml_integration import MLTradingEngine
-            st.session_state.ml_engine = MLTradingEngine()
-            st.info("ML Engine initialized")
+            from ml_models.simple_ml import SimplifiedMLEngine
+            st.session_state.ml_engine = SimplifiedMLEngine()
+            st.info("✅ Simplified ML Engine initialized (OpenMP-free)")
         except Exception as e:
             st.error(f"Failed to initialize ML engine: {str(e)}")
             return
@@ -738,7 +738,7 @@ def display_ml_dashboard():
                     try:
                         # Generate sample data for training (in production, use real historical data)
                         sample_data = generate_sample_market_data()
-                        results = ml_engine.initialize_models(sample_data, initial_training=True)
+                        results = ml_engine.train_models(sample_data)
                         
                         if results:
                             st.success("✅ ML models trained successfully!")
@@ -755,7 +755,7 @@ def display_ml_dashboard():
             with st.spinner("Retraining models..."):
                 try:
                     sample_data = generate_sample_market_data()
-                    results = ml_engine.retrain_models(sample_data)
+                    results = ml_engine.train_models(sample_data)
                     if results:
                         st.success("✅ Models retrained successfully!")
                     else:
@@ -796,30 +796,31 @@ def display_ml_dashboard():
     except Exception as e:
         st.error(f"Error displaying performance: {str(e)}")
     
-    # Feature Importance
-    st.subheader("🎯 Feature Importance")
+    # Feature List
+    st.subheader("🎯 Model Features")
     
     try:
-        importance_data = ml_engine.get_feature_importance_summary()
-        
-        if importance_data.get('top_features'):
-            # Create feature importance chart
-            features, importances = zip(*importance_data['top_features'][:15])
+        if hasattr(ml_engine, 'feature_names') and ml_engine.feature_names:
+            st.write("**Features used by ML models:**")
+            features_info = {
+                'price_change': 'Recent price change percentage',
+                'price_momentum': '5-day price momentum',
+                'volatility': '10-day rolling volatility',
+                'volume_ratio': 'Volume vs 10-day average',
+                'sma_ratio': '5-day vs 20-day SMA ratio',
+                'high_low_ratio': 'High to low price ratio',
+                'close_high_ratio': 'Close to high price ratio',
+                'rsi_simple': 'Simplified RSI indicator'
+            }
             
-            fig = px.bar(
-                x=importances,
-                y=features,
-                orientation='h',
-                title="Top 15 Most Important Features",
-                labels={'x': 'Importance Score', 'y': 'Features'}
-            )
-            fig.update_layout(height=500)
-            st.plotly_chart(fig, use_container_width=True)
+            for feature in ml_engine.feature_names:
+                description = features_info.get(feature, 'Technical indicator')
+                st.write(f"• **{feature}**: {description}")
         else:
-            st.info("Feature importance data not available. Train models first.")
+            st.info("Feature information not available. Train models first.")
     
     except Exception as e:
-        st.error(f"Error displaying feature importance: {str(e)}")
+        st.error(f"Error displaying features: {str(e)}")
     
     # ML Signal Generation
     st.subheader("⚡ Generate ML Signals")
@@ -835,8 +836,8 @@ def display_ml_dashboard():
                 with st.spinner("Generating ML signals..."):
                     try:
                         # Generate sample current data
-                        current_data = generate_sample_market_data(days=1)
-                        signals = ml_engine.generate_ml_signals(current_data, min_confidence=confidence_threshold)
+                        current_data = generate_sample_market_data(days=100)  # Need more data for features
+                        signals = ml_engine.generate_signals(current_data, min_confidence=confidence_threshold)
                         
                         if signals:
                             st.success(f"✅ Generated {len(signals)} ML signals")
@@ -858,19 +859,18 @@ def display_ml_dashboard():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.write("**Ensemble Models:**")
-            st.write("- Random Forest")
-            st.write("- XGBoost") 
-            st.write("- LightGBM")
-            st.write("- Gradient Boosting")
+            st.write("**Available Models:**")
+            st.write("- Random Forest (OpenMP-free)")
+            st.write("- Logistic Regression") 
+            st.write("- Support Vector Machine")
             st.write("- Neural Network")
             
         with col2:
-            st.write("**LSTM Model:**")
-            st.write("- Bidirectional LSTM")
-            st.write("- 60-day sequence length")
-            st.write("- 5-day prediction horizon")
-            st.write("- Early stopping & regularization")
+            st.write("**Simplified Features:**")
+            st.write("- Price momentum indicators")
+            st.write("- Volume analysis")
+            st.write("- Moving average ratios")
+            st.write("- Volatility measures")
 
 def generate_sample_market_data(days: int = 252) -> pd.DataFrame:
     """Generate sample market data for ML training"""
