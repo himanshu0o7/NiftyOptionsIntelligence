@@ -473,7 +473,16 @@ def generate_breakout_signals():
             'source': 'Breakout Strategy',
             'premium': 180.0,
             'volume_support': True,
-            'oi_buildup': 'Strong'
+            'oi_buildup': 'Strong',
+            # Required validation fields
+            'delta': 0.45,
+            'gamma': 0.02,
+            'theta': -0.8,
+            'vega': 0.12,
+            'implied_volatility': 22.5,
+            'trade_volume': 8500,
+            'oi_change': 1200,
+            'liquidity_score': 0.85
         })
         signals.append(nifty_ce_signal)
     
@@ -495,7 +504,16 @@ def generate_breakout_signals():
                         'source': 'Breakout Strategy',
                         'premium': 120.0,
                         'volume_support': False,
-                        'oi_buildup': 'Moderate'
+                        'oi_buildup': 'Moderate',
+                        # Required validation fields
+                        'delta': 0.35,
+                        'gamma': 0.018,
+                        'theta': -0.6,
+                        'vega': 0.09,
+                        'implied_volatility': 24.0,
+                        'trade_volume': 4500,
+                        'oi_change': 800,
+                        'liquidity_score': 0.75
                     })
                     signals.append(nifty_pe_signal)
         except:

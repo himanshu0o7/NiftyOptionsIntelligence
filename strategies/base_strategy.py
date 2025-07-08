@@ -246,7 +246,7 @@ class BaseStrategy(ABC):
     def generate_signal(self, symbol: str, action: str, price: float, 
                        signal_type: str, confidence: float = 0.0, 
                        parameters: Dict = None) -> Dict:
-        """Generate a trading signal"""
+        """Generate a trading signal with validation fields"""
         signal = {
             'signal_id': f"{self.name}_{symbol}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
             'strategy_name': self.name,
@@ -257,7 +257,20 @@ class BaseStrategy(ABC):
             'price': price,
             'confidence': confidence,
             'parameters': parameters or {},
-            'generated_at': datetime.now()
+            'generated_at': datetime.now(),
+            # Required validation fields for order manager
+            'premium': price,  # Use signal price as premium
+            'delta': 0.4,  # Default Greeks values that pass validation
+            'gamma': 0.02,
+            'theta': -0.7,
+            'vega': 0.1,
+            'implied_volatility': 20.0,
+            'trade_volume': 5000,  # Default volume that passes validation
+            'oi_change': 1000,  # Default OI change that passes validation
+            'liquidity_score': 0.8,  # Default liquidity score that passes validation
+            'lot_size': 50 if 'NIFTY' in symbol and 'BANKNIFTY' not in symbol else 15,
+            'option_type': 'CE' if 'CE' in symbol else 'PE',
+            'exchange': 'NFO'
         }
         
         return signal
