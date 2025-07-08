@@ -1,0 +1,112 @@
+# Risk Management Configuration for Options Trading System
+# All monetary values in INR
+
+risk_management:
+  # Capital Management
+  total_capital: 17000
+  max_daily_loss: 850  # 5% of capital
+  max_position_size: 3400  # 20% of capital per position
+  risk_per_trade: 340  # 2% of capital
+  max_concurrent_positions: 5
+
+  # Stop Loss Rules
+  stop_loss:
+    fixed_sl_percent: 50  # 50% of premium paid
+    fixed_sl_amount: 340  # Max loss per trade (2% of capital)
+    greeks_based_sl:
+      delta_threshold: 0.05  # Auto square off if delta < 0.05
+      iv_threshold: 5  # Auto square off if IV < 5%
+    time_based_sl:
+      minutes_before_expiry: 30  # Square off 30 min before expiry
+      intraday_cutoff: "15:15"  # Square off at 3:15 PM
+
+  # Take Profit Rules
+  take_profit:
+    quick_profit_percent: 20  # 20% gain in first 30 minutes
+    target_profit_amount: 850  # Target profit per trade
+    expiry_day_profit: 30  # 30% profit booking on expiry day
+    end_of_day_profit: 50  # 50% of max profit at EOD
+
+  # Trailing Stop Loss Rules
+  trailing_stop_loss:
+    activation_profit: 15  # Activate TSL after 15% profit
+    trail_percent: 10  # Trail 10% of highest profit
+    minimum_trail_amount: 50  # Minimum trail amount per lot
+    dynamic_adjustment: true  # Adjust based on volatility
+
+# Trading Rules
+trading_rules:
+  # Market Modes
+  market_modes:
+    rangebound:
+      strategy: "straddle_buying"
+      confidence_threshold: 0.6
+      preferred_strikes: "ATM"
+    bullish:
+      strategy: "call_buying"
+      confidence_threshold: 0.7
+      preferred_strikes: "ATM_to_OTM"
+    bearish:
+      strategy: "put_buying"
+      confidence_threshold: 0.7
+      preferred_strikes: "ATM_to_OTM"
+
+  # Greeks Validation
+  greeks_thresholds:
+    delta_min: 0.1
+    delta_max: 0.9
+    iv_min: 10
+    iv_max: 50
+    theta_max: -5  # Maximum theta decay acceptable
+    vega_min: 0.05  # Minimum vega for volatility sensitivity
+
+  # Volume and OI Requirements
+  liquidity_requirements:
+    min_volume: 1000
+    min_oi_change: 100
+    liquidity_score_min: 0.6
+    bid_ask_spread_max: 5  # Maximum spread percentage
+
+# Alert Configuration
+alerts:
+  telegram:
+    enabled: true
+    critical_alerts:
+      - "mtm_loss_threshold_reached"
+      - "api_connection_failed"
+      - "position_limit_exceeded"
+      - "daily_loss_limit_approached"
+    
+  mtm_alerts:
+    loss_threshold_percent: 2  # Alert if MTM loss > 2% of capital
+    halt_trading_threshold: 5  # Halt trading if loss > 5% of capital
+    
+  position_alerts:
+    high_risk_positions: true
+    greeks_deviation: true
+    expiry_warnings: true
+
+# Backtesting Configuration
+backtesting:
+  sample_size: 10  # Number of trades to simulate
+  historical_data_days: 30
+  success_rate_threshold: 60  # Minimum acceptable success rate %
+  max_drawdown_percent: 10  # Maximum acceptable drawdown
+  
+# Lot Size Configuration
+lot_sizes:
+  NIFTY: 75
+  BANKNIFTY: 35
+  
+# Exchange Configuration
+exchanges:
+  primary: "NFO"
+  allowed_segments: ["OPTIDX"]
+  
+# System Configuration
+system:
+  paper_trading: false
+  live_trading: true
+  auto_square_off: true
+  risk_monitoring: true
+  performance_tracking: true

@@ -5,6 +5,8 @@ from typing import Dict, Optional
 from core.angel_api import AngelOneAPI
 from core.symbol_resolver import SymbolResolver
 from utils.logger import Logger
+from risk_management.audit_filters import AuditBasedFilters
+from utils.telegram_notifier import TelegramNotifier
 
 class OrderManager:
     """Manage order placement using proper Angel One format"""
@@ -13,6 +15,8 @@ class OrderManager:
         self.api_client = api_client
         self.symbol_resolver = SymbolResolver()
         self.logger = Logger()
+        self.audit_filters = AuditBasedFilters()
+        self.telegram = TelegramNotifier()
         
     def place_option_order(self, signal: Dict) -> Optional[str]:
         """Place option order with comprehensive validation"""
@@ -42,7 +46,11 @@ class OrderManager:
                 self.logger.error("Missing Greeks data - order rejected")
                 return None
             
-            # Check Greeks thresholds
+            # Check Greeks thresholds using audit filters
+            if self.audit_filters.check_greeks_based_sl(signal):
+                self.logger.error("Greeks-based SL criteria triggered - order rejected")
+                return None
+            
             delta = abs(signal.get('delta', 0))
             iv = signal.get('implied_volatility', 0)
             
