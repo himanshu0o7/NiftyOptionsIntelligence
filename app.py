@@ -30,6 +30,7 @@ from ml_models.ensemble_predictor import EnsemblePredictor
 from ml_models.simple_ml import SimplifiedMLEngine
 from styles.dashboard_styles import DASHBOARD_CSS, POPUP_JS, get_status_badge, get_live_indicator, create_signal_card, create_progress_bar
 from utils.popup_manager import PopupManager
+from utils.capital_manager import CapitalManager
 
 # Initialize session state
 if 'api_client' not in st.session_state:
@@ -498,41 +499,95 @@ def create_sample_options_chain(symbol):
     return pd.DataFrame(data)
 
 def generate_breakout_signals():
-    """Generate breakout signals with real NIFTY options using Greeks analysis"""
-    from utils.live_trading_setup import LiveTradingSetup
-    from core.options_greeks_api import OptionsGreeksAPI
-    
-    setup = LiveTradingSetup()
-    signals = []
-    
-    # Get Greeks API if available
-    greeks_api = None
-    if st.session_state.get('api_client'):
-        try:
-            greeks_api = OptionsGreeksAPI(st.session_state.api_client)
-        except:
-            pass
-    
-    # Generate BUY CE signal for NIFTY breakout
-    nifty_ce_signal = setup.create_live_signal_with_greeks('NIFTY', 'BUY', 0.85, 'BREAKOUT', greeks_api)
-    if nifty_ce_signal:
-        nifty_ce_signal.update({
-            'timestamp': datetime.now().isoformat(),
-            'source': 'Breakout Strategy',
-            'premium': 180.0,
-            'volume_support': True,
-            'oi_buildup': 'Strong',
-            # Required validation fields
-            'delta': 0.45,
-            'gamma': 0.02,
-            'theta': -0.8,
-            'vega': 0.12,
-            'implied_volatility': 22.5,
-            'trade_volume': 8500,
-            'oi_change': 1200,
-            'liquidity_score': 0.85
-        })
-        signals.append(nifty_ce_signal)
+    """Generate breakout signals with strict capital and ATM compliance"""
+    try:
+        capital_manager = CapitalManager()
+        signals = []
+        
+        # Check if we can place any orders (capital available)
+        capital_status = capital_manager.get_capital_status()
+        if capital_status['available_capital'] < 1000:  # Need at least ₹1000 available
+            st.warning(f"⚠️ Low capital available: ₹{capital_status['available_capital']:,.0f}")
+            return []
+        
+        # Generate compliant NIFTY signal
+        nifty_signal = capital_manager.create_compliant_signal('NIFTY', 'BUY', 0.78, 'Breakout Analysis')
+        
+        # Validate signal against all limits
+        is_valid, message = capital_manager.validate_signal_for_trading(nifty_signal)
+        if is_valid:
+            nifty_signal.update({
+                'timestamp': datetime.now().isoformat(),
+                'method': 'Volume + Price Breakout',
+                'source': 'Breakout Strategy',
+                'volume_support': True,
+                'oi_buildup': 'Strong',
+                # Greeks data
+                'delta': 0.45,
+                'gamma': 0.02,
+                'theta': -0.8,
+                'vega': 0.12,
+                'implied_volatility': 22.5,
+                'trade_volume': 8500,
+                'oi_change': 1200,
+                'liquidity_score': 0.85
+            })
+            signals.append(nifty_signal)
+            st.success(f"✅ NIFTY signal: Strike {nifty_signal['strike']} | Value: ₹{nifty_signal['order_value']:,.0f}")
+        else:
+            st.warning(f"❌ NIFTY signal rejected: {message}")
+        
+        # Try to generate BANKNIFTY signal if capital allows
+        if capital_status['available_capital'] > 4000:  # Need more capital for BANKNIFTY
+            banknifty_signal = capital_manager.create_compliant_signal('BANKNIFTY', 'BUY', 0.72, 'Breakout Analysis')
+            
+            is_valid, message = capital_manager.validate_signal_for_trading(banknifty_signal)
+            if is_valid:
+                banknifty_signal.update({
+                    'timestamp': datetime.now().isoformat(),
+                    'method': 'Volume Surge + Breakout',
+                    'source': 'Breakout Strategy',
+                    'volume_support': True,
+                    'oi_buildup': 'Moderate'
+                })
+                signals.append(banknifty_signal)
+                st.success(f"✅ BANKNIFTY signal: Strike {banknifty_signal['strike']} | Value: ₹{banknifty_signal['order_value']:,.0f}")
+            else:
+                st.info(f"ℹ️ BANKNIFTY signal skipped: {message}")
+        
+        # Store signals in session state
+        if 'signals' not in st.session_state:
+            st.session_state.signals = []
+        
+        st.session_state.signals.extend(signals)
+        
+        if signals:
+            st.success(f"✅ Generated {len(signals)} ATM breakout signals within ₹17k limit")
+            
+            # Send telegram notification
+            if hasattr(st.session_state, 'telegram_notifier') and st.session_state.telegram_notifier:
+                for signal in signals:
+                    try:
+                        message = f"""
+🚀 ATM BREAKOUT SIGNAL
+Symbol: {signal['symbol']}
+Strike: {signal['strike']} (ATM compliant)
+Order Value: ₹{signal['order_value']:,.0f}
+Capital Used: ₹{capital_status['used_capital']:,.0f} / ₹17,000
+Confidence: {signal['confidence']:.1%}
+"""
+                        st.session_state.telegram_notifier.send_signal_alert(message)
+                    except Exception as e:
+                        logger.error(f"Telegram error: {e}")
+        else:
+            st.info("No breakout signals generated - capital limits or no opportunities")
+        
+        return signals
+        
+    except Exception as e:
+        logger.error(f"Breakout signal generation error: {e}")
+        st.error(f"Error generating breakout signals: {str(e)}")
+        return []
     
     # Generate BUY PE signal for defensive position if market is bearish
     if greeks_api:
@@ -760,7 +815,7 @@ def execute_automated_trading():
         st.error(f"Automated trading error: {str(e)}")
 
 def place_automated_order(signal):
-    """Place automated order based on signal"""
+    """Place automated order based on signal with strict capital and ATM controls"""
     try:
         api_client = st.session_state.api_client
         
@@ -768,13 +823,28 @@ def place_automated_order(signal):
             st.error("API client not connected")
             return False
             
+        # STRICT CAPITAL MANAGEMENT CHECK
+        current_capital_used = calculate_current_capital_usage()
+        max_capital = 17000  # ₹17,000 limit
+        max_per_trade = 3400  # ₹3,400 per position limit
+        
+        if current_capital_used >= max_capital:
+            st.error(f"❌ CAPITAL LIMIT REACHED: Used ₹{current_capital_used:,.0f} / ₹{max_capital:,.0f}")
+            return False
+        
         config = get_live_trading_config()
         
-        # Get option details from signal
+        # Get option details from signal with validation
         symbol = signal.get('symbol')
         token = signal.get('token')
-        exchange = signal.get('exchange', 'NFO')
-        lot_size = signal.get('lot_size', 50)
+        strike_price = signal.get('strike', 0)
+        underlying = signal.get('underlying', 'NIFTY')
+        
+        # ATM STRIKE PRICE VALIDATION
+        current_spot = get_current_spot_price(underlying)
+        if not is_atm_strike_valid(strike_price, current_spot, underlying):
+            st.warning(f"❌ STRIKE REJECTED: {strike_price} not ATM for {underlying} (Spot: {current_spot})")
+            return False
         
         # Check if paper trading is enabled
         if st.session_state.get('paper_trading', False):
@@ -782,8 +852,29 @@ def place_automated_order(signal):
             send_telegram_notification(f"Paper Trade: {signal['action']} {symbol} - Confidence: {signal.get('confidence', 0):.1%}")
             return True
         
+        # Calculate order value BEFORE placing order
+        lot_size = get_proper_lot_size(underlying)
+        premium = signal.get('premium', 200)  # Estimated premium
+        order_value = lot_size * premium
+        
+        if order_value > max_per_trade:
+            st.error(f"❌ ORDER VALUE TOO HIGH: ₹{order_value:,.0f} > ₹{max_per_trade:,.0f}")
+            return False
+        
+        if (current_capital_used + order_value) > max_capital:
+            st.error(f"❌ WOULD EXCEED CAPITAL: ₹{current_capital_used + order_value:,.0f} > ₹{max_capital:,.0f}")
+            return False
+        
+        # Use CapitalManager for validation
+        capital_manager = CapitalManager()
+        is_valid, validation_message = capital_manager.validate_signal_for_trading(signal)
+        
+        if not is_valid:
+            st.error(f"❌ ORDER REJECTED: {validation_message}")
+            return False
+        
         # Real option order placement (BUY CE/PE only)
-        quantity = str(lot_size * config['default_quantity'])  # Proper lot size calculation
+        quantity = str(order_value // premium)  # Calculate proper quantity based on order value
         
         order_params = {
             'variety': 'NORMAL',
@@ -808,18 +899,24 @@ def place_automated_order(signal):
         if order_id:
             # Log successful option order with Greeks data
             option_info = f"{signal.get('underlying', 'NIFTY')} {signal.get('strike', 'ATM')} {signal.get('option_type', 'CE')}"
-            st.success(f"✅ LIVE OPTION ORDER: BUY {option_info} - ID: {order_id}")
+            st.success(f"✅ CAPITAL COMPLIANT ORDER: BUY {option_info} - ID: {order_id}")
+            st.success(f"✅ Order Value: ₹{order_value:,.0f} | Strike: {strike_price} (ATM)")
+            
+            # Update capital tracking using capital manager
+            capital_manager.update_position_after_order(signal, order_id)
             
             # Display comprehensive option metrics
             col1, col2, col3 = st.columns(3)
             with col1:
                 st.metric("Premium", f"₹{signal.get('premium', 'N/A')}")
-                st.metric("Delta", f"{signal.get('delta', 0):.3f}")
+                st.metric("Order Value", f"₹{order_value:,.0f}")
             with col2:
-                st.metric("IV", f"{signal.get('implied_volatility', 0):.1f}%")
-                st.metric("Volume", f"{signal.get('trade_volume', 0):,.0f}")
+                st.metric("Strike (ATM)", f"{strike_price}")
+                st.metric("Lot Size", f"{signal.get('lot_size', 'N/A')}")
             with col3:
-                st.metric("OI Change", signal.get('oi_change', 'N/A'))
+                capital_status = capital_manager.get_capital_status()
+                st.metric("Capital Used", f"₹{capital_status['used_capital']:,.0f}")
+                st.metric("Available", f"₹{capital_status['available_capital']:,.0f}")
                 st.metric("Liquidity", f"{signal.get('liquidity_score', 0):.1f}")
             
             # Greeks summary
