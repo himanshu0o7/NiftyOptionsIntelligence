@@ -10,11 +10,11 @@ from utils.logger import Logger
 class AngelOneAPI:
     """Angel One SmartAPI client for trading operations"""
     
-    def __init__(self, api_key: str, client_code: str, password: str, totp_secret: str = None):
+    def __init__(self, api_key: str, client_code: str, password: str, totp: str = None):
         self.api_key = api_key
         self.client_code = client_code
         self.password = password
-        self.totp_secret = totp_secret
+        self.totp = totp
         
         self.base_url = "https://apiconnect.angelone.in"
         self.headers = {
@@ -35,18 +35,11 @@ class AngelOneAPI:
         
         self.logger = Logger()
     
-    def generate_totp(self) -> str:
-        """Generate TOTP code"""
-        if self.totp_secret:
-            totp = pyotp.TOTP(self.totp_secret)
-            return totp.now()
-        return ""
-    
     def connect(self) -> bool:
         """Establish connection with Angel One API"""
         try:
-            # Generate TOTP if secret is provided
-            totp_code = self.generate_totp()
+            # Use provided TOTP
+            totp_code = self.totp
             
             login_data = {
                 "clientcode": self.client_code,

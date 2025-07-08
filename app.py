@@ -79,22 +79,20 @@ def main():
         api_key = os.getenv("ANGEL_API_KEY", "")
         client_code = os.getenv("ANGEL_CLIENT_CODE", "")
         password = os.getenv("ANGEL_PASSWORD", "")
-        totp_secret = os.getenv("ANGEL_TOTP_SECRET", "")
         
-        if all([api_key, client_code, password, totp_secret]):
+        if all([api_key, client_code, password]):
             st.success("✅ API credentials loaded from environment")
-            # Manual TOTP entry (auto-generation disabled due to secret format)
-            totp = st.text_input("Enter TOTP from Angel One app:", value="", max_chars=6)
-            if totp:
-                st.info(f"TOTP entered: {totp}")
-            else:
-                st.warning("Please enter 6-digit TOTP from your Angel One mobile app")
+            totp = st.text_input("Enter TOTP from Angel One app:", value="", max_chars=6, help="Get 6-digit TOTP from your Angel One mobile app")
+            if totp and len(totp) == 6:
+                st.info(f"✓ TOTP entered: {totp}")
+            elif totp and len(totp) != 6:
+                st.warning("⚠️ TOTP must be exactly 6 digits")
         else:
             st.error("❌ API credentials not found in environment")
             api_key = st.text_input("API Key", type="password", value="")
             client_code = st.text_input("Client Code", value="")
             password = st.text_input("Password", type="password", value="")
-            totp = st.text_input("TOTP", value="")
+            totp = st.text_input("TOTP", value="", max_chars=6)
         
         # Trading Mode
         if st.session_state.live_trading:
@@ -109,35 +107,38 @@ def main():
         
         # Connect to Angel One for Live Trading
         if all([api_key, client_code, password]) and not st.session_state.is_connected:
-            if st.button("🚀 Connect to Angel One (Live Trading)", type="primary"):
-                if totp and len(totp) == 6:
-                    try:
-                        with st.spinner("Connecting to Angel One API for live trading..."):
-                            api_client = AngelOneAPI(api_key, client_code, password, totp)
-                            if api_client.connect():
-                                st.session_state.api_client = api_client
-                                st.session_state.is_connected = True
-                                
-                                # Initialize WebSocket for live data
-                                ws_client = WebSocketClient(api_client)
-                                st.session_state.websocket_client = ws_client
-                                
-                                # Initialize position manager with live trading config
-                                config = get_live_trading_config()
-                                st.session_state.position_manager = PositionManager(config)
-                                
-                                st.success("✅ Connected to Angel One - Live Trading Ready!")
-                                st.balloons()
-                                st.rerun()
-                            else:
-                                st.error("❌ Connection failed! Check credentials and TOTP.")
-                    except Exception as e:
-                        st.error(f"❌ Connection Error: {str(e)}")
-                else:
-                    st.warning("Please enter a valid 6-digit TOTP")
+            connect_enabled = totp and len(totp) == 6
+            if st.button("🚀 Connect to Angel One (Live Trading)", 
+                        type="primary", 
+                        disabled=not connect_enabled):
+                try:
+                    with st.spinner("Connecting to Angel One API for live trading..."):
+                        api_client = AngelOneAPI(api_key, client_code, password, totp)
+                        if api_client.connect():
+                            st.session_state.api_client = api_client
+                            st.session_state.is_connected = True
+                            
+                            # Initialize WebSocket for live data
+                            ws_client = WebSocketClient(api_client)
+                            st.session_state.websocket_client = ws_client
+                            
+                            # Initialize position manager with live trading config
+                            config = get_live_trading_config()
+                            st.session_state.position_manager = PositionManager(config)
+                            
+                            st.success("✅ Connected to Angel One - Live Trading Ready!")
+                            st.balloons()
+                            st.rerun()
+                        else:
+                            st.error("❌ Connection failed! Check credentials and TOTP.")
+                except Exception as e:
+                    st.error(f"❌ Connection Error: {str(e)}")
+            
+            if not connect_enabled:
+                st.caption("Enter valid 6-digit TOTP to connect")
         elif not all([api_key, client_code, password]):
             st.button("Connect to Angel One", disabled=True)
-            st.caption("Missing API credentials")
+            st.caption("Missing API credentials in environment")
         
         # Disconnect Button
         if st.session_state.is_connected:
