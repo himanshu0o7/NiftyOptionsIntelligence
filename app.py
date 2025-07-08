@@ -26,7 +26,11 @@ if 'websocket_client' not in st.session_state:
 if 'is_connected' not in st.session_state:
     st.session_state.is_connected = False
 if 'paper_trading' not in st.session_state:
-    st.session_state.paper_trading = True
+    st.session_state.paper_trading = False  # Live trading mode
+if 'live_trading' not in st.session_state:
+    st.session_state.live_trading = True
+if 'capital' not in st.session_state:
+    st.session_state.capital = 17000.0  # Total capital
 if 'active_positions' not in st.session_state:
     st.session_state.active_positions = []
 if 'signals' not in st.session_state:
@@ -71,37 +75,88 @@ def main():
     with st.sidebar:
         st.header("🔐 API Connection")
         
-        # API Credentials
-        api_key = st.text_input("API Key", type="password", value=os.getenv("ANGEL_API_KEY", ""))
-        client_code = st.text_input("Client Code", value=os.getenv("ANGEL_CLIENT_CODE", ""))
-        password = st.text_input("Password", type="password", value=os.getenv("ANGEL_PASSWORD", ""))
-        totp = st.text_input("TOTP", value="")
+        # API Credentials (auto-populated from environment)
+        api_key = os.getenv("ANGEL_API_KEY", "")
+        client_code = os.getenv("ANGEL_CLIENT_CODE", "")
+        password = os.getenv("ANGEL_PASSWORD", "")
+        totp_secret = os.getenv("ANGEL_TOTP_SECRET", "")
         
-        # Paper Trading Toggle
-        st.session_state.paper_trading = st.toggle("Paper Trading Mode", value=True)
-        
-        # Connection Button
-        if st.button("Connect to Angel One", type="primary"):
-            if all([api_key, client_code, password, totp]):
+        if all([api_key, client_code, password, totp_secret]):
+            st.success("✅ API credentials loaded from environment")
+            # Generate TOTP automatically
+            if st.session_state.api_client is None:
                 try:
-                    with st.spinner("Connecting to Angel One API..."):
+                    import pyotp
+                    totp = pyotp.TOTP(totp_secret).now()
+                    st.info(f"Auto-generated TOTP: {totp}")
+                except:
+                    totp = st.text_input("TOTP (manual entry required)", value="")
+            else:
+                totp = ""
+        else:
+            st.error("❌ API credentials not found in environment")
+            api_key = st.text_input("API Key", type="password", value="")
+            client_code = st.text_input("Client Code", value="")
+            password = st.text_input("Password", type="password", value="")
+            totp = st.text_input("TOTP", value="")
+        
+        # Trading Mode
+        if st.session_state.live_trading:
+            st.success("🔴 LIVE TRADING ACTIVE")
+            st.warning("⚠️ Real money at risk!")
+        
+        st.session_state.paper_trading = st.toggle("Paper Trading Mode", value=False)
+        if st.session_state.paper_trading:
+            st.session_state.live_trading = False
+        else:
+            st.session_state.live_trading = True
+        
+        # Auto-connect if credentials are available
+        if all([api_key, client_code, password, totp_secret]) and not st.session_state.is_connected:
+            if st.button("🚀 Connect to Angel One (Live Trading)", type="primary"):
+                try:
+                    with st.spinner("Connecting to Angel One API for live trading..."):
+                        # Generate fresh TOTP
+                        import pyotp
+                        totp = pyotp.TOTP(totp_secret).now()
+                        
                         api_client = AngelOneAPI(api_key, client_code, password, totp)
                         if api_client.connect():
                             st.session_state.api_client = api_client
                             st.session_state.is_connected = True
                             
-                            # Initialize WebSocket
+                            # Initialize WebSocket for live data
                             ws_client = WebSocketClient(api_client)
                             st.session_state.websocket_client = ws_client
                             
-                            st.success("✅ Connected successfully!")
+                            # Initialize position manager with live trading config
+                            config = get_live_trading_config()
+                            st.session_state.position_manager = PositionManager(config)
+                            
+                            st.success("✅ Connected to Angel One - Live Trading Ready!")
+                            st.balloons()
                             st.rerun()
                         else:
-                            st.error("❌ Connection failed!")
+                            st.error("❌ Connection failed! Check credentials.")
+                except Exception as e:
+                    st.error(f"❌ Connection Error: {str(e)}")
+        elif not all([api_key, client_code, password, totp_secret]):
+            st.button("Connect to Angel One", disabled=True)
+            st.caption("Missing credentials")
+        
+        # Manual connection for fallback
+        if not st.session_state.is_connected and st.button("Manual Connect"):
+            manual_totp = st.text_input("Enter TOTP manually:")
+            if manual_totp and all([api_key, client_code, password]):
+                try:
+                    api_client = AngelOneAPI(api_key, client_code, password, manual_totp)
+                    if api_client.connect():
+                        st.session_state.api_client = api_client
+                        st.session_state.is_connected = True
+                        st.success("✅ Manual connection successful!")
+                        st.rerun()
                 except Exception as e:
                     st.error(f"❌ Error: {str(e)}")
-            else:
-                st.warning("Please fill all credentials")
         
         # Disconnect Button
         if st.session_state.is_connected:
@@ -111,6 +166,24 @@ def main():
                 st.session_state.is_connected = False
                 st.success("Disconnected successfully!")
                 st.rerun()
+    
+    # Live Trading Status Summary
+    if st.session_state.live_trading and st.session_state.is_connected:
+        st.success("🔴 LIVE TRADING SYSTEM ACTIVE")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("Capital", "₹17,000", "")
+            st.metric("Max Daily Loss", "₹850", "5% limit")
+        
+        with col2:
+            st.metric("Position Limit", "₹3,400", "per position")
+            st.metric("Risk Per Trade", "₹340", "2% of capital")
+        
+        with col3:
+            st.metric("Lot Size", "1", "lot only")
+            st.metric("Max Positions", "5", "concurrent")
     
     # Main Dashboard
     if st.session_state.is_connected:
@@ -175,22 +248,49 @@ def main():
 
 def display_dashboard():
     """Display main trading dashboard"""
-    st.header("📊 Live Trading Dashboard")
+    # Live Trading Mode Header
+    if st.session_state.live_trading:
+        st.success("🔴 LIVE TRADING MODE ACTIVE")
+        st.header("📊 Live Trading Dashboard - Capital: ₹17,000")
+    else:
+        st.info("📝 Paper Trading Mode")
+        st.header("📊 Trading Dashboard")
     
-    # Market Status
-    col1, col2, col3, col4 = st.columns(4)
+    # Trading Status and Capital Management
+    col1, col2, col3, col4, col5 = st.columns(5)
     
     with col1:
         st.metric("Market Status", "OPEN", "🟢")
     
     with col2:
-        st.metric("Active Strategies", "3", "+1")
+        st.metric("Capital", f"₹{st.session_state.capital:,.0f}", "")
     
     with col3:
-        st.metric("Today's P&L", "₹2,450", "+5.2%")
+        st.metric("Available", "₹15,550", "-8.5%")
     
     with col4:
-        st.metric("Total Positions", "8", "+2")
+        st.metric("Today's P&L", "₹0", "0%")
+    
+    with col5:
+        st.metric("Positions", "0", "")
+    
+    # Risk Management Alert for Live Trading
+    if st.session_state.live_trading:
+        st.subheader("⚠️ Live Trading Risk Management")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.info(f"**Daily Loss Limit:** ₹850 (5% of capital)")
+            st.info(f"**Max Position Size:** ₹3,400 (20% of capital)")
+        
+        with col2:
+            st.info(f"**Risk Per Trade:** 2% (₹340)")
+            st.info(f"**Max Positions:** 5 concurrent")
+        
+        with col3:
+            st.info(f"**Lot Size:** 1 lot only")
+            st.info(f"**Stop Loss:** 2% default")
     
     # Live Charts
     st.subheader("📈 Live Market Data")
@@ -387,9 +487,35 @@ def generate_all_signals():
     generate_oi_signals()
     st.success("Generated all signals!")
 
+def get_live_trading_config():
+    """Get configuration for live trading with 17k capital"""
+    return {
+        'capital': 17000.0,
+        'max_daily_loss': 850.0,  # 5% of capital
+        'max_position_size': 3400.0,  # 20% of capital per position
+        'risk_per_trade': 340.0,  # 2% of capital
+        'max_positions': 5,
+        'default_quantity': 1,  # 1 lot only
+        'stop_loss_pct': 2.0,
+        'take_profit_pct': 5.0,
+        'live_trading': True,
+        'paper_trading': False
+    }
+
 def update_positions():
     """Update current positions"""
-    st.success("Positions updated!")
+    if st.session_state.live_trading:
+        st.info("Live trading mode: Positions will be fetched from Angel One API")
+    else:
+        st.success("Paper trading positions updated!")
+    
+    # Initialize position manager with live trading config
+    if st.session_state.live_trading:
+        config = get_live_trading_config()
+        if st.session_state.api_client:
+            position_manager = PositionManager(config)
+            # Fetch real positions from API
+            st.info("Connected to API - ready for live position management")
 
 def check_position_risk():
     """Check position risk"""

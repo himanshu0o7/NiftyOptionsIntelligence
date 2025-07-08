@@ -11,15 +11,20 @@ class TradingSettings:
     WEBSOCKET_URL: str = "wss://smartapisocket.angelone.in/smart-stream"
     
     # Trading Parameters
-    DEFAULT_QUANTITY: int = 1
-    MAX_POSITIONS: int = 10
+    CAPITAL: float = 17000.0  # Total trading capital in Rupees
+    DEFAULT_QUANTITY: int = 1  # 1 lot as specified
+    MAX_POSITIONS: int = 5  # Reduced for 17k capital
     DEFAULT_STOP_LOSS: float = 2.0  # Percentage
     DEFAULT_TAKE_PROFIT: float = 5.0  # Percentage
     
-    # Risk Management
-    MAX_DAILY_LOSS: float = 10000.0  # In Rupees
-    MAX_POSITION_SIZE: float = 50000.0  # In Rupees
-    RISK_PER_TRADE: float = 1.0  # Percentage of capital
+    # Risk Management for 17k Capital
+    MAX_DAILY_LOSS: float = 850.0  # 5% of capital (17000 * 0.05)
+    MAX_POSITION_SIZE: float = 3400.0  # 20% of capital per position
+    RISK_PER_TRADE: float = 2.0  # 2% of capital per trade
+    
+    # Trading Mode
+    PAPER_TRADING: bool = False  # Set to False for live trading
+    LIVE_TRADING: bool = True  # Enable live trading
     
     # Technical Indicators
     RSI_PERIOD: int = 14
