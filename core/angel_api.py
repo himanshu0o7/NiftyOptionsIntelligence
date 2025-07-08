@@ -33,6 +33,11 @@ class AngelOneAPI:
         self.feed_token = None
         self.session_valid = False
         
+        # Required attributes for Options Greeks API
+        self.client_local_ip = '127.0.0.1'
+        self.client_public_ip = '127.0.0.1'
+        self.mac_address = '00:00:00:00:00:00'
+        
         self.logger = Logger()
     
     def connect(self) -> bool:
