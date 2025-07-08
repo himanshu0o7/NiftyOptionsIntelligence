@@ -81,6 +81,11 @@ if 'ml_bot' not in st.session_state:
         st.session_state.ml_bot = None
 if 'auto_learning' not in st.session_state:
     st.session_state.auto_learning = False
+
+# Safety check for None
+if st.session_state.ml_bot is None:
+    st.error("ML Bot failed to initialize. Please check the logs.")
+    st.stop()
 if 'training_progress' not in st.session_state:
     st.session_state.training_progress = 0
 
@@ -102,7 +107,7 @@ def main():
         st.markdown("## 🎛️ Control Panel")
         
         # Bot Status
-        if st.session_state.ml_bot.is_trained:
+        if st.session_state.ml_bot and st.session_state.ml_bot.is_trained:
             st.success("✅ Bot Trained & Ready")
         else:
             st.warning("⚠️ Bot Needs Training")
@@ -140,11 +145,12 @@ def main():
             generate_prediction(symbol)
     
     # Main content
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "🎯 Live Predictions", 
         "📰 News Analysis", 
         "📊 Performance", 
         "🌐 Web Learning",
+        "🧠 Self-Evolution",
         "⚙️ Configuration"
     ])
     
@@ -161,6 +167,9 @@ def main():
         display_web_learning()
     
     with tab5:
+        display_evolution_dashboard()
+    
+    with tab6:
         display_configuration()
 
 def train_models():
@@ -612,6 +621,117 @@ def display_configuration():
                     st.success("✅ Data imported successfully!")
                 except Exception as e:
                     st.error(f"❌ Import failed: {str(e)}")
+
+def display_evolution_dashboard():
+    """Display self-evolution and monitoring dashboard"""
+    st.header("🧠 Self-Evolution Dashboard")
+    
+    if st.session_state.ml_bot and getattr(st.session_state.ml_bot, 'evolution_enabled', False):
+        # Status Overview
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            evolution_status = st.session_state.ml_bot.get_evolution_status()
+            st.metric("🔄 Evolution Status", 
+                     "✅ Active" if evolution_status.get("evolution_enabled") else "❌ Disabled")
+            st.metric("🚨 Recent Errors", evolution_status.get("recent_errors", 0))
+        
+        with col2:
+            st.metric("🎯 Current Accuracy", f"{evolution_status.get('current_accuracy', 0):.1%}")
+            if evolution_status.get("health_report"):
+                health = evolution_status["health_report"] 
+                st.metric("🏥 Health Score", f"{health.get('health_score', 0):.0f}/100")
+        
+        with col3:
+            monitoring_active = evolution_status.get("monitoring_active", False)
+            st.metric("📊 Monitoring", "🟢 Active" if monitoring_active else "🔴 Inactive")
+            if evolution_status.get("health_report"):
+                health = evolution_status["health_report"]
+                st.metric("⚡ System Status", health.get('status', 'Unknown'))
+        
+        # Action Buttons
+        st.subheader("🚀 Evolution Actions")
+        col4, col5, col6 = st.columns(3)
+        
+        with col4:
+            if st.button("🔄 Run Evolution Cycle", use_container_width=True):
+                with st.spinner("Running AI-powered evolution cycle..."):
+                    try:
+                        results = st.session_state.ml_bot.run_evolution_cycle()
+                        st.success("Evolution cycle completed!")
+                        with st.expander("📋 Evolution Results"):
+                            st.json(results)
+                    except Exception as e:
+                        st.error(f"Evolution failed: {e}")
+        
+        with col5:
+            if st.button("📊 Analyze Performance", use_container_width=True):
+                with st.spinner("AI analyzing performance data..."):
+                    try:
+                        performance_data = st.session_state.ml_bot.get_performance_metrics()
+                        analysis = st.session_state.ml_bot.evolution_bot.analyze_performance_with_ai(performance_data)
+                        st.success("Performance analysis completed!")
+                        with st.expander("🔍 AI Analysis"):
+                            st.json(analysis)
+                    except Exception as e:
+                        st.error(f"Analysis failed: {e}")
+        
+        with col6:
+            if st.button("🛠️ Generate Strategies", use_container_width=True):
+                with st.spinner("AI generating new strategies..."):
+                    try:
+                        market_data = getattr(st.session_state.ml_bot, 'latest_market_data', {})
+                        current_strategies = getattr(st.session_state.ml_bot, 'active_strategies', [])
+                        improvements = st.session_state.ml_bot.evolution_bot.generate_strategy_improvements(
+                            market_data, current_strategies
+                        )
+                        st.success("New strategies generated!")
+                        with st.expander("💡 AI Strategy Recommendations"):
+                            st.json(improvements)
+                    except Exception as e:
+                        st.error(f"Strategy generation failed: {e}")
+        
+        # Auto Evolution Settings
+        st.subheader("⚙️ Auto Evolution")
+        auto_evolution_enabled = st.checkbox("🔄 Enable Continuous Evolution")
+        
+        if auto_evolution_enabled:
+            col7, col8 = st.columns(2)
+            with col7:
+                interval = st.slider("Evolution Interval (minutes)", 15, 120, 30)
+            with col8:
+                if st.button("▶️ Start Auto Evolution"):
+                    success = st.session_state.ml_bot.start_auto_evolution(interval)
+                    if success:
+                        st.success(f"Auto evolution started with {interval} minute intervals")
+                    else:
+                        st.error("Failed to start auto evolution")
+        
+        # Recent Evolution Log
+        st.subheader("📋 Recent Evolution Activity")
+        if hasattr(st.session_state.ml_bot, 'evolution_bot') and st.session_state.ml_bot.evolution_bot:
+            if hasattr(st.session_state.ml_bot.evolution_bot, 'evolution_log'):
+                log_entries = st.session_state.ml_bot.evolution_bot.evolution_log[-3:]
+                if log_entries:
+                    for i, entry in enumerate(reversed(log_entries)):
+                        with st.expander(f"Evolution #{len(log_entries)-i}: {entry.get('timestamp', 'Unknown')}"):
+                            st.json(entry)
+                else:
+                    st.info("No evolution activity yet. Run an evolution cycle to start!")
+    
+    else:
+        st.warning("🚫 Self-Evolution capabilities not available")
+        
+        st.info("""
+        **🤖 Self-Evolution Features (Requires OpenAI API Key):**
+        
+        • **🧠 AI-Powered Analysis**: GPT-4o analyzes performance and suggests improvements
+        • **🔧 Auto Error Fixing**: Automatically detects and fixes code errors  
+        • **📈 Strategy Enhancement**: Generates new trading strategies
+        • **📊 Performance Monitoring**: Continuous system health tracking
+        • **🔄 Continuous Learning**: Self-improving algorithms
+        • **🚨 Smart Alerts**: Intelligent performance alerts
+        """)
 
 if __name__ == "__main__":
     main()

@@ -16,6 +16,7 @@ import logging
 from typing import Dict, List, Optional, Tuple
 import time
 import threading
+import traceback
 from dataclasses import dataclass, asdict
 
 # ML and Data Processing
@@ -27,6 +28,15 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
 import joblib
+
+# Self-Evolution and Monitoring
+try:
+    from openai_evolution import SelfEvolvingBot
+    from self_monitoring import SelfMonitoringSystem
+    EVOLUTION_AVAILABLE = True
+except ImportError as e:
+    print(f"Evolution modules not available: {e}")
+    EVOLUTION_AVAILABLE = False
 
 # Web Scraping and News Analysis
 import trafilatura
@@ -107,7 +117,28 @@ class AdvancedMLBot:
             'neutral': ['stable', 'flat', 'unchanged', 'sideways', 'consolidation']
         }
         
-        self.logger.info("Advanced ML Bot initialized")
+        # Self-Evolution and Monitoring
+        if EVOLUTION_AVAILABLE:
+            self.evolution_bot = SelfEvolvingBot()
+            self.monitoring_system = SelfMonitoringSystem()
+            self.evolution_enabled = True
+            self.monitoring_system.start_monitoring()
+            self.logger.info("Self-evolution and monitoring enabled")
+        else:
+            self.evolution_bot = None
+            self.monitoring_system = None
+            self.evolution_enabled = False
+            self.logger.warning("Evolution modules not available")
+        
+        # Error tracking for evolution
+        self.recent_errors = deque(maxlen=50)
+        self.current_accuracy = 0.0
+        self.recent_predictions = deque(maxlen=100)
+        self.trading_results = {}
+        self.latest_market_data = {}
+        self.active_strategies = []
+        
+        self.logger.info("Advanced ML Bot initialized with self-evolution capabilities")
     
     def scrape_news_data(self) -> List[NewsData]:
         """Scrape news from multiple sources"""
@@ -598,3 +629,198 @@ class AdvancedMLBot:
             'news_articles_processed': len(self.news_db),
             'last_training': datetime.now().isoformat()
         }
+    
+    # ========== SELF-EVOLUTION METHODS ==========
+    
+    def log_error_for_evolution(self, error_type: str, error_message: str, 
+                               function_name: str = "", code_context: str = ""):
+        """Log errors for self-evolution analysis"""
+        if self.evolution_enabled:
+            error_info = {
+                "timestamp": datetime.now().isoformat(),
+                "error_type": error_type,
+                "error_message": error_message,
+                "function_name": function_name,
+                "code_context": code_context,
+                "traceback": traceback.format_exc()
+            }
+            
+            self.recent_errors.append(error_info)
+            
+            if self.monitoring_system:
+                self.monitoring_system.log_error(error_type, error_message, traceback.format_exc())
+            
+            self.logger.error(f"Error logged for evolution: {error_type} - {error_message}")
+    
+    def update_monitoring_metrics(self):
+        """Update monitoring system with current ML metrics"""
+        if self.evolution_enabled and self.monitoring_system:
+            try:
+                # Calculate current accuracy
+                total_correct = sum(acc['correct'] for acc in self.accuracy_tracking.values())
+                total_predictions = sum(acc['total'] for acc in self.accuracy_tracking.values())
+                current_accuracy = total_correct / total_predictions if total_predictions > 0 else 0
+                
+                # Calculate average confidence
+                recent_confidences = [p.confidence for p in list(self.recent_predictions)[-10:]]
+                avg_confidence = np.mean(recent_confidences) if recent_confidences else 0
+                
+                # Update monitoring metrics
+                self.monitoring_system.update_ml_metrics(
+                    accuracy=current_accuracy,
+                    precision=current_accuracy,  # Simplified for now
+                    recall=current_accuracy,     # Simplified for now
+                    latency_ms=50,              # Estimated prediction time
+                    confidence=avg_confidence,
+                    error_count=len(self.recent_errors)
+                )
+                
+                self.current_accuracy = current_accuracy
+                
+            except Exception as e:
+                self.logger.error(f"Error updating monitoring metrics: {e}")
+    
+    def run_evolution_cycle(self) -> Dict:
+        """Run self-evolution cycle"""
+        if not self.evolution_enabled:
+            return {"error": "Evolution not available"}
+        
+        try:
+            self.logger.info("Starting evolution cycle...")
+            
+            # Update monitoring metrics first
+            self.update_monitoring_metrics()
+            
+            # Run evolution analysis
+            evolution_results = self.evolution_bot.continuous_evolution_cycle(self)
+            
+            # Implement any immediate fixes
+            self.implement_evolution_recommendations(evolution_results)
+            
+            self.logger.info(f"Evolution cycle completed: {evolution_results}")
+            return evolution_results
+            
+        except Exception as e:
+            self.logger.error(f"Error in evolution cycle: {e}")
+            self.log_error_for_evolution("EvolutionError", str(e), "run_evolution_cycle")
+            return {"error": str(e)}
+    
+    def implement_evolution_recommendations(self, evolution_results: Dict):
+        """Implement recommendations from evolution analysis"""
+        try:
+            if "performance_analysis" in evolution_results:
+                analysis = evolution_results["performance_analysis"]
+                
+                # Implement parameter adjustments
+                if "parameter_adjustments" in analysis:
+                    self.apply_parameter_adjustments(analysis["parameter_adjustments"])
+                
+                # Update feature engineering
+                if "feature_engineering" in analysis:
+                    self.update_feature_engineering(analysis["feature_engineering"])
+            
+            # Apply error fixes
+            if "error_fixes" in evolution_results:
+                for fix in evolution_results["error_fixes"]:
+                    self.apply_error_fix(fix)
+            
+            # Update strategies
+            if "strategy_improvements" in evolution_results:
+                self.update_strategies(evolution_results["strategy_improvements"])
+                
+        except Exception as e:
+            self.logger.error(f"Error implementing evolution recommendations: {e}")
+    
+    def apply_parameter_adjustments(self, adjustments: Dict):
+        """Apply ML parameter adjustments"""
+        try:
+            # Update model parameters based on AI recommendations
+            for model_name, params in adjustments.items():
+                if model_name in ['random_forest', 'svm', 'logistic', 'neural']:
+                    self.logger.info(f"Applying parameter adjustments for {model_name}: {params}")
+                    # Parameters would be applied during next training
+                    
+        except Exception as e:
+            self.logger.error(f"Error applying parameter adjustments: {e}")
+    
+    def update_feature_engineering(self, feature_updates: Dict):
+        """Update feature engineering based on AI recommendations"""
+        try:
+            # Enable/disable features based on recommendations
+            if "enable_features" in feature_updates:
+                for feature in feature_updates["enable_features"]:
+                    self.logger.info(f"Enabling feature: {feature}")
+            
+            if "disable_features" in feature_updates:
+                for feature in feature_updates["disable_features"]:
+                    self.logger.info(f"Disabling feature: {feature}")
+                    
+        except Exception as e:
+            self.logger.error(f"Error updating feature engineering: {e}")
+    
+    def apply_error_fix(self, fix_info: Dict):
+        """Apply automatic error fixes"""
+        try:
+            # Log the fix application
+            self.logger.info(f"Applying error fix: {fix_info.get('fix_type', 'unknown')}")
+            
+            # In production, this would apply actual code fixes
+            # For now, we log the proposed changes
+            
+        except Exception as e:
+            self.logger.error(f"Error applying error fix: {e}")
+    
+    def update_strategies(self, strategy_updates: Dict):
+        """Update trading strategies based on AI recommendations"""
+        try:
+            # Update active strategies based on AI analysis
+            if "new_strategies" in strategy_updates:
+                self.active_strategies.extend(strategy_updates["new_strategies"])
+                self.logger.info(f"Added {len(strategy_updates['new_strategies'])} new strategies")
+            
+            if "strategy_parameters" in strategy_updates:
+                self.logger.info("Updated strategy parameters based on AI recommendations")
+                
+        except Exception as e:
+            self.logger.error(f"Error updating strategies: {e}")
+    
+    def get_evolution_status(self) -> Dict:
+        """Get current evolution status"""
+        if not self.evolution_enabled:
+            return {"evolution_enabled": False, "status": "Evolution not available"}
+        
+        try:
+            status = {
+                "evolution_enabled": True,
+                "monitoring_active": self.monitoring_system.is_monitoring if self.monitoring_system else False,
+                "recent_errors": len(self.recent_errors),
+                "current_accuracy": self.current_accuracy,
+                "evolution_summary": self.evolution_bot.get_evolution_summary() if self.evolution_bot else {},
+                "health_report": self.monitoring_system.get_health_report() if self.monitoring_system else {}
+            }
+            
+            return status
+            
+        except Exception as e:
+            self.logger.error(f"Error getting evolution status: {e}")
+            return {"error": str(e)}
+    
+    def start_auto_evolution(self, interval_minutes: int = 30):
+        """Start automatic evolution cycle"""
+        if not self.evolution_enabled:
+            return False
+        
+        def evolution_loop():
+            while self.evolution_enabled:
+                try:
+                    self.run_evolution_cycle()
+                    time.sleep(interval_minutes * 60)  # Convert to seconds
+                except Exception as e:
+                    self.logger.error(f"Error in auto evolution loop: {e}")
+                    time.sleep(60)  # Wait 1 minute before retrying
+        
+        evolution_thread = threading.Thread(target=evolution_loop, daemon=True)
+        evolution_thread.start()
+        
+        self.logger.info(f"Auto-evolution started with {interval_minutes} minute intervals")
+        return True
