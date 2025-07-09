@@ -857,7 +857,10 @@ def place_automated_order(signal):
             return False
             
         # STRICT CAPITAL MANAGEMENT CHECK
-        current_capital_used = calculate_current_capital_usage()
+        # Calculate current capital usage using CapitalManager
+        from utils.capital_manager import CapitalManager
+        capital_manager = CapitalManager()
+        current_capital_used = capital_manager.calculate_current_capital_usage()
         max_capital = 17000  # ₹17,000 limit
         max_per_trade = 3400  # ₹3,400 per position limit
         
@@ -879,11 +882,17 @@ def place_automated_order(signal):
             st.warning(f"❌ STRIKE REJECTED: {strike_price} not ATM for {underlying} (Spot: {current_spot})")
             return False
         
-        # Check if paper trading is enabled
-        if st.session_state.get('paper_trading', False):
+        # Check trading mode from settings - LIVE TRADING ENABLED
+        paper_trading_enabled = st.session_state.get('paper_trading', False)
+        live_trading_enabled = not paper_trading_enabled  # Live trading when paper trading is disabled
+        
+        if paper_trading_enabled:
             st.success(f"✅ PAPER TRADE: {signal['action']} {symbol} (Confidence: {signal.get('confidence', 0):.1%})")
             send_telegram_notification(f"Paper Trade: {signal['action']} {symbol} - Confidence: {signal.get('confidence', 0):.1%}")
             return True
+        
+        # LIVE TRADING MODE
+        st.info(f"🔥 LIVE TRADE: Executing {signal['action']} {symbol} (Confidence: {signal.get('confidence', 0):.1%})")
         
         # Calculate order value BEFORE placing order
         lot_size = get_proper_lot_size(underlying)
