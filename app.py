@@ -886,8 +886,8 @@ def place_automated_order(signal):
         underlying = signal.get('underlying', 'NIFTY')
         
         # ATM STRIKE PRICE VALIDATION
-        current_spot = get_current_spot_price(underlying)
-        if not is_atm_strike_valid(strike_price, current_spot, underlying):
+        current_spot = capital_manager.get_current_spot_price(underlying)
+        if not capital_manager.is_atm_strike_valid(strike_price, underlying):
             st.warning(f"❌ STRIKE REJECTED: {strike_price} not ATM for {underlying} (Spot: {current_spot})")
             return False
         
@@ -904,7 +904,7 @@ def place_automated_order(signal):
         st.info(f"🔥 LIVE TRADE: Executing {signal['action']} {symbol} (Confidence: {signal.get('confidence', 0):.1%})")
         
         # Calculate order value BEFORE placing order
-        lot_size = get_proper_lot_size(underlying)
+        lot_size = capital_manager.get_lot_size(underlying)
         premium = signal.get('premium', 200)  # Estimated premium
         order_value = lot_size * premium
         

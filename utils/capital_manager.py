@@ -32,6 +32,10 @@ class CapitalManager:
             'NIFTYNXT50': 400    # ±400 points
         }
     
+    def get_lot_size(self, underlying: str) -> int:
+        """Get lot size for underlying"""
+        return self.lot_sizes.get(underlying, 75)
+    
     def get_current_spot_price(self, underlying: str) -> float:
         """Get current spot price for underlying"""
         # These would come from live API in production
