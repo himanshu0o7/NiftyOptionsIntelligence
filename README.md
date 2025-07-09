@@ -26,5 +26,7 @@ streamlit run app.py --server.port 5000
 
 ## Documentation
 - [Complete Audit Report](AUDIT_REPORT.md)
-- [Risk Configuration](risk_config.yaml)
-- [System Architecture](replit.md)
+- [Risk Configuration](risk_config.yaml)- [System Architecture](replit.md)
+
+## License
+This project is licensed under the [MIT License](LICENSE).
