@@ -1,0 +1,50 @@
+name: Auto Fix and Dependency Audit
+
+on:
+  push:
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+  workflow_dispatch:
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install pyyaml pandas yfinance plotly websockets
+
+      - name: Generate requirements.txt
+        run: |
+          source venv/bin/activate
+          pip freeze > requirements.txt
+
+      - name: Add missing __init__.py files
+        run: |
+          for dir in core strategies utils risk_management pages data; do
+            if [ -d "$dir" ] && [ ! -f "$dir/__init__.py" ]; then
+              touch "$dir/__init__.py"
+              echo "Added: $dir/__init__.py"
+            fi
+          done
+
+      - name: Commit and Push if Changes
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Action"
+          git add .
+          git commit -m "🔧 Auto-fix missing modules and init files [CI]" || echo "No changes to commit"
+          git push || echo "Nothing to push"
