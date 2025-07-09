@@ -811,32 +811,41 @@ def execute_automated_trading():
             
         st.info(f"Generated {len(signals)} signals for analysis")
         
-        # Process each signal for automated execution
-        orders_placed = 0
+        # SINGLE TRADE MODE - Check if any active positions exist
+        active_positions = len([p for p in st.session_state.get('active_positions', []) if p.get('status') == 'OPEN'])
+        
+        if active_positions > 0:
+            st.info(f"📊 Single trade mode: {active_positions} active position - monitoring current trade")
+            # Monitor existing position instead of placing new trades
+            update_positions()
+            return
+        
+        # Process only the FIRST high-confidence signal (single trade)
+        best_signal = None
+        highest_confidence = 0
+        
         for signal in signals:
             confidence = signal.get('confidence', 0)
-            # Lower confidence threshold for live trading (65% instead of 70%)
-            if confidence > 0.65:  
-                st.info(f"Processing signal: {signal['action']} {signal['symbol']} (Confidence: {confidence:.1%})")
-                # Check risk limits before placing order
-                if check_position_risk():
-                    # Place automated order
-                    success = place_automated_order(signal)
-                    if success:
-                        orders_placed += 1
-                        st.success(f"Order placed for {signal['symbol']}")
-                    else:
-                        st.error(f"Order placement failed for {signal['symbol']}")
-                else:
-                    st.warning(f"Signal rejected due to risk limits: {signal['symbol']}")
-            else:
-                st.info(f"Signal below confidence threshold: {signal['symbol']} ({confidence:.1%})")
+            if confidence > highest_confidence and confidence > 0.65:
+                highest_confidence = confidence
+                best_signal = signal
         
-        if orders_placed > 0:
-            st.success(f"✅ Placed {orders_placed} automated orders")
-            send_telegram_notification(f"Automated trading: {orders_placed} orders placed")
+        if best_signal:
+            st.info(f"🎯 Best signal selected: {best_signal['action']} {best_signal['symbol']} (Confidence: {highest_confidence:.1%})")
+            
+            # Check risk limits before placing order
+            if check_position_risk():
+                # Place the single automated order
+                success = place_automated_order(best_signal)
+                if success:
+                    st.success(f"✅ Single trade executed: {best_signal['symbol']}")
+                    send_telegram_notification(f"Single Trade: {best_signal['action']} {best_signal['symbol']} - Confidence: {highest_confidence:.1%}")
+                else:
+                    st.error(f"❌ Order placement failed for {best_signal['symbol']}")
+            else:
+                st.warning(f"Signal rejected due to risk limits: {best_signal['symbol']}")
         else:
-            st.info("No orders placed - waiting for high-confidence signals")
+            st.info("⏳ No high-confidence signals found - waiting for better opportunities")
                     
         # Monitor and update existing positions
         update_positions()

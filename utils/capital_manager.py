@@ -6,13 +6,13 @@ from datetime import datetime
 from typing import Dict, Tuple, List
 
 class CapitalManager:
-    """Manage trading capital with strict limits"""
+    """Manage trading capital with single trade strategy"""
     
     def __init__(self):
-        self.max_capital = 17000  # ₹17,000 total limit
-        self.max_per_trade = 3400  # ₹3,400 per position limit (20%)
-        self.daily_loss_limit = 850  # ₹850 daily loss limit (5%)
-        self.max_positions = 5
+        self.max_capital_per_trade = 17000  # ₹17,000 max per single trade
+        self.max_positions = 1  # Only 1 position at a time
+        self.daily_loss_limit = 3400  # ₹3,400 daily loss limit (20%)
+        self.single_trade_mode = True  # Single trade mode enabled
         
         # Lot sizes for each index
         self.lot_sizes = {
@@ -81,28 +81,22 @@ class CapitalManager:
                 spot = self.get_current_spot_price(underlying)
                 return False, f"Strike {strike_price} not ATM for {underlying} (Spot: {spot})"
             
-            # 2. Check current capital usage
-            current_used = self.calculate_current_capital_usage()
-            if current_used >= self.max_capital:
-                return False, f"Capital limit reached: ₹{current_used:,.0f} / ₹{self.max_capital:,.0f}"
+            # 2. Check if any active positions exist (single trade mode)
+            active_positions = len([p for p in st.session_state.get('active_positions', []) if p.get('status') == 'OPEN'])
+            if active_positions > 0:
+                return False, f"Single trade mode: Wait for current position to close before new trade"
             
             # 3. Calculate order value
             order_value = self.calculate_order_value(underlying, premium)
             
-            # 4. Check per trade limit
-            if order_value > self.max_per_trade:
-                return False, f"Order value ₹{order_value:,.0f} exceeds ₹{self.max_per_trade:,.0f} limit"
+            # 4. Check single trade capital limit (₹17k max per trade)
+            if order_value > self.max_capital_per_trade:
+                return False, f"Order value ₹{order_value:,.0f} exceeds ₹17k single trade limit"
             
-            # 5. Check if adding this order would exceed total capital
-            if (current_used + order_value) > self.max_capital:
-                return False, f"Would exceed capital: ₹{current_used + order_value:,.0f} > ₹{self.max_capital:,.0f}"
+            # 5. Single trade mode - already checked above, but keeping for compatibility
             
-            # 6. Check maximum positions limit
-            active_positions = len([p for p in st.session_state.get('active_positions', []) if p.get('status') == 'OPEN'])
-            if active_positions >= self.max_positions:
-                return False, f"Maximum positions reached: {active_positions} / {self.max_positions}"
-            
-            return True, f"✅ Order validated: ₹{order_value:,.0f} ATM strike {strike_price}"
+            # All validations passed for single trade
+            return True, f"✅ Single trade validated: ₹{order_value:,.0f} ATM strike {strike_price}"
             
         except Exception as e:
             return False, f"Validation error: {str(e)}"
