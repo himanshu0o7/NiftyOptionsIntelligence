@@ -33,6 +33,7 @@ from utils.popup_manager import PopupManager
 from utils.capital_manager import CapitalManager
 from strategies.professional_options_strategy import ProfessionalOptionsStrategy
 
+
 # Initialize session state
 if 'api_client' not in st.session_state:
     st.session_state.api_client = None
