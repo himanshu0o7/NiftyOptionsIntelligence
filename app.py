@@ -611,14 +611,17 @@ Confidence: {signal['confidence']:.1%}
 """
                         st.session_state.telegram_notifier.send_signal_alert(message)
                     except Exception as e:
-                        logger.error(f"Telegram error: {e}")
+                        if st.session_state.logger:
+                            st.session_state.logger.error(f"Telegram error: {e}")
+                        st.error(f"Telegram error: {e}")
         else:
             st.info("No breakout signals generated - capital limits or no opportunities")
         
         return signals
         
     except Exception as e:
-        logger.error(f"Breakout signal generation error: {e}")
+        if st.session_state.logger:
+            st.session_state.logger.error(f"Breakout signal generation error: {e}")
         st.error(f"Error generating breakout signals: {str(e)}")
         return []
     
