@@ -1,2 +1,6 @@
-uv.lock
-uv.lock
+.env
+__pycache__/
+venv/
+*.log
+*.pyc
+.DS_Store
