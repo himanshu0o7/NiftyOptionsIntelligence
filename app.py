@@ -19,6 +19,9 @@ API_KEY = os.getenv("ANGEL_API_KEY")
 CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
 MPIN = os.getenv("ANGEL_PIN")
 TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
+
+angel = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
+
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -46,7 +49,7 @@ conn.commit()
 # Login
 try:
     login = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
-    tokens = login.login()
+    tokens = angel.ensure_fresh()
     st.success(f"✅ Logged in as {tokens['clientcode']}")
 except Exception as e:
     st.error(f"Login Failed: {e}")
@@ -160,7 +163,7 @@ def get_fresh_tokens():
     return angel.ensure_fresh()
 
 # Example usage for market data API:
-tokens = get_fresh_tokens()
+tokens = angel.ensure_fresh()
 
 # Example usage for websocket (will always get new tokens if expired)
 start_websocket_feed(get_fresh_tokens())
@@ -174,10 +177,11 @@ angel = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
 def ensure_tokens_fresh():
     global tokens, last_login_time
     if time.time() - last_login_time > (14 * 60):  # 14 minutes
-        tokens = angel.login(force_refresh=True)
+        tokens = angel.ensure_fresh()
         last_login_time = time.time()
 
 # Call before EVERY API/WebSocket request
 ensure_tokens_fresh()
 
 #Stashed changes
+
