@@ -143,6 +143,7 @@ with tab4:
         for i, row in df.iterrows():
             st.warning(f"[{row['timestamp']}] {row['symbol']} {row['strike']} {option_type}\nDelta: {row['delta']:.2f} | IV: {row['iv']}%")
 
+#Updated upstream
 # app.py
 from login_manager import AngelOneLogin
 from utils.websockets import start_websocket_feed
@@ -163,3 +164,20 @@ tokens = get_fresh_tokens()
 
 # Example usage for websocket (will always get new tokens if expired)
 start_websocket_feed(get_fresh_tokens())
+
+import time
+
+last_login_time = 0
+tokens = None
+angel = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
+
+def ensure_tokens_fresh():
+    global tokens, last_login_time
+    if time.time() - last_login_time > (14 * 60):  # 14 minutes
+        tokens = angel.login(force_refresh=True)
+        last_login_time = time.time()
+
+# Call before EVERY API/WebSocket request
+ensure_tokens_fresh()
+
+#Stashed changes
