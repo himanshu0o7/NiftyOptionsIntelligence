@@ -15,6 +15,7 @@ idna==3.10
 Jinja2==3.1.6
 jsonschema==4.24.0
 jsonschema-specifications==2025.4.1
+logzero==1.7.0
 MarkupSafe==3.0.2
 multitasking==0.0.11
 narwhals==1.46.0
@@ -23,6 +24,7 @@ packaging==25.0
 pandas==2.3.1
 peewee==3.18.2
 pillow==11.3.0
+pipdeptree==2.26.1
 platformdirs==4.3.8
 plotly==6.2.0
 protobuf==6.31.1
@@ -31,12 +33,15 @@ pycparser==2.22
 pydeck==0.9.1
 pyotp==2.9.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.1.1
 pytz==2025.2
 PyYAML==6.0.2
 referencing==0.36.2
 requests==2.32.4
 rpds-py==0.26.0
+scipy==1.15.3
 six==1.17.0
+smartapi-python==1.5.5
 smmap==5.0.2
 soupsieve==2.7
 streamlit==1.46.1
@@ -47,5 +52,7 @@ typing_extensions==4.14.1
 tzdata==2025.2
 urllib3==2.5.0
 watchdog==6.0.0
+websocket-client==1.8.0
 websockets==15.0.1
 yfinance==0.2.65
+scikit-learn
