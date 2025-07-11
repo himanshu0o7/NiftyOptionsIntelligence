@@ -143,3 +143,23 @@ with tab4:
         for i, row in df.iterrows():
             st.warning(f"[{row['timestamp']}] {row['symbol']} {row['strike']} {option_type}\nDelta: {row['delta']:.2f} | IV: {row['iv']}%")
 
+# app.py
+from login_manager import AngelOneLogin
+from utils.websockets import start_websocket_feed
+
+API_KEY = os.getenv("ANGEL_API_KEY")
+CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
+MPIN = os.getenv("ANGEL_PIN")
+TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
+
+angel = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
+
+def get_fresh_tokens():
+    # Always get fresh tokens for API/WebSocket usage
+    return angel.ensure_fresh()
+
+# Example usage for market data API:
+tokens = get_fresh_tokens()
+
+# Example usage for websocket (will always get new tokens if expired)
+start_websocket_feed(get_fresh_tokens())
