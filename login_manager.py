@@ -1,5 +1,4 @@
 # login_manager.py
-
 import pyotp
 from SmartApi import SmartConnect
 import time
@@ -10,36 +9,35 @@ class AngelOneLogin:
         self.client_id = client_id
         self.mpin = mpin
         self.totp_secret = totp_secret
-        self.connection = SmartConnect(api_key=self.api_key)
+        self.smartconnect = SmartConnect(api_key=api_key)
         self.session_data = None
-        self.login_time = None
-        self.token_expiry = 15 * 60  # 15 minutes validity (SmartAPI docs)
+        self.feed_token = None
+        self.jwt_token = None
+        self.last_login = 0
+        self.TOKEN_LIFE = 14 * 60   # 14 minutes
 
-    def _generate_totp(self):
-        return pyotp.TOTP(self.totp_secret).now()
-
-    def _is_token_expired(self):
-        return not self.login_time or (time.time() - self.login_time > self.token_expiry)
-
-    def login(self, force_refresh=False):
-        if self.session_data and not force_refresh and not self._is_token_expired():
-            return self._get_token_payload()
-        try:
-            totp = self._generate_totp()
-            self.session_data = self.connection.generateSession(self.client_id, self.mpin, totp)
-            if not self.session_data.get('status', False):
-                raise Exception(f"Login failed: {self.session_data.get('message', 'Unknown error')}")
-            self.login_time = time.time()
-            return self._get_token_payload()
-        except Exception as e:
-            raise Exception(f"Login Error: {e}")
-
-    def _get_token_payload(self):
+    def fresh_login(self):
+        totp = pyotp.TOTP(self.totp_secret).now()
+        self.session_data = self.smartconnect.generateSession(self.client_id, self.mpin, totp)
+        if not self.session_data or "data" not in self.session_data:
+            raise Exception("Login failed! Check credentials or TOTP.")
+        self.jwt_token = self.session_data["data"]["jwtToken"]
+        self.feed_token = self.smartconnect.getfeedToken()
+        self.last_login = time.time()
         return {
-            "clientcode": self.session_data["data"]["clientcode"],
-            "jwtToken": self.connection.access_token,
-            "refreshToken": self.session_data["data"]["refreshToken"],
-            "feedToken": self.connection.getfeedToken(),
-            "api_key": self.api_key
+            "jwtToken": self.jwt_token,
+            "feedToken": self.feed_token,
+            "api_key": self.api_key,
+            "clientcode": self.client_id
         }
 
+    def ensure_fresh(self):
+        if not self.jwt_token or (time.time() - self.last_login) > self.TOKEN_LIFE:
+            return self.fresh_login()
+        else:
+            return {
+                "jwtToken": self.jwt_token,
+                "feedToken": self.feed_token,
+                "api_key": self.api_key,
+                "clientcode": self.client_id
+            }
