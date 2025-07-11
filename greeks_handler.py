@@ -38,7 +38,7 @@ def fetch_option_greeks(symbol, strike, option_type, tokens):
 
     # Nearest expiry
     df["strike"] = df["strike"].astype(float) / 100
-    df["expiry_dt"] = pd.to_datetime(df["expiry"])
+    df["expiry_dt"] = pd.to_datetime(df["expiry"], format='%d%b%Y')
     df = df[(df["strike"] == strike) & (df["symbol"].str.endswith(option_type))]
     if df.empty:
         return {"error": f"No {option_type} contract found for {symbol} {strike}"}
