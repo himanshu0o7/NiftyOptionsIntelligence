@@ -1,0 +1,228 @@
+[E 250717 04:13:57 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword. Error: Invalid totp. URL: https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'clientcode': 'H60779', 'password': '5750', 'totp': 'IZFFVUEWVFS34P4BDZ7BXVXC5Y'}, Response: {'status': False, 'message': 'Invalid totp', 'errorcode': 'AB1050', 'data': None}
+[W 250717 07:45:22 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[I 250717 07:45:24 smartConnect:124] in pool
+[E 250717 07:45:25 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[W 250717 07:45:26 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250717 07:45:29 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250717 07:45:29 smartConnect:124] in pool
+[W 250717 07:45:36 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250717 07:45:36 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:45:36 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:45:36 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:45:36 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:45:36 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 07:45:39 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250717 07:45:39 smartConnect:124] in pool
+[W 250717 07:45:46 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250717 07:45:46 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:45:46 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:45:46 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:45:46 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 07:45:49 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250717 07:45:49 smartConnect:124] in pool
+[W 250717 07:45:58 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250717 07:46:01 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250717 07:46:01 smartConnect:124] in pool
+[W 250717 07:46:07 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250717 07:46:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 07:46:09 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250717 07:46:09 smartConnect:124] in pool
+[W 250717 07:46:32 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250717 07:46:35 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250717 07:46:35 smartConnect:124] in pool
+[W 250717 07:46:43 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250717 07:46:46 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[W 250717 07:46:53 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:53 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:53 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:53 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:46:53 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[I 250717 07:47:49 smartConnect:124] in pool
+[W 250717 07:47:50 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250717 07:47:53 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[W 250717 07:48:00 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:48:00 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:48:00 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:48:00 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 07:48:00 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[I 250717 08:23:58 smart_websocket_handler:25] WebSocket connection opened
+[I 250717 08:24:00 smartConnect:124] in pool
+[I 250717 08:24:02 smart_websocket_handler:25] WebSocket connection opened
+[I 250717 08:24:05 smartConnect:124] in pool
+[I 250717 08:24:07 smart_websocket_handler:25] WebSocket connection opened
+[I 250717 08:24:22 smartConnect:124] in pool
+[W 250717 08:24:24 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[I 250717 08:24:27 smartConnect:124] in pool
+[W 250717 08:24:29 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[I 250717 08:24:33 smartConnect:124] in pool
+[W 250717 08:24:35 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250717 08:24:39 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 2)...
+[W 250717 08:24:44 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 3)...
+[W 250717 08:24:45 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 2)...
+[W 250717 08:24:49 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 3)...
+[W 250717 08:24:54 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[W 250717 08:24:55 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 3)...
+[W 250717 08:24:59 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[W 250717 08:25:04 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[W 250717 08:25:05 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[W 250717 08:25:10 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[E 250717 08:25:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250717 08:25:15 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[E 250717 08:25:15 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:25:15 smart_websocket_handler:76] Subscription failed: Connection is already closed.
+[E 250717 08:25:20 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:20 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:20 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:20 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:20 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:20 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:20 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:20 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:20 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:20 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:20 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:20 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:20 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:20 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:21 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:25:21 smart_websocket_handler:76] Subscription failed: Connection is already closed.
+[E 250717 08:25:25 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:25 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:25 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:25 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:25 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:25 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:25 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:25 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:25 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:25 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:25 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:25 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:25 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:25:25 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:25:26 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:25:26 smart_websocket_handler:76] Subscription failed: Connection is already closed.
+[I 250717 08:30:00 smartConnect:124] in pool
+[W 250717 08:30:02 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[I 250717 08:30:07 smartConnect:124] in pool
+[W 250717 08:30:15 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[I 250717 08:30:16 smartConnect:124] in pool
+[W 250717 08:30:18 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250717 08:30:19 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[I 250717 08:30:22 smartConnect:124] in pool
+[W 250717 08:30:24 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250717 08:30:25 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 2)...
+[W 250717 08:30:28 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 2)...
+[W 250717 08:30:29 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 2)...
+[W 250717 08:30:32 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[W 250717 08:30:34 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 2)...
+[W 250717 08:30:35 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 3)...
+[W 250717 08:30:38 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 3)...
+[W 250717 08:30:39 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 3)...
+[W 250717 08:30:42 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[W 250717 08:30:44 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 3)...
+[W 250717 08:30:45 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[W 250717 08:30:48 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[W 250717 08:30:49 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[E 250717 08:30:52 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:30:52 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:30:52 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:30:52 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:30:52 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:30:52 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:30:52 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:30:52 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:30:52 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:30:52 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:30:52 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:30:52 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:30:52 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:30:52 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:30:53 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:30:53 smart_websocket_handler:76] Subscription failed: Connection is already closed.
+[W 250717 08:30:54 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 4)...
+[W 250717 08:30:55 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[W 250717 08:30:58 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[W 250717 08:30:59 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[W 250717 08:31:04 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 5)...
+[E 250717 08:31:05 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:05 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:05 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:05 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:05 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:05 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:05 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:05 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:05 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:05 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:05 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:05 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:05 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:05 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:06 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:31:06 smart_websocket_handler:76] Subscription failed: Connection is already closed.
+[E 250717 08:31:08 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:08 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:08 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:08 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:08 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:08 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:08 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:08 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:09 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:31:09 smart_websocket_handler:76] Subscription failed: Connection is already closed.
+[E 250717 08:31:10 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:31:10 smart_websocket_handler:76] Subscription failed: Connection is already closed.
+[E 250717 08:31:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:14 smart_websocket_handler:40] WebSocket error: Connection closed
+[W 250717 08:31:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250717 08:31:15 smartWebSocketV2:212] Error occurred during subscribe: Connection is already closed.
+[E 250717 08:31:15 smart_websocket_handler:76] Subscription failed: Connection is already closed.

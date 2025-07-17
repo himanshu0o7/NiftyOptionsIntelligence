@@ -1,0 +1,86 @@
+# smart_websocket_handler.py
+# Fixed init args (auth_token not jwt_token), added max_retry_attempt=5, delays, global data store.
+
+import threading
+from logzero import logger  # pip install logzero
+from SmartApi.smartWebSocketV2 import SmartWebSocketV2
+from session_manager import SessionManager
+import time
+
+# Global store for latest data
+latest_data = {}
+
+class SmartWebSocketHandler:
+    def __init__(self):
+        self.sws = None
+        self.correlation_id = "ws_handler_123"
+        self.connected = False
+
+    def _on_open(self, wsapp):
+        logger.info("WebSocket connection opened")
+        self.connected = True
+
+    def _on_data(self, wsapp, message):
+        logger.info(f"Received data: {message}")
+        if isinstance(message, dict) and 'token' in message:
+            token = message['token']
+            latest_data[token] = {
+                'ltp': message.get('last_traded_price'),
+                'oi': message.get('open_interest'),
+                'volume': message.get('volume_trade_for_the_day'),
+                'greeks': {}  # Compute externally if needed
+            }
+
+    def _on_error(self, wsapp, error):
+        logger.error(f"WebSocket error: {error}")
+        self.connected = False
+
+    def _on_close(self, wsapp):
+        logger.info("WebSocket connection closed")
+        self.connected = False
+
+    def start_websocket(self, token_list, mode=2):  # Quote mode
+        sm = SessionManager()
+        session = sm.get_session()
+        data = session['data']
+        auth_token = data['jwtToken']
+        api_key = API_KEY  # From env
+        client_code = data['clientcode']
+        feed_token = data['feedToken']
+
+        time.sleep(1)  # Delay for rate limit
+
+        self.sws = SmartWebSocketV2(
+            auth_token=auth_token,  # Fixed arg name
+            api_key=api_key,
+            client_code=client_code,
+            feed_token=feed_token,
+            max_retry_attempt=5  # Increased retries
+        )
+        self.sws.on_open = self._on_open
+        self.sws.on_data = self._on_data
+        self.sws.on_error = self._on_error
+        self.sws.on_close = self._on_close
+
+        def connect_and_subscribe():
+            try:
+                self.sws.connect()
+                time.sleep(1)
+                self.sws.subscribe(self.correlation_id, mode, token_list)
+            except Exception as e:
+                logger.error(f"Subscription failed: {e}")
+
+        threading.Thread(target=connect_and_subscribe, daemon=True).start()
+
+    def get_latest_data(self, token):
+        return latest_data.get(token)
+
+    def close(self):
+        if self.sws:
+            self.sws.close_connection()
+
+# ✅ Example:
+# handler = SmartWebSocketHandler()
+# token_list = [{"exchangeType": 2, "tokens": ["26009"]}]
+# handler.start_websocket(token_list)
+

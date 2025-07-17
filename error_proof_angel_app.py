@@ -35,9 +35,10 @@ def angel_login():
         st.error(f"❌ Login failed: {e}")
         return None
 
-@st.cache_data(show_spinner=False)
-def load_master_contract(smart):
+def load_master_contract():
     try:
+        smart = SmartConnect(api_key=API_KEY)
+        smart.generateSession(CLIENT_ID, PIN, TOTP)
         df = pd.DataFrame(smart.getMasterContract("NFO"))
         df = df[df['symbol'] == 'NIFTY']  # Only NIFTY contracts
         return df
@@ -67,7 +68,7 @@ def main():
     if not smart:
         st.stop()
 
-    df = load_master_contract(smart)
+    df = load_master_contract()
     if df.empty:
         st.stop()
 

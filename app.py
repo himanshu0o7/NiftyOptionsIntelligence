@@ -1,187 +1,87 @@
-import os
-import time
-import sqlite3
-import datetime as dt
-import requests
-import pandas as pd
-import matplotlib.pyplot as plt
-from dotenv import load_dotenv
-from streamlit_autorefresh import st_autorefresh
+# app.py - Fixed and cleaned version with safe threading and no duplicate key issue
+
 import streamlit as st
-from login_manager import AngelOneLogin
-from greeks_handler import fetch_option_greeks
-from utils.oi_data import fetch_oi_buildup
-
-load_dotenv()
-
-# Load .env
-API_KEY = os.getenv("ANGEL_API_KEY")
-CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
-MPIN = os.getenv("ANGEL_PIN")
-TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
-
-angel = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
-
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-
-if not all([API_KEY, CLIENT_ID, MPIN, TOTP_SECRET]):
-    st.error("❌ API credentials not loaded.")
-    st.stop()
-
-# DB setup
-conn = sqlite3.connect("greeks_log.db", check_same_thread=False)
-c = conn.cursor()
-c.execute('''
-    CREATE TABLE IF NOT EXISTS greek_log (
-        timestamp TEXT,
-        symbol TEXT,
-        strike INTEGER,
-        delta REAL,
-        iv REAL,
-        theta REAL,
-        gamma REAL,
-        vega REAL
-    )
-''')
-conn.commit()
-
-# Login
-try:
-    login = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
-    tokens = angel.ensure_fresh()
-    st.success(f"✅ Logged in as {tokens['clientcode']}")
-except Exception as e:
-    st.error(f"Login Failed: {e}")
-    st.stop()
-
-# UI Controls
-st.title("📊 Nifty Options Intelligence Dashboard")
-symbol = st.selectbox("Symbol", ["NIFTY", "BANKNIFTY"])
-strike = st.number_input("Strike Price", value=23500)
-option_type = st.radio("Option Type", ["CE", "PE"])
-
-# Tabs
-tab1, tab2, tab3, tab4 = st.tabs(["📡 Auto Mode", "🖱️ Manual Mode", "📈 Chart & Logs", "💬 Alerts"])
-
-# ================================
-with tab1:
-    st_autorefresh(interval=10000, limit=None, key="autorefresh")
-    try:
-        greeks = fetch_option_greeks(symbol, strike, option_type, tokens)
-        oi_data = fetch_oi_buildup(symbol)
-
-        st.subheader("🧠 Option Greeks")
-        st.json(greeks)
-        st.subheader("📊 OI Buildup")
-        st.json(oi_data)
-
-        # Log
-        c.execute('''
-            INSERT INTO greek_log VALUES (?,?,?,?,?,?,?,?)
-        ''', (
-            dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            greeks["symbol"],
-            greeks["strike"],
-            greeks["delta"],
-            greeks["iv"],
-            greeks["theta"],
-            greeks["gamma"],
-            greeks["vega"]
-        ))
-        conn.commit()
-
-        # Telegram alert
-        if greeks["delta"] > 0.7 or greeks["iv"] > 30:
-            msg = f"⚠️ Alert: {greeks['symbol']} {greeks['strike']} {option_type}\nDelta: {greeks['delta']:.2f}\nIV: {greeks['iv']}%"
-            url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-            requests.post(url, data={"chat_id": TELEGRAM_CHAT_ID, "text": msg})
-            st.warning("📣 Telegram alert triggered!")
-
-    except Exception as e:
-        st.error(f"Auto fetch error: {e}")
-
-# ================================
-with tab2:
-    if st.button("🛱️ Fetch Market Data"):
-        try:
-            greeks = fetch_option_greeks(symbol, strike, option_type, tokens)
-            oi_data = fetch_oi_buildup(symbol)
-            st.subheader("🧠 Option Greeks")
-            st.json(greeks)
-            st.subheader("📊 OI Buildup")
-            st.json(oi_data)
-        except Exception as e:
-            st.error(f"Manual fetch error: {e}")
-
-# ================================
-with tab3:
-    st.subheader("📈 Last 10 Greeks (Delta & IV)")
-
-    df = pd.read_sql_query("SELECT * FROM greek_log WHERE symbol = ? ORDER BY timestamp DESC LIMIT 10", conn, params=(symbol,))
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
-    df = df.sort_values("timestamp")
-
-    if not df.empty:
-        fig, ax1 = plt.subplots()
-        ax2 = ax1.twinx()
-        ax1.plot(df["timestamp"], df["delta"], label="Delta", marker="o")
-        ax2.plot(df["timestamp"], df["iv"], label="IV", marker="x", color='orange')
-        ax1.set_ylabel("Delta")
-        ax2.set_ylabel("IV")
-        st.pyplot(fig)
-
-    st.subheader("⬇️ Export Full Log")
-    df_all = pd.read_sql_query("SELECT * FROM greek_log", conn)
-    csv = df_all.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Download CSV", csv, file_name="greeks_log.csv", mime="text/csv")
-
-# ================================
-with tab4:
-    st.subheader("💬 Recent Alerts")
-    df = pd.read_sql_query("SELECT * FROM greek_log WHERE delta > 0.7 OR iv > 30 ORDER BY timestamp DESC LIMIT 3", conn)
-    if df.empty:
-        st.info("✅ No recent alerts.")
-    else:
-        for i, row in df.iterrows():
-            st.warning(f"[{row['timestamp']}] {row['symbol']} {row['strike']} {option_type}\nDelta: {row['delta']:.2f} | IV: {row['iv']}%")
-
-#Updated upstream
-# app.py
-from login_manager import AngelOneLogin
-from utils.websockets import start_websocket_feed
-
-API_KEY = os.getenv("ANGEL_API_KEY")
-CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
-MPIN = os.getenv("ANGEL_PIN")
-TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
-
-angel = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
-
-def get_fresh_tokens():
-    # Always get fresh tokens for API/WebSocket usage
-    return angel.ensure_fresh()
-
-# Example usage for market data API:
-tokens = angel.ensure_fresh()
-
-# Example usage for websocket (will always get new tokens if expired)
-start_websocket_feed(get_fresh_tokens())
-
+from streamlit_autorefresh import st_autorefresh
+import pandas as pd
 import time
+import threading
 
-last_login_time = 0
+# Local module imports (make sure these files exist and are error-free)
+from session_manager import SessionManager
+from option_stream_ui import get_option_data
+
+# ---------------------------
+# PAGE SETUP
+# ---------------------------
+st.set_page_config(layout="wide")
+st_autorefresh(interval=5000, limit=100, key="refresh_autokey_001")
+
+st.title("📈 Nifty Options Intelligence Dashboard")
+st.markdown("Use this app to monitor live CE/PE option data for NIFTY/BANKNIFTY")
+
+# ---------------------------
+# GLOBALS
+# ---------------------------
 tokens = None
-angel = AngelOneLogin(API_KEY, CLIENT_ID, MPIN, TOTP_SECRET)
+last_login_time = 0
 
+# ---------------------------
+# TOKEN REFRESH FUNCTION
+# ---------------------------
 def ensure_tokens_fresh():
     global tokens, last_login_time
-    if time.time() - last_login_time > (14 * 60):  # 14 minutes
-        tokens = angel.ensure_fresh()
+    if time.time() - last_login_time > (14 * 60):  # refresh every 14 min
+        time.sleep(1)  # prevent aggressive retry
+        sm = SessionManager()
+        session = sm.get_session()
+        tokens = session
         last_login_time = time.time()
 
-# Call before EVERY API/WebSocket request
-ensure_tokens_fresh()
+# ---------------------------
+# STREAMLIT UI
+# ---------------------------
+col1, col2 = st.columns(2)
 
-#Stashed changes
+with col1:
+    symbol = st.selectbox("Select Symbol", ["NIFTY", "BANKNIFTY"])
+    option_type = st.radio("Option Type", ["CE", "PE"], horizontal=True)
+
+with col2:
+    strike_price = st.number_input(
+        "Select Strike Price", min_value=10000, max_value=50000, step=50, value=22500
+    )
+
+# ---------------------------
+# DATA FETCH + DISPLAY
+# ---------------------------
+try:
+    ensure_tokens_fresh()
+    data = get_option_data(symbol, strike_price, option_type)
+
+    if data and "error" not in data:
+        st.subheader(f"📊 Live Data for {symbol} {strike_price} {option_type}")
+        st.dataframe(pd.DataFrame([data]))
+    else:
+        st.error(data.get("error", "Unknown error occurred"))
+
+except Exception as e:
+    st.error(f"⚠️ App error: {e}")
+
+# ---------------------------
+# SAFELY HANDLE SIGNALS IF NEEDED
+# ---------------------------
+try:
+    import signal
+    if threading.current_thread() is threading.main_thread():
+        def handler(signum, frame):
+            print(f"Signal {signum} received")
+        signal.signal(signal.SIGTERM, handler)
+except Exception as err:
+    print(f"[Signal Handling Skipped] Reason: {err}")
+
+import subprocess
+
+if st.button("Start Live WebSocket"):
+    subprocess.Popen(["python3", "websocket_runner.py"])
+    st.success("WebSocket started in background.")
 
