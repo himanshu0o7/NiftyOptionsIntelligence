@@ -1,47 +1,72 @@
-# websocket_runner.py - Updated for SmartAPI WebSocket V2
+# websocket_runner.py - Live LTP feed, login, auto WebSocket connection
 
-from SmartApi.smartWebSocketV2 import WebSocketV2
 import os
+import pyotp
 from dotenv import load_dotenv
+from SmartApi import SmartConnect
+from SmartApi.smartWebSocketV2 import SmartWebSocketV2
+from scrip_master_utils import get_token_by_symbol
 
+# === Load environment variables ===
 load_dotenv()
 
-# Load credentials from .env
-FEED_TOKEN = os.getenv("FEED_TOKEN")
-CLIENT_CODE = os.getenv("CLIENT_ID")
+API_KEY = os.getenv("API_KEY")
+CLIENT_CODE = os.getenv("CLIENT_CODE")
+PIN = os.getenv("PIN")
+TOTP_SECRET = os.getenv("TOTP_SECRET")
 
-# Symbol tokens (use NSE option tokens e.g. 26000 for NIFTY)
-# Get correct tokens from SmartAPI instrument dump or SnapQuote
-TOKEN_LIST = ["26000"]  # Replace with actual symbolToken(s)
+if not all([API_KEY, CLIENT_CODE, PIN, TOTP_SECRET]):
+    raise ValueError("❌ Missing required environment variables.")
 
-# Initialize WebSocketV2
-sws = WebSocketV2(
-    feed_token=FEED_TOKEN,
-    client_code=CLIENT_CODE,
-    script_tokens=TOKEN_LIST
-)
+# === Generate TOTP ===
+try:
+    totp = pyotp.TOTP(TOTP_SECRET).now()
+except Exception as e:
+    raise ValueError(f"❌ Invalid TOTP_SECRET (must be base32): {e}")
 
-# Define callbacks
+# === Login Session ===
+smart_api = SmartConnect(api_key=API_KEY)
+session = smart_api.generateSession(CLIENT_CODE, PIN, totp)
+feed_token = smart_api.getfeedToken()
+auth_token = session['data']['jwtToken']
+refresh_token = session['data']['refreshToken']
+
+print("✅ Logged in successfully")
+
+# === Get instrument token ===
+token = get_token_by_symbol("NIFTY", expiry="25JUL2025", optiontype="CE", strike=25000)
+if not token:
+    raise ValueError("❌ Unable to fetch token for desired option contract.")
+
+print(f"🎯 Token fetched: {token}")
+
+# === Setup WebSocket ===
+sws = SmartWebSocketV2(auth_token, API_KEY, CLIENT_CODE, feed_token)
+mode = 1  # Mode 1 = LTP only
+correlation_id = "kp5feed"
+
+# === Event callbacks ===
 def on_open(wsapp):
-    print("✅ WebSocket V2 connection opened")
-    sws.subscribe(TOKEN_LIST)
+    print("🟢 WebSocket Connected.")
+    sws.subscribe(correlation_id, mode, [{"exchangeType": 2, "tokens": [token]}])
 
 def on_data(wsapp, message):
-    print(f"📡 Tick Data: {message}")
+    print("📈 Tick Data:", message)
+    # Optional: trigger alert/trade here
 
 def on_error(wsapp, error):
-    print(f"❌ WebSocket Error: {error}")
+    print("❌ WebSocket Error:", error)
 
 def on_close(wsapp):
-    print("🔌 WebSocket connection closed")
+    print("🔌 WebSocket Closed. Reconnecting...")
+    # Optional: Retry logic
 
-# Bind callbacks
+# === Bind callbacks ===
 sws.on_open = on_open
 sws.on_data = on_data
 sws.on_error = on_error
 sws.on_close = on_close
 
-# Start WebSocket (safely without signal handler crash)
-from twisted.internet import reactor
-reactor.run(installSignalHandlers=False)
+# === Connect ===
+sws.connect()
 

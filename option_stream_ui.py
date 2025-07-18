@@ -1,51 +1,70 @@
-# option_stream_ui.py
-# Uses REST API (getQuote) instead of WebSocket for safe integration in Streamlit
+# option_stream_ui.py - Streamlit chart UI for live LTP and signals
 
-import os
+import streamlit as st
 import pandas as pd
-from SmartApi.smartConnect import SmartConnect
-from dotenv import load_dotenv
+import time
+from datetime import datetime
+from threading import Thread
+from collections import deque
+from telegram_alerts import send_telegram_alert
 
-load_dotenv()
+# Shared memory store (can also use cache or session state)
+live_data_store = {
+    'ltp': {},
+    'triggered': set()
+}
 
-API_KEY = os.getenv("API_KEY")
-CLIENT_ID = os.getenv("CLIENT_ID")
-PIN = os.getenv("PIN")
-TOTP = os.getenv("TOTP")
+st.set_page_config(layout="wide")
+st.title("📈 Live Option Stream Monitor")
 
-# Session generator (can be reused)
-def get_session():
-    try:
-        obj = SmartConnect(api_key=API_KEY)
-        session_data = obj.generateSession(CLIENT_ID, PIN, TOTP)
-        return obj, session_data
-    except Exception as e:
-        return None, {"error": f"Login/session failed: {e}"}
+col1, col2 = st.columns(2)
 
-# Option chain REST-based fetcher
-def get_option_data(symbol: str, strike: int, option_type: str) -> dict:
-    try:
-        obj, session = get_session()
-        if not obj:
-            return session  # error info
+with col1:
+    selected_symbols = st.multiselect("Select Option Symbols (format: SYMBOL|TOKEN)", [
+        "NIFTY25JUL25000CE|123456",
+        "BANKNIFTY25JUL45000PE|654321"
+    ])
+    upper_threshold = st.number_input("Upper Price Alert Threshold", min_value=0.0, value=100.0)
+    lower_threshold = st.number_input("Lower Price Alert Threshold", min_value=0.0, value=50.0)
 
-        # Construct tradingsymbol
-        # Example: NIFTY24JUL22500CE
-        tradingsymbol = f"{symbol}24JUL{strike}{option_type.upper()}"
+with col2:
+    auto_trade = st.checkbox("Auto Place Order on Trigger")
+    start_stream = st.button("▶️ Start Stream")
 
-        quote = obj.getQuote(
-            exchange="NFO",
-            tradingsymbol=tradingsymbol
-        )
+ltp_chart = st.empty()
 
-        # Return specific fields (can be expanded)
-        ltp = quote.get("data", {}).get("fetched", {}).get("last_price")
-        return {
-            "symbol": tradingsymbol,
-            "ltp": ltp,
-            "raw": quote
-        }
+# Append live LTP data to deque
+ltp_history = {sym.split("|")[0]: deque(maxlen=100) for sym in selected_symbols}
 
-    except Exception as e:
-        return {"error": f"Fetch failed: {e}"}
+# Live UI update loop
+def update_ui():
+    while True:
+        display_df = []
+        for entry in selected_symbols:
+            sym, token = entry.split("|")
+            ltp = live_data_store['ltp'].get(token, None)
+            if ltp:
+                timestamp = datetime.now().strftime("%H:%M:%S")
+                ltp_history[sym].append((timestamp, ltp))
+                display_df.append({"Symbol": sym, "LTP": ltp, "Time": timestamp})
+
+                # Trigger alerts
+                if token not in live_data_store['triggered']:
+                    if ltp > upper_threshold:
+                        send_telegram_alert(f"📈 {sym} crossed upper threshold! LTP: ₹{ltp}")
+                        live_data_store['triggered'].add(token)
+                    elif ltp < lower_threshold:
+                        send_telegram_alert(f"📉 {sym} fell below lower threshold! LTP: ₹{ltp}")
+                        live_data_store['triggered'].add(token)
+                    # Optional: place_order(symbol, token, "SELL")
+
+        if display_df:
+            df = pd.DataFrame(display_df)
+            ltp_chart.table(df)
+
+        time.sleep(2)
+
+if start_stream:
+    Thread(target=update_ui, daemon=True).start()
+    st.success("🟢 Stream started. Waiting for LTP data...")
 
