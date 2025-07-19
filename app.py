@@ -14,8 +14,7 @@ from option_stream_ui import fetch_option_data
 # PAGE SETUP
 # ---------------------------
 st.set_page_config(layout="wide")
-# Commenting out auto-refresh for better table visibility
-# st_autorefresh(interval=5000, limit=100, key="refresh_autokey_001")
+st_autorefresh(interval=5000, limit=100, key="refresh_autokey_001")
 
 st.title("📈 Nifty Options Intelligence Dashboard")
 st.markdown("Use this app to monitor live CE/PE option data for NIFTY/BANKNIFTY")
@@ -93,6 +92,10 @@ try:
         
         df = pd.DataFrame(display_data)
         st.dataframe(df, use_container_width=True)
+        
+        # Add separator
+        st.markdown("---")
+        st.subheader("📊 Key Metrics Summary")
         
         # Additional summary metrics in columns
         col1, col2, col3, col4 = st.columns(4)
