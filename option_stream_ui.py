@@ -7,6 +7,50 @@ from datetime import datetime
 from threading import Thread
 from collections import deque
 from telegram_alerts import send_telegram_alert
+import numpy as np
+
+def fetch_option_data(symbol, strike_price, option_type):
+    """
+    Fetch live option data including LTP, OI, Greeks
+    Returns structured data compatible with the dashboard
+    """
+    try:
+        # Generate sample data for demo purposes
+        # In production, this would connect to actual APIs
+        
+        # Basic option data structure
+        option_data = {
+            "symbol": f"{symbol}{strike_price}{option_type}",
+            "strike": strike_price,
+            "option_type": option_type,
+            "underlying": symbol,
+            "expiry": "10JUL2025",
+            
+            # Live market data
+            "ltp": round(np.random.uniform(50, 300), 2),
+            "bid": round(np.random.uniform(45, 295), 2),
+            "ask": round(np.random.uniform(55, 305), 2),
+            "volume": np.random.randint(1000, 50000),
+            "oi": np.random.randint(50000, 500000),
+            "oi_change": np.random.randint(-10000, 10000),
+            
+            # Greeks
+            "delta": round(np.random.uniform(0.1, 0.9) if option_type == "CE" else np.random.uniform(-0.9, -0.1), 4),
+            "gamma": round(np.random.uniform(0.001, 0.01), 6),
+            "theta": round(np.random.uniform(-2, -0.1), 4),
+            "vega": round(np.random.uniform(0.1, 2), 4),
+            "iv": round(np.random.uniform(15, 35), 2),
+            
+            # Additional metrics
+            "change": round(np.random.uniform(-20, 20), 2),
+            "change_percent": round(np.random.uniform(-15, 15), 2),
+            "last_update": datetime.now().strftime("%H:%M:%S"),
+        }
+        
+        return option_data
+        
+    except Exception as e:
+        return {"error": f"Failed to fetch option data: {str(e)}"}
 
 # Shared memory store (can also use cache or session state)
 live_data_store = {
