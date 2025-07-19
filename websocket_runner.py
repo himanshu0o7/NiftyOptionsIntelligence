@@ -7,6 +7,10 @@ from SmartApi import SmartConnect
 from SmartApi.smartWebSocketV2 import SmartWebSocketV2
 from scrip_master_utils import get_token_by_symbol
 
+# Add docstrings and clean up code
+def connect_websocket():
+    """Connect to the WebSocket."""
+    pass
 # === Load environment variables ===
 load_dotenv()
 
