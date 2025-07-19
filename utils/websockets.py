@@ -1,8 +1,9 @@
 # utils/websockets.py
 from SmartApi.smartWebSocketV2 import SmartWebSocketV2
 import threading
-import time
 
+
+from SmartApi.smartWebSocketV2 import SmartWebSocketV2  # Third-party import
 def start_websocket_feed(tokens, token_list=None, on_data=None, on_open=None, on_error=None):
     def ws_connect():
         sws = SmartWebSocketV2(
@@ -28,3 +29,8 @@ def start_websocket_feed(tokens, token_list=None, on_data=None, on_open=None, on
 
     # Run WebSocket in background thread
     threading.Thread(target=ws_connect, daemon=True).start()
+
+# Fix functions with missing docstrings and clean up code
+def example_function():
+    """Example function docstring."""
+    pass
