@@ -1,0 +1,9 @@
+{
+  "model": "codex-mini-latest",
+  "temperature": 0.1,
+  "top_p": 0.9,
+  "n": 3,
+  "enable_internet": true,
+  "diff_mode": "unified",
+  "max_tokens": 256
+}
