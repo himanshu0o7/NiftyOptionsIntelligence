@@ -7,6 +7,7 @@ from datetime import datetime
 from threading import Thread
 from collections import deque
 from telegram_alerts import send_telegram_alert
+from option_stream_ui import fetch_option_data  # if that's the correct name
 
 # Shared memory store (can also use cache or session state)
 live_data_store = {
