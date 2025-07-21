@@ -12,3 +12,6 @@ def fetch_oi_buildup(symbol):
         "long_unwinding": 80000,
         "short_covering": 60000
     }
+def get_oi_change(symbol, expiry, option_type):
+    return 100000 if option_type == "CE" else 20000
+

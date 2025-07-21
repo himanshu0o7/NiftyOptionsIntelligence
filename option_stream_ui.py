@@ -7,7 +7,8 @@ from datetime import datetime
 from threading import Thread
 from collections import deque
 from telegram_alerts import send_telegram_alert
-from option_stream_ui import fetch_option_data  # if that's the correct name
+from utils.option_data_utils import fetch_option_data
+
 
 # Shared memory store (can also use cache or session state)
 live_data_store = {
@@ -68,4 +69,18 @@ def update_ui():
 if start_stream:
     Thread(target=update_ui, daemon=True).start()
     st.success("🟢 Stream started. Waiting for LTP data...")
+
+# Add this at the bottom or top of option_stream_ui.py
+
+def get_option_data(symbol, strike_price, option_type):
+    """
+    Dummy or real implementation to return option LTP data.
+    You can replace this with actual logic to fetch data.
+    """
+    option_symbol = f"{symbol}25JUL{strike_price}{option_type}"
+    return {
+        "symbol": option_symbol,
+        "ltp": 150.25,  # Replace with live LTP if available
+        "time": time.strftime("%H:%M:%S")
+    }
 
