@@ -1,0 +1,96 @@
+# perplexity_signal.py
+
+from typing import Dict, Optional
+
+def get_trade_signal(
+    spot_price: float,
+    rsi: float,
+    macd: float,
+    macd_signal: float,
+    option_chain_oi: Dict[float, Dict[str, int]],
+    atm_strike_gap: int = 50,
+    rsi_overbought: float = 70,
+    rsi_oversold: float = 30,
+    macd_threshold: float = 0,
+    sl_percent: float = 0.25,
+    tp_percent: float = 0.50
+) -> Optional[Dict]:
+    """
+    Calculates buy signal for CE/PE option based on spot price, RSI, MACD, and Option Chain OI.
+
+    Parameters
+    ----------
+    spot_price : float
+        Current live spot price of underlying.
+    rsi : float
+        Current RSI value.
+    macd : float
+        Current MACD value.
+    macd_signal : float
+        Current MACD signal value.
+    option_chain_oi : dict
+        Option chain open interest data in format:
+        {strike: {'CE': ce_oi, 'PE': pe_oi}}
+    atm_strike_gap : int
+        Step size to round for ATM strike selection.
+    rsi_overbought : float
+        RSI level considered overbought (default: 70).
+    rsi_oversold : float
+        RSI level considered oversold (default: 30).
+    macd_threshold : float
+        Difference threshold to confirm MACD crossover (default: 0).
+    sl_percent : float
+        Stop loss percentage from entry (default: 0.25).
+    tp_percent : float
+        Target profit percentage from entry (default: 0.50).
+
+    Returns
+    -------
+    dict or None
+        Signal dictionary with keys:
+        {
+            "signal": "BUY_CE" or "BUY_PE",
+            "strike": int,
+            "entry": float,
+            "stop_loss": float,
+            "take_profit": float
+        }
+        or None if no valid signal.
+    """
+
+    # Determine ATM strike
+    atm_strike = round(spot_price / atm_strike_gap) * atm_strike_gap
+    strikes = sorted(option_chain_oi.keys())
+    nearest_strike = min(strikes, key=lambda x: abs(x - atm_strike))
+
+    signal = None
+
+    # Long CE when RSI oversold & MACD bullish crossover & OI supports CE
+    if rsi <= rsi_oversold and macd > macd_signal + macd_threshold:
+        ce_oi = option_chain_oi.get(nearest_strike, {}).get('CE', 0)
+        pe_oi = option_chain_oi.get(nearest_strike, {}).get('PE', 0)
+        if ce_oi >= pe_oi:
+            entry = spot_price
+            signal = {
+                "signal": "BUY_CE",
+                "strike": nearest_strike,
+                "entry": entry,
+                "stop_loss": entry * (1 - sl_percent),
+                "take_profit": entry * (1 + tp_percent)
+            }
+
+    # Long PE when RSI overbought & MACD bearish crossover & OI supports PE
+    elif rsi >= rsi_overbought and macd < macd_signal - macd_threshold:
+        ce_oi = option_chain_oi.get(nearest_strike, {}).get('CE', 0)
+        pe_oi = option_chain_oi.get(nearest_strike, {}).get('PE', 0)
+        if pe_oi >= ce_oi:
+            entry = spot_price
+            signal = {
+                "signal": "BUY_PE",
+                "strike": nearest_strike,
+                "entry": entry,
+                "stop_loss": entry * (1 - sl_percent),
+                "take_profit": entry * (1 + tp_percent)
+            }
+
+    return signal
