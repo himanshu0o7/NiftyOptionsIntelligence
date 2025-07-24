@@ -1,0 +1,93 @@
+"""
+Utility functions for logging into Angel One and working with the
+NFO scrip master.
+
+This module centralises the handling of environment variables for
+Angel One credentials.  It exposes helper functions to perform a
+login, download the NFO scrip master and query the master for a
+particular contract token or last traded price.
+"""
+
+import os
+import pandas as pd
+import pyotp  # type: ignore
+from dotenv import load_dotenv  # type: ignore
+from SmartApi import SmartConnect  # type: ignore
+
+
+# ---------------------------------------------------------------------------
+# Load environment variables
+# ---------------------------------------------------------------------------
+load_dotenv()
+CLIENT_ID = os.getenv("ANGEL_CLIENT_ID")
+PASSWORD = os.getenv("ANGEL_PIN")  # Trading PIN or password
+TOTP_SECRET = os.getenv("ANGEL_TOTP_SECRET")
+API_KEY = os.getenv("ANGEL_API_KEY")
+SCRIP_MASTER_PATH = "scrip_master.csv"
+
+
+def login() -> SmartConnect:
+    """Perform an authenticated login and return a SmartConnect object.
+
+    Raises a ``ValueError`` if any required environment variable is
+    missing or if the login fails.
+    """
+    if not all([CLIENT_ID, PASSWORD, TOTP_SECRET, API_KEY]):
+        raise ValueError("Missing Angel One credentials in environment variables.")
+    # Generate one‑time password via TOTP
+    totp = pyotp.TOTP(TOTP_SECRET).now()
+    client = SmartConnect(api_key=API_KEY)
+    session = client.generateSession(clientCode=CLIENT_ID, password=PASSWORD, totp=totp)
+    if not session.get("status"):
+        raise RuntimeError(f"Login failed: {session.get('message')}")
+    return client
+
+
+def load_nfo_scrip_master(client: SmartConnect, force_refresh: bool = False) -> pd.DataFrame:
+    """Download and cache the NFO scrip master file.
+
+    If ``force_refresh`` is ``True`` or the cache file does not exist,
+    the master is downloaded using ``client.get_scrip_master('NFO')``
+    and written to ``SCRIP_MASTER_PATH``.  Otherwise the cached file
+    is reused.  The returned DataFrame includes the entire NFO master.
+    """
+    if not os.path.exists(SCRIP_MASTER_PATH) or force_refresh:
+        print("⏳ Downloading latest NFO scrip master…")
+        df = client.get_scrip_master("NFO")
+        df.to_csv(SCRIP_MASTER_PATH, index=False)
+    else:
+        print("✅ Using cached scrip master")
+        df = pd.read_csv(SCRIP_MASTER_PATH)
+    return df
+
+
+def find_token(symbol: str, strike: float, option_type: str, expiry: str) -> int | None:
+    """Find an instrument token matching the specified criteria.
+
+    The scrip master must already have been downloaded via
+    :func:`load_nfo_scrip_master`.  If the contract is found, its
+    token ID is returned as an integer; otherwise ``None`` is
+    returned.
+    """
+    if not os.path.exists(SCRIP_MASTER_PATH):
+        raise FileNotFoundError("scrip master not found; run load_nfo_scrip_master first")
+    df = pd.read_csv(SCRIP_MASTER_PATH)
+    filtered = df[
+        (df["name"] == symbol)
+        & (df["strike"] == float(strike))
+        & (df["symbol"].str.endswith(option_type))
+        & (df["expiry"] == expiry)
+    ]
+    if not filtered.empty:
+        return int(filtered.iloc[0]["token"])
+    return None
+
+
+def get_ltp(client: SmartConnect, token: int) -> float | None:
+    """Retrieve the last traded price (LTP) for a given instrument token."""
+    try:
+        data = client.ltpData("NFO", token)
+        return data['data']['ltp']  # type: ignore[index]
+    except Exception as exc:
+        print(f"❌ LTP Fetch Error: {exc}")
+        return None
