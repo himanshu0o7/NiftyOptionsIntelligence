@@ -6,4 +6,9 @@ __pycache__/
 *.zip
 
 codex/
-codex/
+*_broken.py
+*_fixed.py
+test_bot_functionality.py
+production_readiness_check.py
+monitor_bot.py
+start_bot.sh

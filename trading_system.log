@@ -27,3 +27,6 @@
 2025-07-11 04:22:24,071 - TradingSystem - INFO - info:57 - WebSocket v2 connection closed
 2025-07-11 04:22:34,067 - TradingSystem - ERROR - error:65 - WebSocket v2 connection timeout
 2025-07-11 04:22:34,067 - TradingSystem - ERROR - error:65 - WebSocket v2 connection failed
+2025-07-24 23:18:21,817 - TradingSystem - ERROR - error:65 - Connection error: HTTPSConnectionPool(host='apiconnect.angelone.in', port=443): Max retries exceeded with url: /rest/auth/angelbroking/user/v1/loginByPassword (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f1f0612b050>: Failed to resolve 'apiconnect.angelone.in' ([Errno -3] Temporary failure in name resolution)"))
+2025-07-24 23:19:29,285 - TradingSystem - ERROR - error:65 - Connection error: HTTPSConnectionPool(host='apiconnect.angelone.in', port=443): Max retries exceeded with url: /rest/auth/angelbroking/user/v1/loginByPassword (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7f1e96a93620>: Failed to resolve 'apiconnect.angelone.in' ([Errno -3] Temporary failure in name resolution)"))
+2025-07-24 23:19:29,286 - TradingSystem - INFO - info:57 - Initialized Breakout Strategy with threshold: 2.0%
