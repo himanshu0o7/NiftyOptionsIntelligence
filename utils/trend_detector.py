@@ -66,7 +66,7 @@ def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: in
         except Exception as exc:
             logging.error(f"Greek fetch error: {exc}")
     # Fallback: return a representative delta
-    return {"delta": 0.6 if option_type.upper() == "CE" else -0.6}
+    return {"delta": CALL_DELTA_THRESHOLD if option_type.upper() == "CE" else PUT_DELTA_THRESHOLD}
 
 
 def detect_trend(symbol: str, expiry: str) -> dict:
