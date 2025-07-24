@@ -56,47 +56,10 @@ def load_nfo_scrip_master(client: SmartConnect, force_refresh: bool = False) -> 
     """
     if not os.path.exists(SCRIP_MASTER_PATH) or force_refresh:
         print("⏳ Downloading latest NFO scrip master…")
-=======
-# angel_utils.py
-
-import os
-import pandas as pd
-import pyotp
-from dotenv import load_dotenv
-from SmartApi import SmartConnect
-
-# -----------------------------
-# Load environment variables
-# -----------------------------
-load_dotenv()
-
-CLIENT_ID = os.getenv("CLIENT_ID")
-PASSWORD = os.getenv("PASSWORD")           # Login PIN or Password
-TOTP_SECRET = os.getenv("TOTP")
-API_KEY = os.getenv("SMARTAPI_API_KEY")    # Must be added to .env as well
-SCRIP_MASTER_PATH = "scrip_master.csv"
-
-# -----------------------------
-# Login and return client
-# -----------------------------
-def login():
-    totp = pyotp.TOTP(TOTP_SECRET).now()
-    client = SmartConnect(api_key=API_KEY)
-    session = client.generateSession(CLIENT_ID, PASSWORD, totp)
-    return client
-
-# -----------------------------
-# Scrip Master Fetcher
-# -----------------------------
-def load_nfo_scrip_master(client, force_refresh=False):
-    if not os.path.exists(SCRIP_MASTER_PATH) or force_refresh:
-        print("⏳ Downloading latest NFO scrip master...")
-        main
-        df = client.get_scrip_master("NFO")
+        df = client.getMasterContract("NFO")
         df.to_csv(SCRIP_MASTER_PATH, index=False)
     else:
         print("✅ Using cached scrip master")
-# fix-bot-2025-07-24
         df = pd.read_csv(SCRIP_MASTER_PATH)
     return df
 
@@ -105,38 +68,23 @@ def find_token(symbol: str, strike: float, option_type: str, expiry: str) -> int
     """Find an instrument token matching the specified criteria.
 
     The scrip master must already have been downloaded via
-    :func:`load_nfo_scrip_master`.  If the contract is found, its
+    :func:`load_master_contract`.  If the contract is found, its
     token ID is returned as an integer; otherwise ``None`` is
     returned.
     """
     if not os.path.exists(SCRIP_MASTER_PATH):
-        raise FileNotFoundError("scrip master not found; run load_nfo_scrip_master first")
+        raise FileNotFoundError("scrip master not found; run load_master_contract first")
     df = pd.read_csv(SCRIP_MASTER_PATH)
     filtered = df[
         (df["name"] == symbol)
         & (df["strike"] == float(strike))
         & (df["symbol"].str.endswith(option_type))
         & (df["expiry"] == expiry)
-=======
-    return pd.read_csv(SCRIP_MASTER_PATH)
-
-# -----------------------------
-# Token Finder
-# -----------------------------
-def find_token(symbol, strike, option_type, expiry):
-    df = pd.read_csv(SCRIP_MASTER_PATH)
-    filtered = df[
-        (df["name"] == symbol) &
-        (df["strike"] == float(strike)) &
-        (df["symbol"].str.endswith(option_type)) &
-        (df["expiry"] == expiry)
-    main
     ]
     if not filtered.empty:
         return int(filtered.iloc[0]["token"])
     return None
 
-#fix-bot-2025-07-24
 
 def get_ltp(client: SmartConnect, token: int) -> float | None:
     """Retrieve the last traded price (LTP) for a given instrument token."""
@@ -146,16 +94,3 @@ def get_ltp(client: SmartConnect, token: int) -> float | None:
     except Exception as exc:
         print(f"❌ LTP Fetch Error: {exc}")
         return None
-=======
-# -----------------------------
-# LTP Fetcher
-# -----------------------------
-def get_ltp(client, token):
-    try:
-        data = client.ltpData("NFO", token)
-        return data['data']['ltp']
-    except Exception as e:
-        print(f"❌ LTP Fetch Error: {e}")
-        return None
-
-   main

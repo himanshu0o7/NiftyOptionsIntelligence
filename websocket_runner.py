@@ -103,21 +103,6 @@ if __name__ == "__main__":
     # Default run with typical parameters.  Adjust these as needed or
     # override them by calling ``connect_websocket`` from another module.
     connect_websocket()
-=======
-# websocket_runner.py - Live LTP feed, login, auto WebSocket connection
-
-import os
-import pyotp
-from dotenv import load_dotenv
-from SmartApi import SmartConnect
-from SmartApi.smartWebSocketV2 import SmartWebSocketV2
-from scrip_master_utils import get_token_by_symbol
-
-# Add docstrings and clean up code
-def connect_websocket():
-    """Connect to the WebSocket."""
-    pass
-# === Load environment variables ===
 load_dotenv()
 
 API_KEY = os.getenv("API_KEY")
@@ -179,5 +164,3 @@ sws.on_close = on_close
 
 # === Connect ===
 sws.connect()
-
-  main
