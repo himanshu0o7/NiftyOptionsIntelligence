@@ -141,15 +141,28 @@ def option_data_ui() -> None:
     except Exception as e:
         st.error(f"⚠️ App error: {e}")
 
-    # Control to start a persistent WebSocket feed in a background process.
+    # Control to start and stop a persistent WebSocket feed in a background process.
+    global websocket_process
     if st.button("Start Live WebSocket"):
         # Launch the websocket runner using subprocess so it does not block
         # the Streamlit thread.  In production you might integrate the
         # WebSocket logic directly instead of spawning a new Python process.
-        subprocess.Popen(["python3", "websocket_runner.py"])
-        st.success("WebSocket started in background.")
+        if websocket_process is None or websocket_process.poll() is not None:
+            try:
+                websocket_process = subprocess.Popen(["python3", "websocket_runner.py"])
+                st.success("WebSocket started in background.")
+            except Exception as e:
+                st.error(f"Failed to start WebSocket: {e}")
+        else:
+            st.warning("WebSocket is already running.")
 
-
+    if st.button("Stop Live WebSocket"):
+        if websocket_process is not None and websocket_process.poll() is None:
+            websocket_process.terminate()
+            websocket_process.wait()
+            st.success("WebSocket stopped.")
+        else:
+            st.warning("No WebSocket process is running.")
 # ---------------------------------------------------------------------------
 # Trend detector section
 # ---------------------------------------------------------------------------
