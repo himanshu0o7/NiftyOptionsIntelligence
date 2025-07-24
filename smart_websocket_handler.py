@@ -131,6 +131,8 @@ class SmartWebSocketHandler:
         api_key: str | None = os.getenv("ANGEL_API_KEY") or data.get('api_key')
         if not api_key:
             raise EnvironmentError("ANGEL_API_KEY is not set in the environment and not available in session data")
+        if not self._is_valid_api_key(api_key):
+            raise ValueError("Invalid API key format or length")
         # Persist parameters for reconnection
         self.token_list = token_list
         self.mode = mode
