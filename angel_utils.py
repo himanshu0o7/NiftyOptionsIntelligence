@@ -40,7 +40,9 @@ def login() -> SmartConnect:
     client = SmartConnect(api_key=API_KEY)
     session = client.generateSession(clientCode=CLIENT_ID, password=PASSWORD, totp=totp)
     if not session.get("status"):
-        raise RuntimeError(f"Login failed: {session.get('message')}")
+        import logging
+        logging.error(f"Login failed with message: {session.get('message')}")
+        raise RuntimeError("Login failed. Please try again later.")
     return client
 
 
