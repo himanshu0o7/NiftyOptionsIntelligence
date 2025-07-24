@@ -52,8 +52,14 @@ def connect_websocket(symbol: str = "NIFTY", expiry: str = "25JUL2025", optionty
     client_code = os.getenv("ANGEL_CLIENT_ID")
     pin = os.getenv("ANGEL_PIN")
     totp_secret = os.getenv("ANGEL_TOTP_SECRET")
-    if not all([api_key, client_code, pin, totp_secret]):
-        raise ValueError("❌ Missing required environment variables (ANGEL_API_KEY, ANGEL_CLIENT_ID, ANGEL_PIN, ANGEL_TOTP_SECRET)")
+    missing_vars = [var_name for var_name, var_value in {
+        "ANGEL_API_KEY": api_key,
+        "ANGEL_CLIENT_ID": client_code,
+        "ANGEL_PIN": pin,
+        "ANGEL_TOTP_SECRET": totp_secret
+    }.items() if not var_value]
+    if missing_vars:
+        raise ValueError(f"❌ Missing required environment variable(s): {', '.join(missing_vars)}")
     # Generate TOTP
     try:
         totp = pyotp.TOTP(totp_secret).now()
