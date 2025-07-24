@@ -38,7 +38,8 @@ def load_master_contract(exchange: str = "NFO") -> pd.DataFrame:
     df = df[df["instrumenttype"] == "OPTIDX"]
     df = df[df["symbol"].isin(["NIFTY", "BANKNIFTY"])]
     # Keep only future expiries
-    df = df[df["expiry"] >= pd.Timestamp.today().strftime("%Y-%m-%d")]
+    df["expiry"] = pd.to_datetime(df["expiry"])  # Ensure expiry is in datetime format
+    df = df[df["expiry"] >= pd.Timestamp.today()]
     df["strike"] = df["strike"].astype(float).astype(int)
     MASTER_CONTRACT_CACHE = df
     return df
