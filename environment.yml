@@ -1,0 +1,22 @@
+name: base
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - pylint
+  - pytest
+  - pip:
+      - yfinance
+      - streamlit
+      - smartapi-python
+      - pyotp
+      - requests
+      - beautifulsoup4
+      - plotly
+      - logzero
+      - python-dotenv
+      - fastapi
+      - uvicorn
+      - gradio
+      - nsepython
