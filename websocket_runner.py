@@ -63,6 +63,8 @@ def connect_websocket(symbol: str = "NIFTY", expiry: str = "25JUL2025", optionty
     smart_api = SmartConnect(api_key=api_key)
     session = smart_api.generateSession(clientCode=client_code, password=pin, totp=totp)
     feed_token = smart_api.getfeedToken()
+    if not session or 'data' not in session or 'jwtToken' not in session['data']:
+        raise ValueError("❌ Invalid session structure: Missing 'data' or 'jwtToken' in session response.")
     auth_token = session['data']['jwtToken']
     # Fetch instrument token
     token = get_token_by_symbol(symbol, expiry=expiry, optiontype=optiontype, strike=strike)
