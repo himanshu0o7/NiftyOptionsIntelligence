@@ -63,6 +63,9 @@ def load_nfo_scrip_master(client: SmartConnect, force_refresh: bool = False) -> 
         df = pd.read_csv(SCRIP_MASTER_PATH)
     return df
 
+# Alias for compatibility
+load_master_contract = load_nfo_scrip_master
+
 
 def find_token(symbol: str, strike: float, option_type: str, expiry: str) -> int | None:
     """Find an instrument token matching the specified criteria.
