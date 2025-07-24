@@ -72,6 +72,7 @@ st.markdown("Use this app to monitor live CE/PE option data for NIFTY/BANKNIFTY 
 tokens = None
 last_login_time = 0
 
+websocket_process = None  # Global variable for WebSocket process management
 
 @with_retry(max_retries=3, delay=2)
 @rate_limited(angel_api_limiter)
@@ -119,16 +120,8 @@ tokens = None
 last_login_time = 0
 
 # ---------------------------
-# TOKEN REFRESH FUNCTION
+# TOKEN REFRESH FUNCTION (redundant - using the decorated version above)
 # ---------------------------
-def ensure_tokens_fresh():
-    global tokens, last_login_time
-    if time.time() - last_login_time > (14 * 60):
-        time.sleep(1)
-        sm = SessionManager()
-        session = sm.get_session()
-        tokens = session
-        last_login_time = time.time()
 
 # fix-bot-2025-07-24
 
