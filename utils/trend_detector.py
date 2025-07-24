@@ -178,9 +178,10 @@ def detect_trend(symbol, expiry):
             },
         }
     except Exception as exc:
+        logging.error(f"An error occurred in detect_trend: {exc}")
         return {
             "trend": "Error",
-            "reason": str(exc),
+            "reason": "An unexpected error occurred.",
             "supporting_data": {},
         }
 =======
