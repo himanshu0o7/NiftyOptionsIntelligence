@@ -1,0 +1,5 @@
+{
+  "src_include": ["core/"],
+  "src_exclude": ["venv/", "site-packages/", "tests/", "notebooks/", "data/"]
+}
+

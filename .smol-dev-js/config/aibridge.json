@@ -1,0 +1,19 @@
+{
+	"provider": {
+		"openai": "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"
+	},
+	"providerLatencyAdd": 0,
+	"cache": {
+		"localJsonlDir": {
+			"enable": true,
+			"path": "./.smol-dev-js/ai-cache"
+		},
+		"mongoDB": {
+			"enable": false,
+			"url": "<CHANGE TO YOUR RESPECTIVE MONGODB URL>"
+		},
+		"promptCache": true,
+		"embeddingCache": true
+	},
+	"providerRateLimit": 2
+}

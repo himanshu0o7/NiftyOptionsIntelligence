@@ -1,0 +1,163 @@
+[W 250716 00:23:43 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250716 00:23:46 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:23:46 smartConnect:124] in pool
+[W 250716 00:23:54 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250716 00:23:57 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:23:57 smartConnect:124] in pool
+[W 250716 00:24:04 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:24:04 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:04 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:04 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:04 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:04 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:24:07 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:24:07 smartConnect:124] in pool
+[W 250716 00:24:14 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:24:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:14 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:24:17 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:24:21 smartConnect:124] in pool
+[W 250716 00:24:23 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:24:24 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:24 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:24 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:24 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:24 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:24:26 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:24:26 smartConnect:124] in pool
+[W 250716 00:24:32 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:24:33 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:33 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:33 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:33 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:24:33 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:24:35 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:24:36 smartConnect:124] in pool
+[W 250716 00:26:39 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250716 00:26:42 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:26:42 smartConnect:124] in pool
+[W 250716 00:26:49 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:26:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:26:52 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:26:52 smartConnect:124] in pool
+[W 250716 00:26:59 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:26:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:26:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:27:02 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:27:02 smartConnect:124] in pool
+[W 250716 00:27:09 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:27:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:27:12 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:27:12 smartConnect:124] in pool
+[W 250716 00:27:19 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:27:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:27:22 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:27:22 smartConnect:124] in pool
+[W 250716 00:27:39 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250716 00:27:42 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:27:42 smartConnect:124] in pool
+[W 250716 00:27:49 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:27:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:49 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:27:52 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:27:52 smartConnect:124] in pool
+[W 250716 00:27:59 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:27:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:27:59 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:28:02 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:28:02 smartConnect:124] in pool
+[W 250716 00:28:09 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:28:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:28:12 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:28:12 smartConnect:124] in pool
+[W 250716 00:28:19 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:28:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:19 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:28:22 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:28:22 smartConnect:124] in pool
+[W 250716 00:28:29 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:28:29 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:29 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:29 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:29 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:29 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:28:32 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:28:32 smartConnect:124] in pool
+[W 250716 00:28:39 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:28:39 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:39 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:39 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:39 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:28:39 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:28:42 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:28:42 smartConnect:124] in pool
+[W 250716 00:29:24 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250716 00:29:27 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:29:27 smartConnect:124] in pool
+[W 250716 00:29:34 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:29:34 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:34 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:34 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:34 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:34 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:29:37 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:29:37 smartConnect:124] in pool
+[W 250716 00:29:44 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:29:44 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:44 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:44 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:44 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:44 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:29:47 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:29:47 smartConnect:124] in pool
+[W 250716 00:29:54 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:29:54 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:54 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:54 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:29:54 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:29:57 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:29:57 smartConnect:124] in pool
+[W 250716 00:29:59 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[E 250716 00:30:02 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:30:02 smartConnect:124] in pool
+[W 250716 00:30:09 smartWebSocketV2:318] Attempting to resubscribe/reconnect (Attempt 1)...
+[W 250716 00:30:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:30:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:30:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:30:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[W 250716 00:30:09 smartWebSocketV2:342] Connection closed due to max retry attempts reached.
+[E 250716 00:30:12 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek. Error: Invalid Token. URL: https://apiconnect.angelone.in/rest/secure/angelbroking/marketData/v1/optionGreek, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'name': 'NIFTY', 'expirydate': '17JUL2025'}, Response: {'success': False, 'message': 'Invalid Token', 'errorCode': 'AG8001', 'data': ''}
+[I 250716 00:30:12 smartConnect:124] in pool
+[E 250716 00:42:39 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword. Error: Invalid totp. URL: https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'clientcode': 'H60779', 'password': '5750', 'totp': 'IZFFVUEWVFS34P4BDZ7BXVXC5Y'}, Response: {'status': False, 'message': 'Invalid totp', 'errorcode': 'AB1050', 'data': None}
+[E 250716 00:44:47 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword. Error: Invalid totp. URL: https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'clientcode': 'H60779', 'password': '5750', 'totp': 'IZFFVUEWVFS34P4BDZ7BXVXC5Y'}, Response: {'status': False, 'message': 'Invalid totp', 'errorcode': 'AB1050', 'data': None}
+[E 250716 04:13:47 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword. Error: Invalid totp. URL: https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'clientcode': 'H60779', 'password': '5750', 'totp': 'IZFFVUEWVFS34P4BDZ7BXVXC5Y'}, Response: {'status': False, 'message': 'Invalid totp', 'errorcode': 'AB1050', 'data': None}
+[E 250716 04:35:59 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword. Error: Invalid totp. URL: https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'clientcode': 'H60779', 'password': '5750', 'totp': 'IZFFVUEWVFS34P4BDZ7BXVXC5Y'}, Response: {'status': False, 'message': 'Invalid totp', 'errorcode': 'AB1050', 'data': None}
+[E 250716 05:00:40 smartConnect:246] Error occurred while making a POST request to https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword. Error: Invalid totp. URL: https://apiconnect.angelone.in/rest/auth/angelbroking/user/v1/loginByPassword, Headers: {'Content-type': 'application/json', 'X-ClientLocalIP': '127.0.0.1', 'X-ClientPublicIP': '106.193.147.98', 'X-MACAddress': '73:0c:51:bc:0f:75', 'Accept': 'application/json', 'X-PrivateKey': 'clvccH3G', 'X-UserType': 'USER', 'X-SourceID': 'WEB'}, Request: {'clientcode': 'H60779', 'password': '5750', 'totp': 'IZFFVUEWVFS34P4BDZ7BXVXC5Y'}, Response: {'status': False, 'message': 'Invalid totp', 'errorcode': 'AB1050', 'data': None}

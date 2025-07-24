@@ -1,0 +1,321 @@
+nohup: ignoring input
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://0.0.0.0:8501
+
+[I 250717 16:25:14 smartConnect:124] in pool
+[I 250717 16:25:16 smartConnect:124] in pool
+[I 250717 16:25:16 smartConnect:124] in pool
+While calling system event trigger handler
+Traceback (most recent call last):
+  File "/root/NiftyOptionsIntelligence/venv/lib/python3.10/site-packages/twisted/internet/base.py", line 518, in _continueFiring
+    callable(*args, **kwargs)
+  File "/root/NiftyOptionsIntelligence/venv/lib/python3.10/site-packages/twisted/internet/base.py", line 951, in _reallyStartRunning
+    self._signals.install()
+  File "/root/NiftyOptionsIntelligence/venv/lib/python3.10/site-packages/twisted/internet/_signals.py", line 190, in install
+    d.install()
+  File "/root/NiftyOptionsIntelligence/venv/lib/python3.10/site-packages/twisted/internet/_signals.py", line 150, in install
+    signal.signal(signal.SIGTERM, self._sigTerm)
+  File "/usr/lib/python3.10/signal.py", line 56, in signal
+    handler = _signal.signal(_enum_to_int(signalnum), _enum_to_int(handler))
+builtins.ValueError: signal only works in main thread of the main interpreter
+
+[I 250717 16:25:20 smartConnect:124] in pool
+[I 250717 16:25:20 smartConnect:124] in pool
+[I 250717 16:25:21 smartConnect:124] in pool
+[I 250717 16:25:21 smartConnect:124] in pool
+[I 250717 16:25:21 smartConnect:124] in pool
+[I 250717 16:25:21 smartConnect:124] in pool
+[I 250717 16:25:25 smartConnect:124] in pool
+[I 250717 16:25:26 smartConnect:124] in pool
+[I 250717 16:25:26 smartConnect:124] in pool
+[I 250717 16:25:30 smartConnect:124] in pool
+[I 250717 16:25:31 smartConnect:124] in pool
+[I 250717 16:25:31 smartConnect:124] in pool
+[I 250717 16:26:02 smartConnect:124] in pool
+[I 250717 16:26:03 smartConnect:124] in pool
+[I 250717 16:26:03 smartConnect:124] in pool
+Retrying connection. Retry attempt count: 1. Next retry in around: 2 seconds
+Retrying connection. Retry attempt count: 2. Next retry in around: 6 seconds
+Retrying connection. Retry attempt count: 1. Next retry in around: 3 seconds
+Retrying connection. Retry attempt count: 1. Next retry in around: 3 seconds
+Retrying connection. Retry attempt count: 1. Next retry in around: 3 seconds
+Retrying connection. Retry attempt count: 2. Next retry in around: 7 seconds
+Retrying connection. Retry attempt count: 2. Next retry in around: 8 seconds
+Retrying connection. Retry attempt count: 2. Next retry in around: 7 seconds
+Retrying connection. Retry attempt count: 1. Next retry in around: 3 seconds
+Retrying connection. Retry attempt count: 3. Next retry in around: 16 seconds
+Retrying connection. Retry attempt count: 2. Next retry in around: 9 seconds
+Retrying connection. Retry attempt count: 3. Next retry in around: 14 seconds
+Retrying connection. Retry attempt count: 3. Next retry in around: 17 seconds
+Retrying connection. Retry attempt count: 3. Next retry in around: 19 seconds
+Retrying connection. Retry attempt count: 1. Next retry in around: 3 seconds
+Retrying connection. Retry attempt count: 3. Next retry in around: 23 seconds
+Retrying connection. Retry attempt count: 2. Next retry in around: 7 seconds
+Retrying connection. Retry attempt count: 4. Next retry in around: 51 seconds
+Retrying connection. Retry attempt count: 3. Next retry in around: 18 seconds
+Retrying connection. Retry attempt count: 4. Next retry in around: 45 seconds
+Retrying connection. Retry attempt count: 4. Next retry in around: 48 seconds
+Retrying connection. Retry attempt count: 4. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 4. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 4. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 5. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 5. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 5. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 5. Next retry in around: 69 seconds
+Retrying connection. Retry attempt count: 5. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 5. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 6. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 6. Next retry in around: 70 seconds
+Retrying connection. Retry attempt count: 6. Next retry in around: 70 seconds
+Retrying connection. Retry attempt count: 6. Next retry in around: 74 seconds
+Retrying connection. Retry attempt count: 6. Next retry in around: 52 seconds
+Retrying connection. Retry attempt count: 7. Next retry in around: 52 seconds
+Retrying connection. Retry attempt count: 6. Next retry in around: 73 seconds
+Retrying connection. Retry attempt count: 7. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 7. Next retry in around: 61 seconds
+Retrying connection. Retry attempt count: 7. Next retry in around: 55 seconds
+Retrying connection. Retry attempt count: 7. Next retry in around: 46 seconds
+Retrying connection. Retry attempt count: 7. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 8. Next retry in around: 68 seconds
+Retrying connection. Retry attempt count: 8. Next retry in around: 53 seconds
+Retrying connection. Retry attempt count: 8. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 8. Next retry in around: 47 seconds
+Retrying connection. Retry attempt count: 8. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 8. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 9. Next retry in around: 69 seconds
+Retrying connection. Retry attempt count: 9. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 9. Next retry in around: 77 seconds
+Retrying connection. Retry attempt count: 9. Next retry in around: 53 seconds
+Retrying connection. Retry attempt count: 9. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 9. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 10. Next retry in around: 76 seconds
+Retrying connection. Retry attempt count: 10. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 10. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 10. Next retry in around: 69 seconds
+Retrying connection. Retry attempt count: 10. Next retry in around: 61 seconds
+Retrying connection. Retry attempt count: 10. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 11. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 11. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 11. Next retry in around: 73 seconds
+Retrying connection. Retry attempt count: 11. Next retry in around: 67 seconds
+Retrying connection. Retry attempt count: 11. Next retry in around: 53 seconds
+Retrying connection. Retry attempt count: 11. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 12. Next retry in around: 49 seconds
+Retrying connection. Retry attempt count: 12. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 12. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 12. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 12. Next retry in around: 70 seconds
+Retrying connection. Retry attempt count: 12. Next retry in around: 67 seconds
+Retrying connection. Retry attempt count: 13. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 13. Next retry in around: 70 seconds
+Retrying connection. Retry attempt count: 13. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 13. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 13. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 13. Next retry in around: 68 seconds
+Retrying connection. Retry attempt count: 14. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 14. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 14. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 14. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 14. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 14. Next retry in around: 69 seconds
+Retrying connection. Retry attempt count: 15. Next retry in around: 44 seconds
+Retrying connection. Retry attempt count: 15. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 15. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 15. Next retry in around: 64 seconds
+Retrying connection. Retry attempt count: 15. Next retry in around: 64 seconds
+Retrying connection. Retry attempt count: 15. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 16. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 16. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 16. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 16. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 16. Next retry in around: 55 seconds
+Retrying connection. Retry attempt count: 16. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 17. Next retry in around: 52 seconds
+Retrying connection. Retry attempt count: 17. Next retry in around: 50 seconds
+Retrying connection. Retry attempt count: 17. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 17. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 17. Next retry in around: 47 seconds
+Retrying connection. Retry attempt count: 17. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 18. Next retry in around: 58 seconds
+Retrying connection. Retry attempt count: 18. Next retry in around: 70 seconds
+Retrying connection. Retry attempt count: 18. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 18. Next retry in around: 67 seconds
+Retrying connection. Retry attempt count: 18. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 18. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 19. Next retry in around: 58 seconds
+Retrying connection. Retry attempt count: 19. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 19. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 19. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 19. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 19. Next retry in around: 70 seconds
+Retrying connection. Retry attempt count: 20. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 20. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 20. Next retry in around: 47 seconds
+Retrying connection. Retry attempt count: 20. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 20. Next retry in around: 55 seconds
+Retrying connection. Retry attempt count: 20. Next retry in around: 50 seconds
+Retrying connection. Retry attempt count: 21. Next retry in around: 67 seconds
+Retrying connection. Retry attempt count: 21. Next retry in around: 67 seconds
+Retrying connection. Retry attempt count: 21. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 21. Next retry in around: 68 seconds
+Retrying connection. Retry attempt count: 21. Next retry in around: 52 seconds
+Retrying connection. Retry attempt count: 21. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 22. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 22. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 22. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 22. Next retry in around: 50 seconds
+Retrying connection. Retry attempt count: 22. Next retry in around: 64 seconds
+Retrying connection. Retry attempt count: 22. Next retry in around: 73 seconds
+Retrying connection. Retry attempt count: 23. Next retry in around: 50 seconds
+Retrying connection. Retry attempt count: 23. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 23. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 23. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 23. Next retry in around: 75 seconds
+Retrying connection. Retry attempt count: 23. Next retry in around: 71 seconds
+Retrying connection. Retry attempt count: 24. Next retry in around: 53 seconds
+Retrying connection. Retry attempt count: 24. Next retry in around: 53 seconds
+Retrying connection. Retry attempt count: 24. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 24. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 24. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 24. Next retry in around: 61 seconds
+Retrying connection. Retry attempt count: 25. Next retry in around: 61 seconds
+Retrying connection. Retry attempt count: 25. Next retry in around: 53 seconds
+Retrying connection. Retry attempt count: 25. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 25. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 25. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 25. Next retry in around: 51 seconds
+Retrying connection. Retry attempt count: 26. Next retry in around: 47 seconds
+Retrying connection. Retry attempt count: 26. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 26. Next retry in around: 64 seconds
+Retrying connection. Retry attempt count: 26. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 26. Next retry in around: 67 seconds
+Retrying connection. Retry attempt count: 26. Next retry in around: 52 seconds
+Retrying connection. Retry attempt count: 27. Next retry in around: 68 seconds
+Retrying connection. Retry attempt count: 27. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 27. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 27. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 27. Next retry in around: 59 seconds
+Retrying connection. Retry attempt count: 27. Next retry in around: 68 seconds
+Retrying connection. Retry attempt count: 28. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 28. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 28. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 28. Next retry in around: 65 seconds
+Retrying connection. Retry attempt count: 28. Next retry in around: 68 seconds
+Retrying connection. Retry attempt count: 28. Next retry in around: 61 seconds
+Retrying connection. Retry attempt count: 29. Next retry in around: 55 seconds
+Retrying connection. Retry attempt count: 29. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 29. Next retry in around: 56 seconds
+Retrying connection. Retry attempt count: 29. Next retry in around: 53 seconds
+Retrying connection. Retry attempt count: 29. Next retry in around: 64 seconds
+Retrying connection. Retry attempt count: 29. Next retry in around: 55 seconds
+Retrying connection. Retry attempt count: 30. Next retry in around: 71 seconds
+Retrying connection. Retry attempt count: 30. Next retry in around: 64 seconds
+Retrying connection. Retry attempt count: 30. Next retry in around: 58 seconds
+Retrying connection. Retry attempt count: 30. Next retry in around: 66 seconds
+Retrying connection. Retry attempt count: 30. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 30. Next retry in around: 61 seconds
+Retrying connection. Retry attempt count: 31. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 31. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 31. Next retry in around: 68 seconds
+Retrying connection. Retry attempt count: 31. Next retry in around: 72 seconds
+Retrying connection. Retry attempt count: 31. Next retry in around: 67 seconds
+Retrying connection. Retry attempt count: 31. Next retry in around: 72 seconds
+Retrying connection. Retry attempt count: 32. Next retry in around: 52 seconds
+Retrying connection. Retry attempt count: 32. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 32. Next retry in around: 50 seconds
+Retrying connection. Retry attempt count: 32. Next retry in around: 58 seconds
+Retrying connection. Retry attempt count: 32. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 33. Next retry in around: 45 seconds
+Retrying connection. Retry attempt count: 32. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 33. Next retry in around: 48 seconds
+Retrying connection. Retry attempt count: 33. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 33. Next retry in around: 62 seconds
+Retrying connection. Retry attempt count: 33. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 33. Next retry in around: 57 seconds
+Retrying connection. Retry attempt count: 34. Next retry in around: 54 seconds
+Retrying connection. Retry attempt count: 34. Next retry in around: 75 seconds
+Retrying connection. Retry attempt count: 34. Next retry in around: 58 seconds
+Retrying connection. Retry attempt count: 34. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 34. Next retry in around: 60 seconds
+Retrying connection. Retry attempt count: 34. Next retry in around: 52 seconds
+Retrying connection. Retry attempt count: 35. Next retry in around: 64 seconds
+Retrying connection. Retry attempt count: 35. Next retry in around: 63 seconds
+Retrying connection. Retry attempt count: 35. Next retry in around: 68 seconds
+[I 250717 17:28:42 smartConnect:124] in pool
+[I 250717 17:28:45 smartConnect:124] in pool
+[I 250717 17:28:45 smartConnect:124] in pool
+[I 250717 17:31:56 smartConnect:124] in pool
+[I 250717 17:31:57 smartConnect:124] in pool
+[I 250717 17:31:57 smartConnect:124] in pool
+[I 250717 17:31:59 smartConnect:124] in pool
+[I 250717 17:32:00 smartConnect:124] in pool
+[I 250717 17:32:00 smartConnect:124] in pool
+[I 250717 17:32:05 smartConnect:124] in pool
+[I 250717 17:32:06 smartConnect:124] in pool
+[I 250717 17:32:06 smartConnect:124] in pool
+[I 250718 15:44:43 smartConnect:124] in pool
+[I 250718 15:44:44 smartConnect:124] in pool
+[I 250718 15:44:48 smartConnect:124] in pool
+[I 250718 15:44:48 smartConnect:124] in pool
+[I 250718 15:44:49 smartConnect:124] in pool
+[I 250718 15:44:50 smartConnect:124] in pool
+[I 250718 15:44:50 smartConnect:124] in pool
+[I 250718 15:44:54 smartConnect:124] in pool
+[I 250718 15:44:55 smartConnect:124] in pool
+[I 250718 15:44:55 smartConnect:124] in pool
+[I 250718 15:45:00 smartConnect:124] in pool
+[I 250718 15:45:01 smartConnect:124] in pool
+[I 250718 15:45:01 smartConnect:124] in pool
+[I 250718 15:46:47 smartConnect:124] in pool
+[I 250718 15:46:48 smartConnect:124] in pool
+[I 250718 15:46:48 smartConnect:124] in pool
+[I 250718 15:46:52 smartConnect:124] in pool
+[I 250718 15:46:53 smartConnect:124] in pool
+[I 250718 15:46:53 smartConnect:124] in pool
+[I 250718 15:51:02 smartConnect:124] in pool
+[I 250718 15:51:03 smartConnect:124] in pool
+[I 250718 15:51:03 smartConnect:124] in pool
+[I 250718 15:51:07 smartConnect:124] in pool
+[I 250718 15:51:08 smartConnect:124] in pool
+[I 250718 15:51:08 smartConnect:124] in pool
+[I 250718 15:51:12 smartConnect:124] in pool
+[I 250718 15:51:13 smartConnect:124] in pool
+[I 250718 15:51:13 smartConnect:124] in pool
+[I 250718 15:51:17 smartConnect:124] in pool
+[I 250718 15:51:18 smartConnect:124] in pool
+[I 250718 15:51:18 smartConnect:124] in pool
+[I 250718 15:51:22 smartConnect:124] in pool
+[I 250718 15:51:23 smartConnect:124] in pool
+[I 250718 15:51:23 smartConnect:124] in pool
+[I 250718 15:51:27 smartConnect:124] in pool
+[I 250718 15:51:28 smartConnect:124] in pool
+[I 250718 15:51:28 smartConnect:124] in pool
+[I 250718 15:51:32 smartConnect:124] in pool
+[I 250718 15:51:33 smartConnect:124] in pool
+[I 250718 15:51:33 smartConnect:124] in pool
+[I 250718 15:51:37 smartConnect:124] in pool
+[I 250718 15:51:38 smartConnect:124] in pool
+[I 250718 15:51:38 smartConnect:124] in pool
+[I 250718 15:51:42 smartConnect:124] in pool
+[I 250718 15:51:43 smartConnect:124] in pool
+[I 250718 15:51:43 smartConnect:124] in pool
+[I 250718 15:51:47 smartConnect:124] in pool
+[I 250718 15:51:48 smartConnect:124] in pool
+[I 250718 15:51:48 smartConnect:124] in pool
+[I 250718 15:51:52 smartConnect:124] in pool
+[I 250718 15:51:53 smartConnect:124] in pool
+[I 250718 15:51:53 smartConnect:124] in pool
+[I 250718 15:51:57 smartConnect:124] in pool
+[I 250718 15:51:58 smartConnect:124] in pool
+[I 250718 15:51:58 smartConnect:124] in pool
+[I 250718 15:52:02 smartConnect:124] in pool
+[I 250718 15:52:03 smartConnect:124] in pool
+[I 250718 15:52:03 smartConnect:124] in pool
+[I 250718 15:52:42 smartConnect:124] in pool
+[I 250718 15:52:43 smartConnect:124] in pool
+[I 250718 15:52:43 smartConnect:124] in pool
+[I 250718 15:53:42 smartConnect:124] in pool
+[I 250718 15:53:43 smartConnect:124] in pool
+[I 250718 15:53:43 smartConnect:124] in pool

@@ -1,0 +1,16 @@
+{
+	"provider": "openai",
+	"gpt4_32k": true,
+	"short_description": "AI-powered auto-fixing and module generator for NiftyOptionsIntelligence bot using GPT-4",
+	"spec_dir": "specs",
+	"src_include": [
+		"**"
+	],
+	"src_exclude": [
+		"**/.*",
+		"**/*.bin",
+		"**/node_modules/**",
+		"**/build/**",
+		"**/bin/**"
+	]
+}
