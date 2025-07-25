@@ -1,0 +1,30 @@
+name: nifty-options-intelligence
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pandas>=2.0
+  - numpy>=1.24
+  - matplotlib>=3.7
+  - scipy>=1.10
+  - requests>=2.31
+  - pyyaml>=6.0
+  - pip:
+    - streamlit==1.46.1
+    - streamlit-autorefresh==1.0.1
+    - yfinance==0.2.65
+    - smartapi-python==1.5.5
+    - pyotp==2.9.0
+    - python-dotenv==1.1.1
+    - logzero==1.7.0
+    - beautifulsoup4==4.13.4
+    - peewee==3.18.2
+    - plotly==6.2.0
+    - fastapi==0.116.0
+    - uvicorn==0.35.0
+    - ruff==0.12.2
+    - pylint
+    - pytest
+    - flake8

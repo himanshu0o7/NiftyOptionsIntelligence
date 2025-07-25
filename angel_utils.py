@@ -75,6 +75,7 @@ def load_nfo_scrip_master(client: SmartConnect, force_refresh: bool = False) -> 
     """
     if not os.path.exists(SCRIP_MASTER_PATH) or force_refresh:
         print("⏳ Downloading latest NFO scrip master…")
+# fix-bot-2025-07-24
         try:
             df = client.get_scrip_master("NFO")
             df.to_csv(SCRIP_MASTER_PATH, index=False)
@@ -86,12 +87,24 @@ def load_nfo_scrip_master(client: SmartConnect, force_refresh: bool = False) -> 
         print("✅ Using cached scrip master")
     
     return pd.read_csv(SCRIP_MASTER_PATH)
+=======
+        df = client.getMasterContract("NFO")
+        df.to_csv(SCRIP_MASTER_PATH, index=False)
+    else:
+        print("✅ Using cached scrip master")
+        df = pd.read_csv(SCRIP_MASTER_PATH)
+    return df
+ main
+
+# Alias for compatibility
+load_master_contract = load_nfo_scrip_master
 
 
 def find_token(symbol: str, strike: float, option_type: str, expiry: str) -> int | None:
     """Find an instrument token matching the specified criteria.
 
-    The scrip master must already have been downloaded via
+    The scrip master must already have been downloaded vi
+    #fix-bot-2025-07-24
     load_nfo_scrip_master. If the contract is found, its
     token ID is returned as an integer; otherwise None is
     returned.
@@ -114,6 +127,24 @@ def find_token(symbol: str, strike: float, option_type: str, expiry: str) -> int
     except Exception as e:
         print(f"❌ Error finding token: {e}")
         return None
+=======
+    :func:`load_master_contract`.  If the contract is found, its
+    token ID is returned as an integer; otherwise ``None`` is
+    returned.
+    """
+    if not os.path.exists(SCRIP_MASTER_PATH):
+        raise FileNotFoundError("scrip master not found; run load_master_contract first")
+    df = pd.read_csv(SCRIP_MASTER_PATH)
+    filtered = df[
+        (df["name"] == symbol)
+        & (df["strike"] == float(strike))
+        & (df["symbol"].str.endswith(option_type))
+        & (df["expiry"] == expiry)
+    ]
+    if not filtered.empty:
+        return int(filtered.iloc[0]["token"])
+    return None
+ main
 
 
 def get_ltp(client: SmartConnect, token: int) -> float | None:
@@ -123,4 +154,7 @@ def get_ltp(client: SmartConnect, token: int) -> float | None:
         return data['data']['ltp']
     except Exception as exc:
         print(f"❌ LTP Fetch Error: {exc}")
+#fix-bot-2025-07-24
         return None
+        return None
+main

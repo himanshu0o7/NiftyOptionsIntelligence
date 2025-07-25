@@ -25,11 +25,40 @@ import pandas as pd
 import time
 import subprocess
 import signal
+#fix-bot-2025-07-24
 import threading
 
 # Local module imports
 from session_manager import SessionManager
 from option_stream_ui import get_option_data
+=======
+import logging
+import sys
+
+# Import production configuration and error handling
+try:
+    from production_config import get_config, rate_limited, angel_api_limiter, with_retry
+    config = get_config()  # Only create when needed
+    logger = logging.getLogger(__name__)
+    logger.info("✅ Production configuration loaded")
+except ImportError as e:
+    st.error(f"❌ Failed to load production configuration: {e}")
+    st.stop()
+except ValueError as e:
+    st.error(f"❌ Configuration error: {e}")
+    st.error("Please check your environment variables in .env file")
+    st.stop()
+
+try:
+    from session_manager import SessionManager
+    from option_stream_ui import get_option_data
+except ImportError as e:
+    st.error(f"❌ Failed to import required modules: {e}")
+    st.error("Please ensure all dependencies are installed and modules are available.")
+    st.stop()
+from utils.trend_detector import detect_trend
+
+main
 
 # ---------------------------------------------------------------------------
 # Streamlit page setup
@@ -44,8 +73,15 @@ st.markdown("Use this app to monitor live CE/PE option data for NIFTY/BANKNIFTY 
 # ---------------------------------------------------------------------------
 tokens = None
 last_login_time = 0
+#fix-bot-2025-07-24
 websocket_process = None
+=======
 
+websocket_process = None  # Global variable for WebSocket process management
+ main
+
+@with_retry(max_retries=3, delay=2)
+@rate_limited(angel_api_limiter)
 def ensure_tokens_fresh() -> None:
     """Refresh the Angel One session tokens if they have expired.
     
@@ -57,11 +93,49 @@ def ensure_tokens_fresh() -> None:
     # 14 minutes (14 × 60 seconds)
     refresh_interval = 14 * 60
     if tokens is None or time.time() - last_login_time > refresh_interval:
+#fix-bot-2025-07-24
         time.sleep(1)
         sm = SessionManager()
         session = sm.get_session()
         tokens = session
         last_login_time = time.time()
+=======
+        try:
+            logger.info("🔄 Refreshing Angel One session tokens...")
+            session_mgr = SessionManager()
+            tokens = session_mgr.get_session()
+            last_login_time = time.time()
+            logger.info("✅ Session refreshed successfully")
+            st.success("🔐 Session refreshed successfully")
+        except Exception as exc:
+            error_msg = f"❌ Session refresh failed: {exc}"
+            logger.error(error_msg)
+            st.error(error_msg)
+            tokens = None
+            raise
+
+# Local module imports
+from session_manager import SessionManager
+from option_stream_ui import get_option_data
+
+# ---------------------------
+# PAGE SETUP
+# ---------------------------
+st.set_page_config(layout="wide")
+st_autorefresh(interval=5000, limit=100, key="refresh_autokey_001")
+st.title("📈 Nifty Options Intelligence Dashboard")
+st.markdown("Use this app to monitor live CE/PE option data for NIFTY/BANKNIFTY")
+
+# ---------------------------
+# GLOBALS
+# ---------------------------
+tokens = None
+last_login_time = 0
+
+# ---------------------------
+# TOKEN REFRESH FUNCTION (redundant - using the decorated version above)
+# ---------------------------
+ main
 
 # ---------------------------------------------------------------------------
 # Option data section
@@ -177,4 +251,8 @@ def main() -> None:
         pass
 
 if __name__ == "__main__":
+# fix-bot-2025-07-24
     main()
+=======
+    main()
+ main
