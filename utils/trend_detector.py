@@ -38,7 +38,7 @@ except ImportError:
         return 100.0  # Dummy positive OI change
 
 
-def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: int = None, tokens: dict = None) -> dict:
+def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: int = None, tokens: Optional[dict] = None) -> dict:
     """Fetch option Greek data for a given contract.
 
     Parameters
