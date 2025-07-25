@@ -115,7 +115,6 @@ def detect_trend(symbol: str, expiry: str) -> dict:
             and pe_delta < -0.6
             and pe_oi_change > 0
         ):
-=======
 # utils/trend_detector.py
 
 #from trend_detector import detect_trend
@@ -163,7 +162,6 @@ def detect_trend(symbol, expiry):
             trend = "Sideways"
             reason = "No strong CE/PE delta + OI change trigger"
 # fix-bot-2025-07-24
-=======
 
   main
         return {
@@ -184,7 +182,6 @@ def detect_trend(symbol, expiry):
             "reason": "An unexpected error occurred.",
             "supporting_data": {},
         }
-=======
                 "pe_oi_change": pe_oi_change
             }
         }

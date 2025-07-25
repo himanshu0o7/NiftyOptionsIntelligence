@@ -28,14 +28,11 @@ import signal
 import threading
 import logging
 import sys
-import sys, os
-sys.path.insert(0, os.path.dirname(__file__))
 
 # Local module imports
 from session_manager import SessionManager
 from option_stream_ui import get_option_data
 from utils.trend_detector import detect_trend
-from NiftyOptionsIntelligence.option_stream_ui import get_option_data
 
 # Import production configuration and error handling
 try:
@@ -51,21 +48,35 @@ except ValueError as e:
     st.error("Please check your environment variables in .env file")
     st.stop()
 
+# ---------------------------------------------------------------------------
+# Streamlit page setup
+# ---------------------------------------------------------------------------
 st.set_page_config(layout="wide")
 st_autorefresh(interval=5000, limit=100, key="refresh_autokey_001")
 st.title("📈 Nifty Options Intelligence Dashboard")
 st.markdown("Use this app to monitor live CE/PE option data for NIFTY/BANKNIFTY and assess short-term trends.")
 
+# ---------------------------------------------------------------------------
+# Globals
+# ---------------------------------------------------------------------------
 tokens = None
 last_login_time = 0
 websocket_process = None  # Global variable for WebSocket process management
 
+# ---------------------------------------------------------------------------
+# Token refresh support
+# ---------------------------------------------------------------------------
 @with_retry(max_retries=3, delay=2)
 @rate_limited(angel_api_limiter)
 def ensure_tokens_fresh() -> None:
-    """Refresh the Angel One session tokens if they have expired."""
+    """Refresh the Angel One session tokens if they have expired.
+
+    A cached session is reused until 14 minutes have elapsed. On
+    expiration, a new session is created via SessionManager and
+    stored in the global tokens variable.
+    """
     global tokens, last_login_time
-    refresh_interval = 14 * 60  # 14 minutes
+    refresh_interval = 14 * 60  # 14 minutes (14 × 60 seconds)
     if tokens is None or time.time() - last_login_time > refresh_interval:
         try:
             logger.info("🔄 Refreshing Angel One session tokens...")
@@ -81,9 +92,19 @@ def ensure_tokens_fresh() -> None:
             tokens = None
             raise
 
+# ---------------------------------------------------------------------------
+# Option data section
+# ---------------------------------------------------------------------------
 def option_data_ui() -> None:
-    """Render the option LTP viewer."""
+    """Render the option LTP viewer.
+
+    Users select a symbol (e.g. NIFTY or BANKNIFTY), strike and option type.
+    The latest quote is displayed in a table. A button spawns the
+    websocket_runner.py script in a backgroundsubprocess so that
+    real-time ticks continue streaming.
+    """
     global websocket_process
+
     col1, col2 = st.columns(2)
     with col1:
         symbol = st.selectbox("Select Symbol", ["NIFTY", "BANKNIFTY"])
@@ -99,6 +120,7 @@ def option_data_ui() -> None:
 
     try:
         ensure_tokens_fresh()
+        # Delegated fetch from option_stream_ui; can be replaced with live logic.
         data = get_option_data(symbol, strike_price, option_type)
         if data and "error" not in data:
             st.subheader(f"📊 Live Data for {symbol} {strike_price} {option_type}")
@@ -108,6 +130,7 @@ def option_data_ui() -> None:
     except Exception as e:
         st.error(f"⚠️ App error: {e}")
 
+    # Control to start and stop a persistent WebSocket feed in a background process.
     if st.button("Start Live WebSocket"):
         if websocket_process is None or websocket_process.poll() is not None:
             try:
@@ -126,6 +149,9 @@ def option_data_ui() -> None:
         else:
             st.warning("No WebSocket process is running.")
 
+# ---------------------------------------------------------------------------
+# Trend detector section
+# ---------------------------------------------------------------------------
 def trend_detector_ui() -> None:
     """Render a simple form to detect the market trend using delta and OI change."""
     try:
@@ -148,11 +174,23 @@ def trend_detector_ui() -> None:
     except ImportError as e:
         st.warning(f"Trend detector unavailable: {e}")
 
+# ---------------------------------------------------------------------------
+# Main entrypoint
+# ---------------------------------------------------------------------------
 def main() -> None:
-    """Entry point for Streamlit."""
+    """Entry point for Streamlit.
+
+    Compose the UI by rendering the option data viewer and the trend
+    detector on the same page. A dummy signal handler is installed
+    when running in the main thread to gracefully handle SIGTERM
+    during local development.
+    """
     option_data_ui()
     trend_detector_ui()
+
+    # Optional signal handling for graceful shutdown
     try:
+        # Only register the handler if running in the main thread
         if threading.current_thread() == threading.main_thread():
             def handler(signum, frame):
                 print(f"Signal {signum} received")
@@ -162,4 +200,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

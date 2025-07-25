@@ -73,7 +73,6 @@ class SmartWebSocketHandler:
                 logger.debug(f"Received non-dict message: {message}")
         except Exception as e:
             logger.error(f"Error processing tick data: {e}")
-=======
         logger.info(f"Data: {message}")
         if isinstance(message, dict) and 'token' in message:
             token = message['token']

@@ -251,7 +251,6 @@ def detect_trend(symbol: str, expiry: str) -> dict:
                 "pe_delta": pe_delta,
                 "pe_oi_change": pe_oi_change,
             },
-=======
             reason = "Delta and OI conditions not met for clear directional trend"
         
         return {

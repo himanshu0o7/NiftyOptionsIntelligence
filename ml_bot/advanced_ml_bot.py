@@ -630,7 +630,6 @@ class AdvancedMLBot:
             'last_training': datetime.now().isoformat()
         }
     
-    # ========== SELF-EVOLUTION METHODS ==========
     
     def log_error_for_evolution(self, error_type: str, error_message: str, 
                                function_name: str = "", code_context: str = ""):

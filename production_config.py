@@ -8,6 +8,10 @@ import time
 import logging
 from functools import wraps
 from typing import Optional, Dict, Any
+from dotenv import load_dotenv
+import os
+
+load_dotenv()  # This will now auto-load .env into os.environ
 
 # Configure logging for production
 logging.basicConfig(

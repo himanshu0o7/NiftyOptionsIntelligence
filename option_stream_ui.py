@@ -1,4 +1,3 @@
-
 # option_stream_ui.py - Streamlit chart UI for live LTP and signals
 
 import streamlit as st
@@ -85,7 +84,6 @@ def get_option_data(symbol, strike_price, option_type):
         "time": time.strftime("%H:%M:%S")
     }
 
-=======
 """
 Real-time CE/PE screener Streamlit UI with live Sensibull Greeks integration.
 """
@@ -121,5 +119,64 @@ def show_option_stream():
 # Optional wrapper
 if __name__ == "__main__":
     show_option_stream()
-#>>>>>>> dcd189d3 (🚀 Add: New UI module, Sensibull Greeks fetcher, debug strategy config; modified settings & logic)
+
+"""
+Module for fetching option stream data from Angel One API.
+This provides utility functions to fetch real-time option data.
+"""
+
+import logging
+from typing import Dict, Any, Optional
+
+logger = logging.getLogger(__name__)
+
+def get_option_data(symbol: str, strike_price: int, option_type: str) -> Dict[str, Any]:
+    """
+    Fetch option data for the given symbol, strike price and option type.
+
+    Args:
+        symbol (str): The symbol (e.g., "NIFTY", "BANKNIFTY")
+        strike_price (int): The strike price
+        option_type (str): Option type ("CE" or "PE")
+
+    Returns:
+        dict: Option data including LTP, change, OI, etc.
+    """
+    try:
+        # This is a placeholder implementation - in production, replace with actual API call
+        # In a real implementation, you would use the Angel One API client to fetch live data
+
+        # Mock data for demonstration
+        return {
+            "symbol": f"{symbol} {strike_price} {option_type}",
+            "ltp": 250.45,
+            "change": 2.34,
+            "change_percent": 0.94,
+            "open_interest": 1450,
+            "volume": 2345,
+            "bid": 250.30,
+            "ask": 250.60,
+            "timestamp": "2025-07-25 02:15:10"
+        }
+    except Exception as e:
+        logger.error(f"Error fetching option data: {e}")
+        return {"error": f"Failed to fetch option data: {str(e)}"}
+"""
+Option stream UI logic - stub for get_option_data.
+
+Replace this logic with actual option chain/Greeks fetching.
+"""
+
+def get_option_data(symbol: str, strike: int, option_type: str):
+    # Dummy data for UI test
+    return {
+        "symbol": symbol,
+        "strike": strike,
+        "option_type": option_type,
+        "price": 123.45,
+        "oi": 1000,
+        "change": 0.5,
+        "timestamp": "2025-07-25 14:10:00"
+    }
+
 

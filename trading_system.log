@@ -35,3 +35,7 @@
 2025-07-24 23:44:03,682 - yfinance - ERROR - Failed to get ticker '^NSEI' reason: Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
 2025-07-24 23:44:03,693 - utils.trend_detector - ERROR - Error in trend detection: Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
  main
+2025-07-25 17:15:29,734 - production_config - ERROR - Missing required environment variables: ANGEL_API_KEY, ANGEL_CLIENT_ID, ANGEL_PIN, ANGEL_TOTP_SECRET
+2025-07-25 17:30:25,564 - production_config - ERROR - Missing required environment variables: ANGEL_API_KEY, ANGEL_CLIENT_ID, ANGEL_PIN, ANGEL_TOTP_SECRET
+2025-07-25 17:33:05,451 - production_config - INFO - ✅ All required environment variables are set
+2025-07-25 17:33:05,451 - production_config - INFO - ✅ Logging configured at INFO level

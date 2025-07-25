@@ -45,13 +45,13 @@ def login() -> SmartConnect:
         if not API_KEY:
             missing.append("ANGEL_API_KEY or SMARTAPI_API_KEY")
         raise ValueError(f"Missing Angel One credentials: {', '.join(missing)}")
-    
+
     # Generate one-time password via TOTP
     try:
         totp = pyotp.TOTP(TOTP_SECRET).now()
     except Exception as e:
         raise ValueError(f"Invalid TOTP_SECRET: {e}")
-    
+
     client = SmartConnect(api_key=API_KEY)
     try:
         session = client.generateSession(clientCode=CLIENT_ID, password=PASSWORD, totp=totp)
@@ -61,7 +61,7 @@ def login() -> SmartConnect:
             raise RuntimeError("Login failed. Please try again later.")
     except Exception as e:
         raise RuntimeError(f"Login failed: {e}")
-    
+
     return client
 
 
@@ -85,9 +85,9 @@ def load_nfo_scrip_master(client: SmartConnect, force_refresh: bool = False) -> 
             raise
     else:
         print("✅ Using cached scrip master")
-    
+
     return pd.read_csv(SCRIP_MASTER_PATH)
-=======
+
         df = client.getMasterContract("NFO")
         df.to_csv(SCRIP_MASTER_PATH, index=False)
     else:
@@ -111,7 +111,7 @@ def find_token(symbol: str, strike: float, option_type: str, expiry: str) -> int
     """
     if not os.path.exists(SCRIP_MASTER_PATH):
         raise FileNotFoundError("scrip master not found; run load_nfo_scrip_master first")
-    
+
     try:
         df = pd.read_csv(SCRIP_MASTER_PATH)
         filtered = df[
@@ -120,14 +120,14 @@ def find_token(symbol: str, strike: float, option_type: str, expiry: str) -> int
             & (df["symbol"].str.endswith(option_type))
             & (df["expiry"] == expiry)
         ]
-        
+
         if not filtered.empty:
             return int(filtered.iloc[0]["token"])
         return None
     except Exception as e:
         print(f"❌ Error finding token: {e}")
         return None
-=======
+
     :func:`load_master_contract`.  If the contract is found, its
     token ID is returned as an integer; otherwise ``None`` is
     returned.
@@ -158,3 +158,4 @@ def get_ltp(client: SmartConnect, token: int) -> float | None:
         return None
         return None
 main
+
