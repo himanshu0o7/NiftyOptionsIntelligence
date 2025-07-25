@@ -1,6 +1,17 @@
 import streamlit as st
 import json
 import pandas as pd
+import sys
+from pathlib import Path
+
+import streamlit as st
+st.write("✅ App Loaded")
+
+
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
+
 from datetime import datetime
 from typing import Dict, List
 from strategies.breakout_strategy import BreakoutStrategy

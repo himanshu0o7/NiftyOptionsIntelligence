@@ -1,3 +1,4 @@
+
 # option_stream_ui.py - Streamlit chart UI for live LTP and signals
 
 import streamlit as st
@@ -83,4 +84,42 @@ def get_option_data(symbol, strike_price, option_type):
         "ltp": 150.25,  # Replace with live LTP if available
         "time": time.strftime("%H:%M:%S")
     }
+
+=======
+"""
+Real-time CE/PE screener Streamlit UI with live Sensibull Greeks integration.
+"""
+
+import streamlit as st
+from utils.sensibull_greeks_fetcher import fetch_option_data
+
+
+def show_option_stream():
+    st.title("📡 Live Option Stream (with Sensibull Greeks)")
+
+    index = st.selectbox("Select Index", ["NIFTY", "BANKNIFTY"])
+    strike = st.number_input("Select Strike", value=25200)
+    option_type = st.radio("Option Type", ["CE", "PE"])
+
+    with st.spinner("Fetching live data from Sensibull..."):
+        option_data = fetch_option_data(index, strike, option_type)
+
+    if option_data:
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Delta", f"{option_data['delta']:.2f}")
+        col2.metric("LTP", f"₹{option_data['ltp']:.2f}")
+        col3.metric("IV", f"{option_data['iv']}%")
+
+        if 0.4 <= option_data["delta"] <= 0.7:
+            st.success("✅ Signal Confirmed: Delta in ideal zone for directional trade")
+        else:
+            st.warning("⚠️ Delta not in optimal range")
+    else:
+        st.error("No matching option data found or API failed.")
+
+
+# Optional wrapper
+if __name__ == "__main__":
+    show_option_stream()
+#>>>>>>> dcd189d3 (🚀 Add: New UI module, Sensibull Greeks fetcher, debug strategy config; modified settings & logic)
 
