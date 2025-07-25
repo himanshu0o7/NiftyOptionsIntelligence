@@ -49,20 +49,20 @@ def connect_websocket(symbol: str = "NIFTY", expiry: str = "25JUL2025", optionty
     load_dotenv()
     
     # Get environment variables with fallback to common names
-    api_key = os.getenv("ANGEL_API_KEY") or os.getenv("API_KEY")
-    client_code = os.getenv("ANGEL_CLIENT_ID") or os.getenv("CLIENT_CODE")
-    pin = os.getenv("ANGEL_PIN") or os.getenv("PIN")
-    totp_secret = os.getenv("ANGEL_TOTP_SECRET") or os.getenv("TOTP_SECRET")
+    api_key = os.getenv(Config.API_KEY) or os.getenv(Config.API_KEY_FALLBACK)
+    client_code = os.getenv(Config.CLIENT_ID) or os.getenv(Config.CLIENT_ID_FALLBACK)
+    pin = os.getenv(Config.PIN) or os.getenv(Config.PIN_FALLBACK)
+    totp_secret = os.getenv(Config.TOTP_SECRET) or os.getenv(Config.TOTP_SECRET_FALLBACK)
     
     missing_vars = []
     if not api_key:
-        missing_vars.append("ANGEL_API_KEY or API_KEY")
+        missing_vars.append(f"{Config.API_KEY} or {Config.API_KEY_FALLBACK}")
     if not client_code:
-        missing_vars.append("ANGEL_CLIENT_ID or CLIENT_CODE")
+        missing_vars.append(f"{Config.CLIENT_ID} or {Config.CLIENT_ID_FALLBACK}")
     if not pin:
-        missing_vars.append("ANGEL_PIN or PIN")
+        missing_vars.append(f"{Config.PIN} or {Config.PIN_FALLBACK}")
     if not totp_secret:
-        missing_vars.append("ANGEL_TOTP_SECRET or TOTP_SECRET")
+        missing_vars.append(f"{Config.TOTP_SECRET} or {Config.TOTP_SECRET_FALLBACK}")
         
     if missing_vars:
         raise ValueError(f"❌ Missing required environment variable(s): {', '.join(missing_vars)}")
