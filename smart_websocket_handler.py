@@ -98,7 +98,7 @@ class SmartWebSocketHandler:
         # Attempt to reconnect if not at max retries
         if self.retry_count < self.max_retries:
             self.retry_count += 1
-            reconnect_delay = min(30, 2 ** self.retry_count)  # Exponential backoff, max 30s
+            reconnect_delay = min(self.MAX_RECONNECT_DELAY, self.BACKOFF_BASE ** self.retry_count)  # Exponential backoff
             logger.info(f"Attempting reconnect {self.retry_count}/{self.max_retries} in {reconnect_delay}s")
             time.sleep(reconnect_delay)
             self._reconnect()
