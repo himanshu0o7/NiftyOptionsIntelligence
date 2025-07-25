@@ -51,38 +51,6 @@ class SmartWebSocketHandler:
             self.sws.subscribe(self.correlation_id, self.mode, self.token_list)
 
     def _on_data(self, wsapp, message) -> None:
-=======
-# smart_websocket_handler.py
-# Fixed with V2 docs: higher retries, ping_interval, subscribe in on_open, resubscribe in on_close.
-
-import threading
-from logzero import logger
-from SmartApi.smartWebSocketV2 import SmartWebSocketV2
-from session_manager import SessionManager
-reactor.run(installSignalHandlers=False)
-
-
-import time
-
-
-latest_data = {}
-
-class SmartWebSocketHandler:
-    def __init__(self):
-        self.sws = None
-        self.correlation_id = "ws_handler_123"
-        self.connected = False
-        self.token_list = None  # New: Store for resubscribe
-        self.mode = None  # New: Store for resubscribe
-
-    def _on_open(self, wsapp):
-        logger.info("WebSocket opened")
-        self.connected = True
-        if self.token_list and self.mode:  # Subscribe here (doc-recommended)
-            self.sws.subscribe(self.correlation_id, self.mode, self.token_list)
-
-    def _on_data(self, wsapp, message):
- main
         logger.info(f"Data: {message}")
         if isinstance(message, dict) and 'token' in message:
             token = message['token']
@@ -90,7 +58,6 @@ class SmartWebSocketHandler:
                 'ltp': message.get('last_traded_price'),
                 'oi': message.get('open_interest'),
                 'volume': message.get('volume_trade_for_the_day'),
-# fix-bot-2025-07-24
                 'greeks': {},
             }
 
@@ -149,13 +116,10 @@ class SmartWebSocketHandler:
             ping_interval=5,
         )
         # Attach callbacks
-=======
-                'greeks': {}
-            }
-
-    def _on_error(self, wsapp, error):
-        logger.error(f"Error: {error}")
-        self.connected = False
+        self.sws.on_open = self._on_open
+        self.sws.on_data = self._on_data
+        self.sws.on_error = self._on_error
+        self.sws.on_close = self._on_close
         self._reconnect()  # Trigger reconnect
 
     def _on_close(self, wsapp):
@@ -192,7 +156,6 @@ class SmartWebSocketHandler:
             retry_multiplier=2,
             ping_interval=5  # Doc: Heartbeat to prevent idle close
         )
-  main
         self.sws.on_open = self._on_open
         self.sws.on_data = self._on_data
         self.sws.on_error = self._on_error
@@ -218,21 +181,3 @@ class SmartWebSocketHandler:
         """Close the active WebSocket connection if one exists."""
         if self.sws:
             self.sws.close_connection()
-=======
-        def connect_thread():
-            try:
-                self.sws.connect()
-            except Exception as e:
-                logger.error(f"Connect failed: {e}")
-                self._reconnect()
-
-        threading.Thread(target=connect_thread, daemon=True).start()
-
-    def get_latest_data(self, token):
-        return latest_data.get(token)
-
-    def close(self):
-        if self.sws:
-            self.sws.close_connection()
-
-  main

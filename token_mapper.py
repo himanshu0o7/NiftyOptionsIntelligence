@@ -63,20 +63,9 @@ def get_token(symbol: str, strike: int, option_type: str) -> str | None:
         & (df["strike"] == strike)
         & (df["optiontype"] == option_type)
     ]
-=======
-# token_mapper.py (Auto Token Mapping via Angel One Master Contract)
-
-import pandas as pd
-from smartapi import SmartConnect
-from session_manager import get_access_token, api_key, client_id
-
-MASTER_CONTRACT_CACHE = {}
-
-# Load master contract from Angel One (filter OPTIDX only)
-def load_master_contract(exchange="NFO"):
-    global MASTER_CONTRACT_CACHE
-    if MASTER_CONTRACT_CACHE:
-        return MASTER_CONTRACT_CACHE
+    if not row.empty:
+        return int(row.iloc[0]["token"])
+    return None
 
     sc = SmartConnect(api_key=api_key)
     sc.generate_session(client_id=client_id, access_token=get_access_token())
@@ -97,7 +86,6 @@ def load_master_contract(exchange="NFO"):
 def get_token(symbol, strike, option_type):
     df = load_master_contract()
     row = df[(df["symbol"] == symbol) & (df["strike"] == strike) & (df["optiontype"] == option_type)]
-  main
     if not row.empty:
         return str(row.iloc[0]["token"])
     return None
@@ -117,16 +105,3 @@ def get_strike_tokens(symbol: str, option_type: str, strikes: list[int]) -> dict
         if not row.empty:
             tokens[strike] = str(row.iloc[0]["token"])
     return tokens
-=======
-# Get multiple tokens
-
-def get_strike_tokens(symbol, option_type, strikes):
-    df = load_master_contract()
-    tokens = {}
-    for strike in strikes:
-        row = df[(df["symbol"] == symbol) & (df["strike"] == strike) & (df["optiontype"] == option_type)]
-        if not row.empty:
-            tokens[strike] = str(row.iloc[0]["token"])
-    return tokens
-
-  main
