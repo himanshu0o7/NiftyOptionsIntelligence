@@ -1,36 +1,35 @@
-# fix-bot-2025-07-24
 """
 Standalone runner to stream live option data via SmartAPI's WebSocket V2.
 
 This module encapsulates the steps required to:
 
-1. Load credentials from environment variables (via ``dotenv``).
+1. Load credentials from environment variables (via dotenv).
 2. Generate a TOTP and authenticate with Angel One SmartAPI.
 3. Retrieve the instrument token for a given option contract.
 4. Connect to the WebSocket and print tick data to STDOUT.
 
-You can run this script directly from the command line.  The default
-parameters stream LTP quotes for the 25 JUL 2025 NIFTY 25000 call option.
+You can run this script directly from the command line. The default
+parameters stream LTP quotes for the 25 JUL 2025 NIFTY 25000 call option.
 
 Environment variables required:
 
-* ``ANGEL_API_KEY`` – your API key
-* ``ANGEL_CLIENT_ID`` – your client/user ID
-* ``ANGEL_PIN`` – your trading PIN/password
-* ``ANGEL_TOTP_SECRET`` – the base32 secret used for generating OTPs
+* ANGEL_API_KEY – your API key
+* ANGEL_CLIENT_ID – your client/user ID
+* ANGEL_PIN – your trading PIN/password
+* ANGEL_TOTP_SECRET – the base32 secret used for generating OTPs
 
-Ensure that ``scrip_master_utils.get_token_by_symbol`` is correctly
+Ensure that scrip_master_utils.get_token_by_symbol is correctly
 implemented to map a symbol/expiry/option type/strike into an
 instrument token.
 """
 
 import os
 import time
-import pyotp  # type: ignore
-from dotenv import load_dotenv  # type: ignore
-from SmartApi import SmartConnect  # type: ignore
-from SmartApi.smartWebSocketV2 import SmartWebSocketV2  # type: ignore
-from scrip_master_utils import get_token_by_symbol  # type: ignore
+import pyotp
+from dotenv import load_dotenv
+from SmartApi import SmartConnect
+from SmartApi.smartWebSocketV2 import SmartWebSocketV2
+from scrip_master_utils import get_token_by_symbol
 
 
 def connect_websocket(symbol: str = "NIFTY", expiry: str = "25JUL2025", optiontype: str = "CE", strike: int = 25000) -> None:
@@ -39,67 +38,107 @@ def connect_websocket(symbol: str = "NIFTY", expiry: str = "25JUL2025", optionty
     Parameters
     ----------
     symbol: str
-        Underlying symbol (e.g. ``"NIFTY"``).
+        Underlying symbol (e.g. "NIFTY").
     expiry: str
-        Expiry date in Angel One format (e.g. ``"25JUL2025"``).
+        Expiry date in Angel One format (e.g. "25JUL2025").
     optiontype: str
-        Option type (``"CE"`` or ``"PE"``).
+        Option type ("CE" or "PE").
     strike: int
         Strike price of the option contract.
     """
     load_dotenv()
-    api_key = os.getenv("ANGEL_API_KEY")
-    client_code = os.getenv("ANGEL_CLIENT_ID")
-    pin = os.getenv("ANGEL_PIN")
-    totp_secret = os.getenv("ANGEL_TOTP_SECRET")
-    missing_vars = [var_name for var_name, var_value in {
-        "ANGEL_API_KEY": api_key,
-        "ANGEL_CLIENT_ID": client_code,
-        "ANGEL_PIN": pin,
-        "ANGEL_TOTP_SECRET": totp_secret
-    }.items() if not var_value]
+    
+    # Get environment variables with fallback to common names
+    api_key = os.getenv(Config.API_KEY) or os.getenv(Config.API_KEY_FALLBACK)
+    client_code = os.getenv(Config.CLIENT_ID) or os.getenv(Config.CLIENT_ID_FALLBACK)
+    pin = os.getenv(Config.PIN) or os.getenv(Config.PIN_FALLBACK)
+    totp_secret = os.getenv(Config.TOTP_SECRET) or os.getenv(Config.TOTP_SECRET_FALLBACK)
+    
+    missing_vars = []
+    if not api_key:
+        missing_vars.append(f"{Config.API_KEY} or {Config.API_KEY_FALLBACK}")
+    if not client_code:
+        missing_vars.append(f"{Config.CLIENT_ID} or {Config.CLIENT_ID_FALLBACK}")
+    if not pin:
+        missing_vars.append(f"{Config.PIN} or {Config.PIN_FALLBACK}")
+    if not totp_secret:
+        missing_vars.append(f"{Config.TOTP_SECRET} or {Config.TOTP_SECRET_FALLBACK}")
+        
     if missing_vars:
         raise ValueError(f"❌ Missing required environment variable(s): {', '.join(missing_vars)}")
+    
     # Generate TOTP
     try:
         totp = pyotp.TOTP(totp_secret).now()
     except Exception as exc:
-        raise ValueError(f"❌ Invalid ANGEL_TOTP_SECRET (must be base32): {exc}")
+        raise ValueError(f"❌ Invalid TOTP_SECRET (must be base32): {exc}")
+    
     # Login session
-    smart_api = SmartConnect(api_key=api_key)
-    session = smart_api.generateSession(clientCode=client_code, password=pin, totp=totp)
-    feed_token = smart_api.getfeedToken()
-    if not session or 'data' not in session or 'jwtToken' not in session['data']:
-        raise ValueError("❌ Invalid session structure: Missing 'data' or 'jwtToken' in session response.")
-    auth_token = session['data']['jwtToken']
+    try:
+        smart_api = SmartConnect(api_key=api_key)
+        session = smart_api.generateSession(clientCode=client_code, password=pin, totp=totp)
+        feed_token = smart_api.getfeedToken()
+        
+        if not session or 'data' not in session or 'jwtToken' not in session['data']:
+            raise ValueError("❌ Invalid session structure: Missing 'data' or 'jwtToken' in session response.")
+        
+        auth_token = session['data']['jwtToken']
+    except Exception as e:
+        raise ValueError(f"❌ Login failed: {e}")
+    
     # Fetch instrument token
-    token = get_token_by_symbol(symbol, expiry=expiry, optiontype=optiontype, strike=strike)
-    if not token:
-        raise ValueError("❌ Unable to fetch token for desired option contract.")
+    try:
+        token = get_token_by_symbol(symbol, expiry=expiry, optiontype=optiontype, strike=strike)
+        if not token:
+            raise ValueError("❌ Unable to fetch token for desired option contract.")
+    except Exception as e:
+        raise ValueError(f"❌ Token fetch failed: {e}")
+    
     print(f"✅ Logged in successfully. Streaming {symbol} {expiry} {strike}{optiontype} (token {token})")
+    
     # Configure WebSocket
-    sws = SmartWebSocketV2(auth_token, api_key, client_code, feed_token)
-    mode = 1  # Mode 1 = LTP only
-    correlation_id = "nifty_ws"
-    # Event handlers
-    def on_open(wsapp):
-        print("🟢 WebSocket Connected.")
-        sws.subscribe(correlation_id, mode, [{"exchangeType": 2, "tokens": [token]}])
-    def on_data(wsapp, message):
-        print("📈 Tick Data:", message)
-    def on_error(wsapp, error):
-        print("❌ WebSocket Error:", error)
-    def on_close(wsapp):
-        print("🔌 WebSocket Closed. Attempting to reconnect…")
-    sws.on_open = on_open
-    sws.on_data = on_data
-    sws.on_error = on_error
-    sws.on_close = on_close
-    # Connect (blocks until terminated)
-    sws.connect()
+    try:
+        sws = SmartWebSocketV2(auth_token, api_key, client_code, feed_token)
+        mode = 1  # Mode 1 = LTP only
+        correlation_id = "nifty_ws"
+        
+        # Event handlers
+        def on_open(wsapp):
+            print("🟢 WebSocket Connected.")
+            sws.subscribe(correlation_id, mode, [{"exchangeType": 2, "tokens": [token]}])
+        
+        def on_data(wsapp, message):
+            print("📈 Tick Data:", message)
+        
+        def on_error(wsapp, error):
+            print("❌ WebSocket Error:", error)
+        
+        def on_close(wsapp):
+            print("🔌 WebSocket Closed. Attempting to reconnect…")
+        
+        sws.on_open = on_open
+        sws.on_data = on_data
+        sws.on_error = on_error
+        sws.on_close = on_close
+        
+        # Connect (blocks until terminated)
+        sws.connect()
+        
+    except Exception as e:
+        print(f"❌ WebSocket connection failed: {e}")
+        raise
 
 
 if __name__ == "__main__":
+#fix-bot-2025-07-24
+    # Default run with typical parameters. Adjust these as needed or
+    # override them by calling connect_websocket from another module.
+    try:
+        connect_websocket()
+    except Exception as e:
+        print(f"❌ Error in websocket_runner: {e}")
+        exit(1)
+
     # Default run with typical parameters.  Adjust these as needed or
     # override them by calling ``connect_websocket`` from another module.
     connect_websocket()
@@ -164,3 +203,4 @@ sws.on_close = on_close
 
 # === Connect ===
 sws.connect()
+ main
