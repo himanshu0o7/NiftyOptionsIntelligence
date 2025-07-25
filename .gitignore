@@ -13,3 +13,5 @@ production_readiness_check.py
 monitor_bot.py
 start_bot.sh
 *.pyc
+__pycache__/
+*.pyc
