@@ -243,7 +243,7 @@ def main() -> None:
     # Optional signal handling for graceful shutdown
     try:
         # Only register the handler if running in the main thread
-        if threading.current_thread() is threading.main_thread():
+        if threading.current_thread() == threading.main_thread():
             def handler(signum, frame):
                 print(f"Signal {signum} received")
             signal.signal(signal.SIGTERM, handler)
