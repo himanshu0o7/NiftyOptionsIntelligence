@@ -24,7 +24,6 @@ PROJECT_ROOT = CURRENT_DIR.parent.parent  # parent of the `pages` folder
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-import streamlit as st
 import json
 import pandas as pd
 # …the rest of your imports…
