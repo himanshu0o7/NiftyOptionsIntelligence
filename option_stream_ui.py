@@ -85,7 +85,7 @@ def get_option_data(symbol, strike_price, option_type):
         "time": time.strftime("%H:%M:%S")
     }
 
-=======
+
 """
 Real-time CE/PE screener Streamlit UI with live Sensibull Greeks integration.
 """
