@@ -8,7 +8,8 @@ ws_handler = SmartWebSocketHandler()
 ws_handler.start_websocket(tokens, mode=2)  # mode=2 means 'Quote'
 
 # Loop to monitor incoming data
-while True:
+while not stop_loop:
     print("Latest Tick:", latest_data.get("26000"))
     time.sleep(2)
 
+print("Websocket monitoring stopped.")
