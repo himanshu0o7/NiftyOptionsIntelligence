@@ -91,7 +91,7 @@ Real-time CE/PE screener Streamlit UI with live Sensibull Greeks integration.
 """
 
 import streamlit as st
-from utils.sensibull_greeks_fetcher import fetch_option_data
+from sensibull_greeks_fetcher import fetch_option_data
 
 
 def show_option_stream():
