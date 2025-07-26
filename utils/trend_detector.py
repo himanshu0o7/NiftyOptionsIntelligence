@@ -17,6 +17,23 @@ broker's API.
 
 import logging
 
+# utils/trend_detector.py
+
+def detect_trend(price_data: list) -> str:
+    """
+    Dummy trend detector based on price list.
+    Returns: 'bullish', 'bearish', or 'sideways'
+    """
+    if not price_data or len(price_data) < 2:
+        return "sideways"
+
+    if price_data[-1] > price_data[0]:
+        return "bullish"
+    elif price_data[-1] < price_data[0]:
+        return "bearish"
+    else:
+        return "sideways"
+
 # Constants for fallback delta values
 CALL_DELTA_THRESHOLD = 0.65  # Representative delta for ATM calls
 PUT_DELTA_THRESHOLD = -0.65  # Representative delta for ATM puts
@@ -99,7 +116,7 @@ except ImportError:
 
 def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: int = None, tokens: dict = None) -> dict:
     """Retrieve option Greek data (primarily delta) for the given parameters.
-    
+
     If fetch_option_greeks is available, it will be used to fetch live
     data. Otherwise, dummy data is returned for testing purposes.
  main
@@ -110,7 +127,7 @@ def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: in
         except Exception as exc:
 #fix-bot-2025-07-24
             logging.error(f"Greek fetch error: {exc}")
-    
+
     # Fallback: return a representative delta
     return {"delta": CALL_DELTA_THRESHOLD if option_type.upper() == "CE" else PUT_DELTA_THRESHOLD}
 
