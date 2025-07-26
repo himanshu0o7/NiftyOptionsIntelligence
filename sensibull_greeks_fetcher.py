@@ -15,7 +15,7 @@ def fetch_option_data(
 ) -> Optional[Dict[str, float]]:
     """Fetch option data including Greeks and OI from Sensibull API."""
     try:
-        response = requests.get(f"{SENSIBULL_CHAIN_API}{symbol.upper()}")
+        response = requests.get(f"{SENSIBULL_CHAIN_API}{symbol.upper()}", timeout=10)
         if response.status_code != 200:
             logger.warning(f"Failed to fetch Sensibull data: {response.status_code}")
             return None
