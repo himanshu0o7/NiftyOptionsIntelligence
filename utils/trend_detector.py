@@ -1,231 +1,138 @@
-# fix-bot-2025-07-24
-"""
-Utility functions for detecting market trends.
+"""Utility functions for detecting market trends.
 
-The core function exposed by this module, detect_trend,
-analyses option Greek data and open-interest changes to classify the
-market as Bullish, Bearish or Sideways. A small wrapper is used to
-retrieve delta values either via a live call into
-greeks_handler.fetch_option_greeks (if available) or, if that
-dependency is absent, by falling back to a sensible default. The
-open-interest change is fetched from utils.oi_data.get_oi_change.
-
-In a real-time deployment you should replace the dummy delta values
-returned by get_option_greek_data with real data from your
-broker's API.
-"""
-
-import logging
-
-# utils/trend_detector.py
-
-def detect_trend(price_data: list) -> str:
-    """
-    Dummy trend detector based on price list.
-    Returns: 'bullish', 'bearish', or 'sideways'
-    """
-    if not price_data or len(price_data) < 2:
-        return "sideways"
-
-    if price_data[-1] > price_data[0]:
-        return "bullish"
-    elif price_data[-1] < price_data[0]:
-        return "bearish"
-    else:
-        return "sideways"
-
-# Constants for fallback delta values
-CALL_DELTA_THRESHOLD = 0.65  # Representative delta for ATM calls
-PUT_DELTA_THRESHOLD = -0.65  # Representative delta for ATM puts
-
-try:
-    # Attempt to import the live Greek fetcher. This will fail in
-    # environments where greeks_handler is unavailable (e.g. when
-    # running locally without Angel One connectivity).
-    from greeks_handler import fetch_option_greeks
-except ImportError:
-    fetch_option_greeks = None
-
-try:
-    from utils.oi_data import get_oi_change
-except ImportError:
-    def get_oi_change(symbol: str, expiry: str, option_type: str) -> float:
-        """Fallback OI change function"""
-        logging.warning("OI data module not available, using dummy data")
-        return 100.0  # Dummy positive OI change
-
-
-def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: int = None, tokens: Optional[dict] = None) -> dict:
-    """Fetch option Greek data for a given contract.
-
-    Parameters
-    ----------
-    symbol: str
-        Underlying index or stock symbol (e.g. "NIFTY").
-    expiry: str
-        Expiry date in Angel One format (e.g. "25JUL2025"). This
-        parameter is currently unused by the fallback implementation.
-    option_type: str
-        "CE" for call options or "PE" for put options.
-    strike: int | None
-        Strike price of the option. If None and the live Greek
-        fetcher is available, the function may choose a reasonable
-        default or return dummy data.
-    tokens: dict | None
-        Dictionary of authentication tokens required by the live API.
-
-    Returns
-    -------
-    dict
-        A mapping containing at least the key "delta".
-
-    Notes
-    -----
-    This wrapper attempts to call fetch_option_greeks from
-    greeks_handler if it exists. If either the function is
-    unavailable or an error is raised during the call, a deterministic
-    dummy delta is returned: positive for calls and negative for puts.
-
-# utils/trend_detector.py
-"""
-Utility functions for detecting market trends.
-
-The core function exposed by this module, detect_trend(),
-analyses option Greek data and open-interest changes to classify the
-market as Bullish, Bearish or Sideways.
+The core function exposed by this module, detect_trend, analyses option Greek data and open-interest changes to classify the market as Bullish, Bearish or Sideways. Data is fetched live from NSE India for LTP, OI, IV, volume, etc. Greeks like delta are calculated using Black-Scholes model.
 """
 
 import logging
 import yfinance as yf
 from datetime import datetime
+from typing import Optional, Dict
+import requests
+import json
+import math
+from scipy.stats import norm
 
 logger = logging.getLogger(__name__)
 
-try:
-    from utils.oi_data import get_oi_change
-except ImportError:
-    def get_oi_change(symbol, strike, option_type, expiry):
-        """Mock OI change data for testing."""
-        return 1000 if option_type == "CE" else -500
+# Headers for NSE requests
+HEADERS = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+    'accept-language': 'en,gu;q=0.9,hi;q=0.8',
+    'accept-encoding': 'gzip, deflate, br'
+}
 
-try:
-    from greeks_handler import fetch_option_greeks
-except ImportError:
-    fetch_option_greeks = None
+def fetch_option_chain(symbol: str) -> Dict:
+    """Fetch the option chain data from NSE India."""
+    url = f"https://www.nseindia.com/api/option-chain-indices?symbol={symbol.upper()}"
+    sess = requests.Session()
+    sess.get("https://www.nseindia.com", headers=HEADERS, timeout=5)
+    response = sess.get(url, headers=HEADERS, timeout=5)
+    if response.status_code != 200:
+        raise ValueError(f"Failed to fetch option chain: {response.status_code}")
+    return response.json()
 
+def calculate_delta(S: float, K: float, t: float, r: float, sigma: float, option_type: str) -> float:
+    """Calculate delta using Black-Scholes model."""
+    if sigma <= 0 or t <= 0:
+        return 0.5 if option_type == "CE" else -0.5  # Fallback for ATM
+    d1 = (math.log(S / K) + (r + 0.5 * sigma ** 2) * t) / (sigma * math.sqrt(t))
+    if option_type == "CE":
+        return norm.cdf(d1)
+    else:
+        return norm.cdf(d1) - 1
 
-def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: int = None, tokens: dict = None) -> dict:
-    """Retrieve option Greek data (primarily delta) for the given parameters.
-
-    If fetch_option_greeks is available, it will be used to fetch live
-    data. Otherwise, dummy data is returned for testing purposes.
- main
-    """
-    if fetch_option_greeks is not None:
-        try:
-            return fetch_option_greeks(symbol, expiry, option_type, strike, tokens)
-        except Exception as exc:
-#fix-bot-2025-07-24
-            logging.error(f"Greek fetch error: {exc}")
-
-    # Fallback: return a representative delta
-    return {"delta": CALL_DELTA_THRESHOLD if option_type.upper() == "CE" else PUT_DELTA_THRESHOLD}
-
-
-def detect_trend(symbol: str, expiry: str) -> dict:
-    """Determine the trend of the market for the given symbol and expiry.
-
-    A bullish trend is signalled when the call option delta exceeds 0.6
-    **and** call open-interest change is positive. A bearish trend is
-    signalled when the put option delta is less than -0.6 and the put
-    open-interest change is positive. Otherwise the market is
-    considered sideways.
-
-    Parameters
-    ----------
-    symbol: str
-        Underlying index (e.g. "NIFTY" or "BANKNIFTY").
-    expiry: str
-        Expiry date in Angel One format.
-
-    Returns
-    -------
-    dict
-        A dictionary with "trend" ("Bullish", "Bearish" or
-        "Sideways"), "reason" (explanatory string) and
-        "supporting_data" (raw values used in the decision).
-    """
+def get_option_greek_data(symbol: str, expiry: str, option_type: str, strike: Optional[int] = None) -> Dict:
+    """Fetch option data including calculated Greeks from NSE."""
     try:
-        # Greek deltas
-        ce_greeks = get_option_greek_data(symbol, expiry, option_type="CE")
-        pe_greeks = get_option_greek_data(symbol, expiry, option_type="PE")
+        data = fetch_option_chain(symbol)
+        records = data['records']
+        underlying = records['underlyingValue']
+        if not expiry:
+            expiry = records['expiryDates'][0]
+        filtered = [d for d in records['data'] if d['expiryDate'] == expiry]
+        if not filtered:
+            raise ValueError(f"No data for expiry {expiry}")
+        atm_strike = min([d['strikePrice'] for d in filtered], key=lambda x: abs(x - underlying))
+        if strike is None:
+            strike = atm_strike
+        option_data = next((d[option_type.upper()] for d in filtered if d['strikePrice'] == strike), None)
+        if not option_data:
+            raise ValueError(f"No {option_type} data for strike {strike}")
         
-        # Open interest changes
-        ce_oi_change = get_oi_change(symbol, expiry, option_type="CE")
-        pe_oi_change = get_oi_change(symbol, expiry, option_type="PE")
+        # Parse expiry for time to maturity
+        expiry_date = datetime.strptime(expiry, '%d-%b-%Y')
+        t = max((expiry_date - datetime.now()).days / 365.0, 1/365.0)
+        r = 0.07  # Risk-free rate assumption
+        sigma = option_data['impliedVolatility'] / 100.0
         
-        ce_delta = ce_greeks.get("delta")
-        pe_delta = pe_greeks.get("delta")
+        delta = calculate_delta(underlying, strike, t, r, sigma, option_type.upper())
         
-        # Determine trend based on delta and OI change
-
-            logger.warning(f"Failed to fetch live Greeks: {exc}")
-    
-    # Return dummy data for testing/development
-    return {
-        "delta": 0.7 if option_type == "CE" else -0.7,
-        "gamma": 0.01,
-        "theta": -0.05,
-        "vega": 0.02
-    }
-
-
-def detect_trend(symbol: str, expiry: str) -> dict:
-    """Detect market trend based on option delta and OI changes.
-    
-    Args:
-        symbol: The underlying symbol (e.g., "NIFTY", "BANKNIFTY")
-        expiry: The expiry date string
-    
-    Returns:
-        dict: {
-            "trend": "Bullish/Bearish/Sideways/Error",
-            "reason": "explanation of the trend detection",
-            "supporting_data": { delta and OI data }
+        return {
+            "delta": delta,
+            "ltp": option_data['lastPrice'],
+            "oi": option_data['openInterest'],
+            "oi_change": option_data['changeinOpenInterest'],
+            "volume": option_data['totalTradedVolume'],
+            "iv": option_data['impliedVolatility'],
+            "gamma": 0.01,  # Placeholder; can implement full BS if needed
+            "theta": -0.05,  # Placeholder
+            "vega": 0.02  # Placeholder
         }
-    """
+    except Exception as exc:
+        logger.error(f"Error fetching option data: {exc}")
+        # Fallback dummy data
+        return {
+            "delta": 0.65 if option_type.upper() == "CE" else -0.65,
+            "ltp": 0.0,
+            "oi": 0,
+            "oi_change": 100,
+            "volume": 0,
+            "iv": 20.0,
+            "gamma": 0.01,
+            "theta": -0.05,
+            "vega": 0.02
+        }
+
+def get_live_news(symbol: str) -> list:
+    """Fetch recent market news using yfinance."""
+    ticker_map = {
+        "NIFTY": "^NSEI",
+        "BANKNIFTY": "^NSEBANK"
+    }
+    ticker = ticker_map.get(symbol.upper(), "^NSEI")
+    stock = yf.Ticker(ticker)
+    return stock.news[:5]  # Get top 5 recent news items
+
+def detect_trend(symbol: str, expiry: Optional[str] = None) -> Dict:
+    """Detect market trend based on option delta, OI changes, and include live news."""
     try:
-        # Get current price using yfinance
+        # Fetch current price using yfinance as fallback
         ticker_map = {
             "NIFTY": "^NSEI",
             "BANKNIFTY": "^NSEBANK"
         }
-        
-        ticker = ticker_map.get(symbol, "^NSEI")
+        ticker = ticker_map.get(symbol.upper(), "^NSEI")
         stock = yf.Ticker(ticker)
         hist = stock.history(period="1d")
+        if not hist.empty:
+            current_price = hist['Close'].iloc[-1]
+        else:
+            current_price = 0  # Will be overridden by NSE data
         
-        if hist.empty:
-            raise ValueError(f"No data found for {symbol}")
-        
-        current_price = hist['Close'].iloc[-1]
-        
-        # Calculate ATM strike
-        if symbol == "NIFTY":
+        # Fetch ATM strike roughly
+        if symbol.upper() == "NIFTY":
             atm_strike = round(current_price / 50) * 50
-        else:  # BANKNIFTY
+        else:
             atm_strike = round(current_price / 100) * 100
         
         # Fetch CE and PE data
         ce_data = get_option_greek_data(symbol, expiry, "CE", atm_strike)
         pe_data = get_option_greek_data(symbol, expiry, "PE", atm_strike)
         
-        # Get OI changes
-        ce_oi_change = get_oi_change(symbol, atm_strike, "CE", expiry)
-        pe_oi_change = get_oi_change(symbol, atm_strike, "PE", expiry)
-        
-        ce_delta = ce_data.get("delta")
-        pe_delta = pe_data.get("delta")
+        ce_delta = ce_data["delta"]
+        pe_delta = pe_data["delta"]
+        ce_oi_change = ce_data["oi_change"]
+        pe_oi_change = pe_data["oi_change"]
         
         supporting_data = {
             "ce_delta": ce_delta,
@@ -233,59 +140,39 @@ def detect_trend(symbol: str, expiry: str) -> dict:
             "ce_oi_change": ce_oi_change,
             "pe_oi_change": pe_oi_change,
             "strike": atm_strike,
-            "current_price": current_price
+            "current_price": current_price,
+            "ce_ltp": ce_data["ltp"],
+            "pe_ltp": pe_data["ltp"],
+            "ce_volume": ce_data["volume"],
+            "pe_volume": pe_data["volume"]
         }
         
         # Trend detection logic
- main
-        if (
-            ce_delta is not None
-            and ce_oi_change is not None
-            and ce_delta > 0.6
-            and ce_oi_change > 0
-        ):
+        if ce_delta > 0.6 and ce_oi_change > 0:
             trend = "Bullish"
             reason = f"CE delta ({ce_delta:.2f}) > 0.6 and CE OI change ({ce_oi_change:,}) > 0"
-        elif (
-            pe_delta is not None
-            and pe_oi_change is not None
-            and pe_delta < -0.6
-            and pe_oi_change > 0
-        ):
+        elif pe_delta < -0.6 and pe_oi_change > 0:
             trend = "Bearish"
             reason = f"PE delta ({pe_delta:.2f}) < -0.6 and PE OI change ({pe_oi_change:,}) > 0"
         else:
             trend = "Sideways"
-#fix-bot-2025-07-24
-            reason = "No strong CE/PE delta + OI change trigger"
-
-        return {
-            "trend": trend,
-            "reason": reason,
-            "supporting_data": {
-                "ce_delta": ce_delta,
-                "ce_oi_change": ce_oi_change,
-                "pe_delta": pe_delta,
-                "pe_oi_change": pe_oi_change,
-            },
             reason = "Delta and OI conditions not met for clear directional trend"
         
+        # Add live news
+        news = get_live_news(symbol)
+        
         return {
             "trend": trend,
             "reason": reason,
-            "supporting_data": supporting_data
- main
+            "supporting_data": supporting_data,
+            "news": news
         }
-        
     except Exception as exc:
         logger.error(f"Error in trend detection: {exc}")
         return {
             "trend": "Error",
-#fix-bot-2025-07-24
-            "reason": f"An unexpected error occurred: {exc}",
-            "supporting_data": {},
-
             "reason": f"Failed to analyze trend: {exc}",
-            "supporting_data": {}
- main
+            "supporting_data": {},
+            "news": []
         }
+

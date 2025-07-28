@@ -1,22 +1,14 @@
+# .streamlit/config.toml
+
 [server]
 headless = true
-address = "0.0.0.0"
-port = 5000
+port = 9000
 enableCORS = false
 enableXsrfProtection = false
-maxUploadSize = 200
 
-[browser]
-gatherUsageStats = false
-
-[client]
-showErrorDetails = false
-
-[logger]
-level = "error"
-
-[server]
-headless = true
-port = 8501
-enableCORS = false
+[theme]
+base = "dark"
+primaryColor = "#1abc9c"
+backgroundColor = "#000000"
+secondaryBackgroundColor = "#262730"
 

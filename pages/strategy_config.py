@@ -2,7 +2,11 @@ import streamlit as st
 import json
 import pandas as pd
 import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))  # Adds project root to path
+from config.settings import Settings
 from pathlib import Path
+from NiftyOptionsIntelligence.config.settings import Settings  # Assuming config is under the package root
 
 import streamlit as st
 st.write("✅ App Loaded")
