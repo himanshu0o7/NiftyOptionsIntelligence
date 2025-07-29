@@ -43,6 +43,8 @@ class SmartWebSocketHandler:
         self.mode: int | None = None
         self.retry_count = 0
         self.max_retries = 5
+        self.backoff_base = 2
+        self.max_reconnect_delay = 60
         self.session_manager = SessionManager()
 
     def _on_open(self, wsapp) -> None:
@@ -60,30 +62,25 @@ class SmartWebSocketHandler:
                 logger.error(f"Failed to subscribe: {e}")
 
     def _on_data(self, wsapp, message) -> None:
-#fix-bot-2025-07-24
         """Handle incoming tick data."""
         try:
             if isinstance(message, dict):
                 # Extract token and update latest_data
                 token = message.get('token')
                 if token:
-                    latest_data[str(token)] = message
-                    logger.debug(f"Updated data for token {token}: {message}")
+                    latest_data[str(token)] = {
+                        'ltp': message.get('last_traded_price'),
+                        'oi': message.get('open_interest'),
+                        'volume': message.get('volume_trade_for_the_day'),
+                        'greeks': {},
+                    }
+                    logger.debug(f"Updated data for token {token}: {latest_data[str(token)]}")
             else:
                 logger.debug(f"Received non-dict message: {message}")
         except Exception as e:
             logger.error(f"Error processing tick data: {e}")
-=======
+
         logger.info(f"Data: {message}")
-        if isinstance(message, dict) and 'token' in message:
-            token = message['token']
-            latest_data[token] = {
-                'ltp': message.get('last_traded_price'),
-                'oi': message.get('open_interest'),
-                'volume': message.get('volume_trade_for_the_day'),
-                'greeks': {},
-            }
- main
 
     def _on_error(self, wsapp, error) -> None:
         """Handle WebSocket errors."""
@@ -98,7 +95,7 @@ class SmartWebSocketHandler:
         # Attempt to reconnect if not at max retries
         if self.retry_count < self.max_retries:
             self.retry_count += 1
-            reconnect_delay = min(self.MAX_RECONNECT_DELAY, self.BACKOFF_BASE ** self.retry_count)  # Exponential backoff
+            reconnect_delay = min(self.max_reconnect_delay, self.backoff_base ** self.retry_count)
             logger.info(f"Attempting reconnect {self.retry_count}/{self.max_retries} in {reconnect_delay}s")
             time.sleep(reconnect_delay)
             self._reconnect()
@@ -114,12 +111,21 @@ class SmartWebSocketHandler:
                 logger.error("Failed to get fresh session for reconnection")
                 return
             
+            api_key = os.getenv("ANGEL_API_KEY") or session.get('apikey')
+            if not api_key:
+                raise EnvironmentError("ANGEL_API_KEY is not set and not available in session")
+            
             # Reinitialize WebSocket with fresh credentials
             self.sws = SmartWebSocketV2(
-                session['jwtToken'],
-                session['apikey'],
-                session['clientcode'],
-                session['feedtoken']
+                auth_token=session['jwtToken'],
+                api_key=api_key,
+                client_code=session['clientcode'],
+                feed_token=session['feedtoken'],
+                max_retry_attempt=10,
+                retry_strategy=1,
+                retry_delay=2,
+                retry_multiplier=2,
+                ping_interval=5
             )
             
             # Bind event handlers
@@ -145,7 +151,6 @@ class SmartWebSocketHandler:
         mode: int
             Subscription mode (1=LTP, 2=Quote, 3=SnapQuote)
         """
-#fix-bot-2025-07-24
         self.token_list = token_list
         self.mode = mode
         
@@ -155,12 +160,21 @@ class SmartWebSocketHandler:
             if not session:
                 raise RuntimeError("Failed to get session credentials")
             
+            api_key = os.getenv("ANGEL_API_KEY") or session.get('apikey')
+            if not api_key:
+                raise EnvironmentError("ANGEL_API_KEY is not set and not available in session")
+            
             # Initialize WebSocket
             self.sws = SmartWebSocketV2(
-                session['jwtToken'],
-                session['apikey'],
-                session['clientcode'],
-                session['feedtoken']
+                auth_token=session['jwtToken'],
+                api_key=api_key,
+                client_code=session['clientcode'],
+                feed_token=session['feedtoken'],
+                max_retry_attempt=10,
+                retry_strategy=1,
+                retry_delay=2,
+                retry_multiplier=2,
+                ping_interval=5
             )
             
             # Bind event handlers
@@ -170,7 +184,14 @@ class SmartWebSocketHandler:
             self.sws.on_close = self._on_close
             
             # Connect in a separate thread to avoid blocking
-            thread = threading.Thread(target=self.sws.connect, daemon=True)
+            def connect_thread():
+                try:
+                    self.sws.connect()
+                except Exception as exc:
+                    logger.error(f"Connect failed: {exc}")
+                    self._reconnect()
+            
+            thread = threading.Thread(target=connect_thread, daemon=True)
             thread.start()
             
             logger.info("WebSocket connection initiated")
@@ -183,7 +204,7 @@ class SmartWebSocketHandler:
         """Stop the WebSocket connection."""
         if self.sws:
             try:
-                self.sws.close()
+                self.sws.close_connection()
                 logger.info("WebSocket stopped")
             except Exception as e:
                 logger.error(f"Error stopping WebSocket: {e}")
@@ -200,98 +221,3 @@ class SmartWebSocketHandler:
     def get_all_latest_data(self) -> dict:
         """Get all latest tick data."""
         return latest_data.copy()
-
-        sm = SessionManager()
-        session = sm.get_session()
-        data = session['data']
-        auth_token: str = data['jwtToken']
-        client_code: str = data['clientcode']
-        feed_token: str = data['feedToken']
-        # Prefer API key from environment but fall back to the session data if present
-        api_key: str | None = os.getenv("ANGEL_API_KEY") or data.get('api_key')
-        if not api_key:
-            raise EnvironmentError("ANGEL_API_KEY is not set in the environment and not available in session data")
-        if not self._is_valid_api_key(api_key):
-            raise ValueError("Invalid API key format or length")
-        # Persist parameters for reconnection
-        self.token_list = token_list
-        self.mode = mode
-        # Instantiate WebSocket object
-        self.sws = SmartWebSocketV2(
-            auth_token=auth_token,
-            api_key=api_key,
-            client_code=client_code,
-            feed_token=feed_token,
-            max_retry_attempt=10,
-            retry_strategy=1,
-            retry_delay=2,
-            retry_multiplier=2,
-            ping_interval=5,
-        )
-        # Attach callbacks
-        self.sws.on_open = self._on_open
-        self.sws.on_data = self._on_data
-        self.sws.on_error = self._on_error
-        self.sws.on_close = self._on_close
-        self._reconnect()  # Trigger reconnect
-
-    def _on_close(self, wsapp):
-        logger.info("Closed")
-        self.connected = False
-        self._reconnect()  # Doc: Resubscribe after reconnect
-
-    def _reconnect(self):
-        time.sleep(2)  # Initial delay
-        logger.warning("Reconnecting...")
-        self.start_websocket(self.token_list, self.mode)  # Re-init with stored params
-
-    def start_websocket(self, token_list, mode=2):
-        sm = SessionManager()
-        session = sm.get_session()
-        data = session['data']
-        auth_token = data['jwtToken']
-        api_key = 'your_api_key'  # From env/config
-        client_code = data['clientcode']
-        feed_token = data['feedToken']
-
-        time.sleep(1)  # Rate delay
-
-        self.token_list = token_list
-        self.mode = mode
-        self.sws = SmartWebSocketV2(
-            auth_token=auth_token,  # Doc: Keyword OK
-            api_key=api_key,
-            client_code=client_code,
-            feed_token=feed_token,
-            max_retry_attempt=10,  # Doc: Increase for stability
-            retry_strategy=1,  # Exponential backoff
-            retry_delay=2,
-            retry_multiplier=2,
-            ping_interval=5  # Doc: Heartbeat to prevent idle close
-        )
-        self.sws.on_open = self._on_open
-        self.sws.on_data = self._on_data
-        self.sws.on_error = self._on_error
-        self.sws.on_close = self._on_close
-
-# fix-bot-2025-07-24
-        def connect_thread() -> None:
-            try:
-                # Connect blocks until closed
-                self.sws.connect()
-            except Exception as exc:
-                logger.error(f"Connect failed: {exc}")
-                self._reconnect()
-
-        # Run connection in a background thread to avoid blocking the caller
-        threading.Thread(target=connect_thread, daemon=True).start()
-
-    def get_latest_data(self, token: str) -> dict | None:
-        """Return the last tick received for the given token."""
-        return latest_data.get(token)
-
-    def close(self) -> None:
-        """Close the active WebSocket connection if one exists."""
-        if self.sws:
-            self.sws.close_connection()
- main
