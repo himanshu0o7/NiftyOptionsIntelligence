@@ -62,3 +62,22 @@ def load_nfo_scrip_master():
     return pd.read_csv(SCRIP_MASTER_PATH)
 
 load_master_contract = load_nfo_scrip_master
+
+def load_nfo_scrip_master():
+    if not os.path.exists(SCRIP_MASTER_PATH):
+        path = fetch_and_save_nfo_master_contract()  # From master_contract_fetcher.py
+    else:
+        df = pd.read_csv(SCRIP_MASTER_PATH)
+        if 'fetch_timestamp' in df.columns:
+            last_fetch = pd.to_datetime(df['fetch_timestamp'].iloc[0])
+            if (datetime.now() - last_fetch).days > 1:
+                logger.warning("Cached scrip master is stale. Refetching...")
+                path = fetch_and_save_nfo_master_contract()
+        else:
+            logger.warning("No timestamp in cache. Refetching...")
+            path = fetch_and_save_nfo_master_contract()
+        df = pd.read_csv(path)
+    if df.empty:
+        raise ValueError("Scrip master is empty.")
+    return df
+
