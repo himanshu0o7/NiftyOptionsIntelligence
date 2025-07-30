@@ -13,7 +13,6 @@ from streamlit_autorefresh import st_autorefresh
 sws = SmartWebSocketHandler()
 
 # Black-Scholes Greeks and IV
-
 def black_scholes_call(S, K, T, r, sigma):
     if sigma <= 0 or T <= 0:
         return max(S - K, 0)
@@ -167,13 +166,13 @@ def run_dashboard():
                     if not match.empty:
                         diff = abs(row['OI'] - match['OI'].iloc[0])
                         if diff > 1000:
-                            msg = f"Alert: OI change for {row['Token']} → {diff}"
+                            msg = f"Alert: OI change for {row['Token']} â†’ {diff}"
                             send_telegram_message(bot_token, chat_id, msg)
 
             st.session_state.previous_data = df[['Token', 'OI']].copy()
+
         except Exception as e:
             st.error(f"Data error: {e}")
 
 if __name__ == "__main__":
     run_dashboard()
-
