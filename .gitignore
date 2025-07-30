@@ -15,3 +15,6 @@ start_bot.sh
 *.pyc
 __pycache__/
 *.pyc
+__pycache__/
+*.pyc
+*.csv
