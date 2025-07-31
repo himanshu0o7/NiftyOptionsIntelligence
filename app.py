@@ -1,3 +1,5 @@
+import requests
+import pytz
 import streamlit as st
 import pandas as pd
 import logging
@@ -5,7 +7,10 @@ import plotly.express as px
 from streamlit_autorefresh import st_autorefresh
 from session_manager import SessionManager
 from option_stream_ui import get_option_data
+from datetime import datetime
 
+
+logging.getLogger("watchdog.observers.inotify_buffer").setLevel(logging.ERROR)
 logging.basicConfig(level=logging.DEBUG)  # Debug for detailed logs
 logger = logging.getLogger(__name__)
 
@@ -24,6 +29,8 @@ with st.sidebar:
 st_autorefresh(interval=refresh_rate * 1000, key="datarefresh")
 
 # Check market hours
+import pytz
+
 def is_market_open():
     ist = pytz.timezone('Asia/Kolkata')
     now = datetime.now(ist)

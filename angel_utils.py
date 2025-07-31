@@ -2,6 +2,8 @@ import os
 import pandas as pd
 import pyotp
 import requests
+import logging
+logger = logging.getLogger(__name__)
 from dotenv import load_dotenv
 from SmartApi import SmartConnect
 

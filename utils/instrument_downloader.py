@@ -198,3 +198,40 @@ class InstrumentDownloader:
         except Exception as e:
             self.logger.error(f"Error getting current week options: {str(e)}")
             return []
+
+import pandas as pd
+from datetime import datetime
+
+# Load CSV
+df = pd.read_csv("nfo_scrip_master.csv")
+
+# Filter only NIFTY and BANKNIFTY Options
+df = df[
+    (df['name'].isin(['NIFTY', 'BANKNIFTY'])) &
+    (df['instrumenttype'] == 'OPTIDX')
+]
+
+# Convert expiry to datetime
+df['expiry'] = pd.to_datetime(df['expiry'], errors='coerce')
+
+# Identify weekly expiry:
+# Weekly = upcoming Thursday, NOT monthly
+def is_weekly_expiry(row):
+    today = datetime.now()
+    expiry = row['expiry']
+    return (
+        expiry.weekday() == 3  # Thursday
+        and expiry.month == today.month
+        and expiry.year == today.year
+        and (expiry - today).days <= 7  # within a week
+    )
+
+df['is_weekly'] = df.apply(is_weekly_expiry, axis=1)
+
+# Final filtered result
+weekly_df = df[df['is_weekly']]
+
+# Show summary
+print("✅ Weekly Expiry Option Tokens:")
+print(weekly_df[['name', 'symbol', 'expiry', 'strike', 'optiontype', 'tradingsymbol']].head(20))
+
