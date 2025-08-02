@@ -1,75 +1,92 @@
-import requests
-import pytz
 import streamlit as st
 import pandas as pd
-import logging
 import plotly.express as px
-from streamlit_autorefresh import st_autorefresh
-from session_manager import SessionManager
-from option_stream_ui import get_option_data
+import logging
 from datetime import datetime
+from option_stream_ui import get_nifty_option_tokens
+from utils.sensibull_greeks_fetcher import fetch_option_data
+from utils.ui_refresh import streamlit_autorefresh
+from telegram_handler import send_alert
+from greek_scanner_panel import render_scanner
+
+# Somewhere below main content
+st.divider()
+render_scanner()
 
 
-logging.getLogger("watchdog.observers.inotify_buffer").setLevel(logging.ERROR)
-logging.basicConfig(level=logging.DEBUG)  # Debug for detailed logs
+# 📄 Streamlit Page Config
+st.set_page_config(layout="wide", page_title="📈 Nifty Live Option Dashboard")
+
+# 🔧 Logger Setup
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-st.set_page_config(page_title="Nifty Options Intelligence", layout="wide")
-st.title("🔍 Nifty Options Intelligence Dashboard")
+# 🔁 Auto-Refresh Controls
+st.sidebar.markdown("## 🔄 Auto Refresh Settings")
+refresh_interval = st.sidebar.selectbox("Refresh Interval (seconds)", [15, 30, 60], index=1)
+pause_refresh = st.sidebar.checkbox("⏸️ Pause Auto-Refresh", value=False)
 
-st.markdown("""
-This dashboard shows real-time options data with Greeks, OI, volume, and signal flags using Sensibull + Angel One API.
-""")
+if not pause_refresh:
+    streamlit_autorefresh(
+        seconds=refresh_interval,
+        enable_telegram=True,
+        enable_debug_panel=True
+    )
+    st.sidebar.success(f"🔁 Refreshing every {refresh_interval} sec")
+else:
+    st.sidebar.warning("⏸️ Auto-refresh is paused")
 
-with st.sidebar:
-    st.header("⚙️ Settings")
-    refresh_rate = st.slider("Refresh Interval (seconds)", 5, 60, 15)
-
-# Auto-refresh every refresh_rate seconds (in ms)
-st_autorefresh(interval=refresh_rate * 1000, key="datarefresh")
-
-# Check market hours
-import pytz
-
+# 🕒 Market Hours
 def is_market_open():
-    ist = pytz.timezone('Asia/Kolkata')
-    now = datetime.now(ist)
-    if now.weekday() >= 5:  # Sat/Sun
-        return False
-    market_open = now.replace(hour=9, minute=15, second=0, microsecond=0)
-    market_close = now.replace(hour=15, minute=30, second=0, microsecond=0)
-    return market_open <= now <= market_close
+    now = datetime.now().astimezone()
+    return now.replace(hour=9, minute=15) <= now <= now.replace(hour=15, minute=30)
 
-# Fetch and render data
+# 🧠 Load Token Data
+ce_df, pe_df = get_nifty_option_tokens()
+if ce_df is None or ce_df.empty:
+    st.error("⚠️ Could not load Nifty option tokens.")
+    st.stop()
+
+# 🎛️ User Filters
+strikes = sorted(ce_df['strike'].unique())
+expiries = sorted(ce_df['expiry'].unique())
+
+selected_strike = st.sidebar.selectbox("🎯 Select Strike", strikes, index=len(strikes)//2)
+selected_expiry = st.sidebar.selectbox("🗓️ Select Expiry", expiries)
+
+token_df = pd.concat([
+    ce_df[(ce_df['strike'] == selected_strike) & (ce_df['expiry'] == selected_expiry)],
+    pe_df[(pe_df['strike'] == selected_strike) & (pe_df['expiry'] == selected_expiry)]
+])
+
+# 📊 Main Dashboard
 try:
     if not is_market_open():
-        st.warning("Market is closed (9:15 AM - 3:30 PM IST, Mon-Fri). Showing cached or no data.")
-    df = get_option_data()
-    if df.empty:
-        st.error("No option data available. Check market hours or API settings.")
-        logger.warning("Empty DataFrame from get_option_data")
-    else:
-        logger.debug(f"DataFrame shape: {df.shape}")
-        st.write(f"Data shape: {df.shape}")  # Debug UI output
-        fig = px.bar(df, x='Token', y=['oi', 'volume'], color='type' if 'type' in df else None,
-                     title="Live OI and Volume by Option Token", barmode='group')
-        st.plotly_chart(fig, use_container_width=True, theme="streamlit")
-        if all(col in df for col in ['delta', 'theta', 'vega']):
-            greeks_fig = px.line(df, x='strike' if 'strike' in df else 'Token', y=['delta', 'theta', 'vega'],
-                                 title="Greeks by Strike/Token")
-            st.plotly_chart(greeks_fig, use_container_width=True, theme="streamlit")
-        st.dataframe(df, use_container_width=True)
-        st.toast("📡 Data updated")
-except IndexError as e:
-    st.error(f"Data indexing error: {e}. Check filters or scrip master data.")
-    logger.error(f"IndexError in data fetch: {e}", exc_info=True)
-except ValueError as e:
-    st.error(f"Data validation error: {e}. Check API response or token filters.")
-    logger.error(f"ValueError in data fetch: {e}", exc_info=True)
-except requests.exceptions.RequestException as e:
-    st.error(f"API connection error: {e}. Check internet or API credentials.")
-    logger.error(f"RequestException in data fetch: {e}", exc_info=True)
-except Exception as e:
-    st.error(f"Unexpected error: {e}. See logs for details.")
-    logger.error(f"Unexpected error: {e}", exc_info=True)
+        st.warning("⚠️ Market is closed (9:15 AM – 3:30 PM IST). Data may be stale.")
 
+    df = fetch_option_data(token_df['token'].tolist())
+
+    if df.empty:
+        st.error("🚫 No option data found. Check filters or API connectivity.")
+        st.stop()
+
+    st.success("✅ Live Option Data Fetched")
+    st.write(f"🧮 Data Shape: {df.shape}")
+
+    # 📊 OI + Volume Chart
+    fig = px.bar(df, x='Token', y=['oi', 'volume'], color='type',
+                 title="OI vs Volume", barmode='group')
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 📉 Greeks Chart
+    if all(col in df.columns for col in ['delta', 'theta', 'vega']):
+        greek_chart = px.line(df, x='strike', y=['delta', 'theta', 'vega'],
+                              title="Option Greeks by Strike")
+        st.plotly_chart(greek_chart, use_container_width=True)
+
+    # 🔎 Full Data Table
+    st.dataframe(df)
+
+except Exception as e:
+    logger.exception("❌ Fetch failed")
+    st.error(f"❌ Error: {e}")

@@ -295,3 +295,8 @@ class BaseStrategy(ABC):
         self.total_pnl = 0.0
         
         self.logger.info(f"[{self.name}] Strategy reset")
+
+if signal == "BUY_CE":
+    send_alert(f"💹 BUY SIGNAL CE | {symbol} | Entry={ltp:.2f}, SL={sl:.2f}, Target={tp:.2f}")
+elif signal == "BUY_PE":
+    send_alert(f"📉 BUY SIGNAL PE | {symbol} | Entry={ltp:.2f}, SL={sl:.2f}, Target={tp:.2f}")

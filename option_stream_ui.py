@@ -1,106 +1,74 @@
 import streamlit as st
 import pandas as pd
-import time
 import threading
 import logging
-from smart_websocket_handler import SmartWebSocketHandler
-from angel_utils import load_nfo_scrip_master
 from utils.sensibull_greeks_fetcher import fetch_option_data
+from utils.instrument_downloader import InstrumentDownloader
+from utils.ui_refresh import streamlit_autorefresh
+from telegram_handler import send_alert
+
+st.set_page_config(page_title="Nifty Option Live Dashboard", layout="wide")
+st.title("📊 Nifty Options Stream Dashboard")
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-sws = SmartWebSocketHandler()
-
-@st.cache_data(ttl=300)
 def get_nifty_option_tokens():
     try:
-        df = load_nfo_scrip_master()
-        df = df[(df['name'] == 'NIFTY') & (df['instrumenttype'] == 'OPTIDX')]
-        if df.empty:
-            logger.error("No Nifty options data in scrip master.")
-            st.error("No Nifty options data available.")
-            return None, None
-        
-        logger.debug(f"Nifty options DF shape: {df.shape}")
-        
-        df['expiry_dt'] = pd.to_datetime(df['expiry'], format='%d-%b-%Y', errors='coerce')
-        valid_expiries = df['expiry_dt'].dropna().unique()
-        if len(valid_expiries) == 0:
-            logger.error("No valid expiry dates found.")
-            st.error("No valid expiry dates in scrip master.")
-            return None, None
-        nearest_expiry = sorted(valid_expiries)[0].strftime('%d-%b-%Y')
-        
-        atm_strike = int(round(df['strike'].mean() / 100) * 100)
-        atm_strike_paise = atm_strike * 100
-        
-        ce_df = df[(df['strike'] == atm_strike_paise) & (df['expiry'] == nearest_expiry) & (df['symbol'].str.endswith('CE'))]
-        pe_df = df[(df['strike'] == atm_strike_paise) & (df['expiry'] == nearest_expiry) & (df['symbol'].str.endswith('PE'))]
-        
-        if ce_df.empty or pe_df.empty:
-            logger.error(f"No ATM CE/PE for strike {atm_strike}, expiry {nearest_expiry}. CE shape: {ce_df.shape}, PE shape: {pe_df.shape}")
-            st.error(f"No ATM options found for strike {atm_strike}, expiry {nearest_expiry}.")
-            return None, None
-        
-        ce_token = str(ce_df['token'].iloc[0])
-        pe_token = str(pe_df['token'].iloc[0])
-        logger.info(f"Fetched tokens: CE={ce_token}, PE={pe_token}")
-        return ce_token, pe_token
+        downloader = InstrumentDownloader()
+        downloader.download_and_process()
+
+        nifty_df = pd.read_json("data/cache/nifty_tokens.json")
+        banknifty_df = pd.read_json("data/cache/banknifty_tokens.json")
+
+        ce_df = nifty_df[nifty_df['optiontype'] == 'CE']
+        pe_df = nifty_df[nifty_df['optiontype'] == 'PE']
+        return ce_df, pe_df
     except Exception as e:
-        logger.error(f"Error in get_nifty_option_tokens: {e}", exc_info=True)
-        st.error(f"Token fetch error: {e}")
+        st.error("❌ Failed to fetch Nifty option tokens.")
+        logger.error(f"Error in get_nifty_option_tokens: {e}")
         return None, None
 
-@st.cache_resource
-def start_socket():
-    ce_token, pe_token = get_nifty_option_tokens()
-    if ce_token is None or pe_token is None:
-        logger.warning("No valid tokens. WebSocket not started.")
-        return []
-    token_list = [{"exchangeType": 2, "tokens": [ce_token, pe_token]}]
-    sws.start_websocket(token_list=token_list, mode=2)
-    return [ce_token, pe_token]
+def monitor_and_alert():
+    ce_df, pe_df = get_nifty_option_tokens()
+    if ce_df is None or pe_df is None:
+        return
 
-def get_option_data():
-    tokens = start_socket()
-    if not tokens:
-        logger.warning("No tokens available for data fetch.")
-        return pd.DataFrame()
-    
-    data = []
-    try:
-        greeks_df = fetch_option_data()  # From sensibull_greeks_fetcher
-        for token in tokens:
-            tick = sws.get_latest_data(token)
-            if tick:
-                # Merge with Greeks if available
-                greeks_row = greeks_df[(greeks_df['strike'] == tick.get('strike', 0)) & (greeks_df['type'] == tick.get('type', ''))]
-                greeks_data = greeks_row.to_dict('records')[0] if not greeks_row.empty else {}
-                data.append({"Token": token, **tick, **greeks_data})
-        df = pd.DataFrame(data)
-        logger.debug(f"Option data DF shape: {df.shape}")
-        return df
-    except Exception as e:
-        logger.error(f"Error in get_option_data: {e}", exc_info=True)
-        st.error(f"Data fetch error: {e}")
-        return pd.DataFrame()
+    df_combined = pd.concat([ce_df, pe_df])
+    for _, row in df_combined.iterrows():
+        symbol = row.get('symbol') or row.get('tradingsymbol')
+        if not symbol:
+            continue
 
-def run_dashboard():
-    st.title("Nifty Live CE/PE Stream")
-    interval = st.slider("Refresh every n seconds", 5, 60, 10)
-    placeholder = st.empty()
-    def stream_data():
-        while True:
-            df = get_option_data()
-            with placeholder.container():
-                if not df.empty:
-                    st.dataframe(df, use_container_width=True)
-                else:
-                    st.error("No data available. Check market hours or API.")
-            time.sleep(interval)
-    thread = threading.Thread(target=stream_data, daemon=True)
-    thread.start()
+        try:
+            data = fetch_option_data([row['token']])
+            if data.empty:
+                continue
 
-if __name__ == "__main__":
-    run_dashboard()
+            opt = data.iloc[0]
+            delta = opt.get('delta', 0)
+            theta = opt.get('theta', 0)
+            vega = opt.get('vega', 0)
+            volume = opt.get('volume', 0)
 
+            if delta > 0.4 and abs(theta) < 10 and vega > 1.5 and volume > 2000:
+                msg = (
+                    f"📢 *Option Alert: {symbol}*\n"
+                    f"Δ = `{delta:.2f}`, Θ = `{theta:.2f}`, Vega = `{vega:.2f}`, Vol = `{volume}`"
+                )
+                send_alert(msg)
+        except Exception as e:
+            logger.warning(f"Skipping symbol {symbol}: {e}")
+
+# 🚀 Background Thread Start (once)
+if "alert_thread" not in st.session_state:
+    alert_thread = threading.Thread(target=monitor_and_alert, daemon=True)
+    alert_thread.start()
+    st.session_state.alert_thread = alert_thread
+    st.success("✅ Alert monitoring started in background")
+
+# ⏱️ UI Auto Refresh
+refresh_interval = st.sidebar.selectbox("⏱️ Refresh every", [15, 30, 60], index=1)
+streamlit_autorefresh(seconds=refresh_interval, enable_telegram=True, enable_debug_panel=True)
+
+# ℹ️ You can add token display or charts here using ce_df/pe_df if needed

@@ -35,3 +35,28 @@
 2025-07-24 23:44:03,682 - yfinance - ERROR - Failed to get ticker '^NSEI' reason: Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
 2025-07-24 23:44:03,693 - utils.trend_detector - ERROR - Error in trend detection: Failed to perform, curl: (6) Could not resolve host: guce.yahoo.com. See https://curl.se/libcurl/c/libcurl-errors.html first for more details.
  main
+2025-07-31 16:51:07,336 - TradingSystem - INFO - info:57 - Downloading Angel One instrument master...
+2025-07-31 16:51:09,377 - TradingSystem - INFO - info:57 - Downloaded 127612 instruments
+2025-07-31 16:51:09,531 - TradingSystem - WARNING - warning:61 - No weekly expiry options found.
+2025-07-31 16:52:30,372 - TradingSystem - INFO - info:57 - Downloading Angel One instrument master...
+2025-07-31 16:52:32,341 - TradingSystem - INFO - info:57 - Downloaded 127612 instruments
+2025-07-31 16:52:32,518 - TradingSystem - WARNING - warning:61 - No weekly expiry options found.
+2025-07-31 16:55:13,607 - TradingSystem - INFO - info:57 - Downloading Angel One instrument master...
+2025-07-31 16:55:15,587 - TradingSystem - INFO - info:57 - Downloaded 127612 instruments
+2025-07-31 16:55:15,744 - TradingSystem - WARNING - warning:61 - No weekly expiry options found.
+2025-07-31 17:00:01,508 - TradingSystem - INFO - info:57 - Downloading Angel One instrument master...
+2025-07-31 17:00:03,787 - TradingSystem - INFO - info:57 - Downloaded 127612 instruments
+2025-07-31 17:00:03,951 - TradingSystem - INFO - info:57 - Total weekly options found: 174 / 1946
+2025-07-31 17:00:03,969 - TradingSystem - INFO - info:57 - Saved NIFTY and BANKNIFTY tokens
+2025-07-31 17:11:37,111 - TradingSystem - INFO - info:57 - Downloading Angel One instrument master...
+2025-07-31 17:11:39,399 - TradingSystem - INFO - info:57 - Downloaded 127612 instruments
+2025-07-31 17:11:39,576 - TradingSystem - INFO - info:57 - Total weekly options found: 174 / 1946
+2025-07-31 17:11:39,585 - TradingSystem - INFO - info:57 - Saved NIFTY and BANKNIFTY tokens
+2025-07-31 17:47:36,851 - TradingSystem - INFO - info:57 - Downloading Angel One instrument master...
+2025-07-31 17:47:38,892 - TradingSystem - INFO - info:57 - Downloaded 127612 instruments
+2025-07-31 17:47:39,075 - TradingSystem - INFO - info:57 - Total weekly options found: 0 / 1946
+2025-07-31 17:47:39,081 - TradingSystem - INFO - info:57 - Saved NIFTY and BANKNIFTY tokens
+2025-08-02 16:37:43,376 - TradingSystem - INFO - info:57 - Downloading Angel One instrument master...
+2025-08-02 16:37:45,444 - TradingSystem - INFO - info:57 - Downloaded 120076 instruments
+2025-08-02 16:37:45,614 - TradingSystem - INFO - info:57 - Total weekly options found: 180 / 2366
+2025-08-02 16:37:45,630 - TradingSystem - INFO - info:57 - Saved NIFTY and BANKNIFTY tokens
