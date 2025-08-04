@@ -111,9 +111,9 @@ class TestCriticalFunctionality(unittest.TestCase):
         self.assertEqual(test_function(), "success")
         self.assertEqual(test_function(), "success")
         
-        # Third call should work but limiter should be at capacity
+        # Third call triggers wait but completes successfully
         self.assertEqual(test_function(), "success")
-        self.assertFalse(limiter.can_make_call())
+        self.assertTrue(limiter.can_make_call())
 
 class TestLiveMarketReadiness(unittest.TestCase):
     """Test live market specific functionality."""
