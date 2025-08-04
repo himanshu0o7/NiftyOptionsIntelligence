@@ -1,4 +1,6 @@
 import os
+import json
+import builtins
 
 import pytest
 import requests
@@ -57,3 +59,50 @@ def test_download_scrip_master_failure(monkeypatch, tmp_path):
     assert result is False
     assert alerts  # ensure alert was triggered
     assert not os.path.exists(token_manager.LOCAL_SCRIP_FILE)
+
+
+def test_load_scrip_data_uses_cache(monkeypatch, tmp_path):
+    token_manager.clear_cache()
+    data = [
+        {"symbol": "ABC", "exchange": "NFO", "instrumenttype": "OPTIDX"}
+    ]
+    path = tmp_path / "scrip_master.json"
+    path.write_text(json.dumps(data))
+    monkeypatch.setattr(token_manager, "LOCAL_SCRIP_FILE", str(path))
+
+    download_calls = {"count": 0}
+
+    def fake_download():
+        download_calls["count"] += 1
+        return True
+
+    monkeypatch.setattr(token_manager, "download_scrip_master", fake_download)
+
+    original_open = builtins.open
+    open_calls = {"count": 0}
+
+    def fake_open(*args, **kwargs):
+        open_calls["count"] += 1
+        return original_open(*args, **kwargs)
+
+    monkeypatch.setattr(builtins, "open", fake_open)
+
+    df1 = token_manager.load_scrip_data()
+    df2 = token_manager.load_scrip_data()
+
+    assert download_calls["count"] == 1
+    assert open_calls["count"] == 1
+    assert df1 is df2
+
+
+def test_clear_cache_resets(monkeypatch, tmp_path):
+    token_manager.clear_cache()
+    path = tmp_path / "scrip_master.json"
+    path.write_text(json.dumps([]))
+    monkeypatch.setattr(token_manager, "LOCAL_SCRIP_FILE", str(path))
+    monkeypatch.setattr(token_manager, "download_scrip_master", lambda: True)
+
+    token_manager.load_scrip_data()
+    assert token_manager._scrip_data_cache is not None
+    token_manager.clear_cache()
+    assert token_manager._scrip_data_cache is None
