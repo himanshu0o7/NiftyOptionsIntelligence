@@ -32,7 +32,7 @@ def download_scrip_master(retries: int = 3) -> bool:
                     json.dump(response.json(), f)
                 logger.info("ScripMasterUtils: Scrip master saved.")
                 return True
-            except OSError as err:
+            except (FileNotFoundError, PermissionError, IOError) as err:
                 logger.error("ScripMasterUtils: File write failed: %s", err)
                 send_telegram_alert(
                     f"ScripMasterUtils: File write failed: {err}"
