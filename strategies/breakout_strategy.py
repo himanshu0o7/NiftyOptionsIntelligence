@@ -421,3 +421,15 @@ class BreakoutStrategy(BaseStrategy):
             self.support_levels[symbol] = support
             
         self.logger.info(f"Updated levels for {symbol}: R={resistance}, S={support}")
+
+# strategies/breakout_strategy.py
+
+from strategies.base import BaseStrategy
+
+class BreakoutStrategy(BaseStrategy):
+    def should_enter(self):
+        return self.data["volume"] > 100000  # Example logic
+
+    def should_exit(self):
+        return self.data["volume"] < 50000  # Example logic
+

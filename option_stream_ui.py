@@ -7,13 +7,24 @@ from utils.instrument_downloader import InstrumentDownloader
 from utils.ui_refresh import streamlit_autorefresh
 from telegram_handler import send_alert
 
+# ─────────────────────────────────────────────────────────────
+# ✅ Page and Logger Setup
+# ─────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Nifty Option Live Dashboard", layout="wide")
 st.title("📊 Nifty Options Stream Dashboard")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Load Tokens
+# ─────────────────────────────────────────────────────────────
 def get_nifty_option_tokens():
+    """
+    Fetches and filters NIFTY call and put option tokens from the cached JSON file.
+    Handles column name variations for 'optiontype' gracefully.
+    """
     try:
         downloader = InstrumentDownloader()
         downloader.download_and_process()
@@ -21,15 +32,36 @@ def get_nifty_option_tokens():
         nifty_df = pd.read_json("data/cache/nifty_tokens.json")
         banknifty_df = pd.read_json("data/cache/banknifty_tokens.json")
 
-        ce_df = nifty_df[nifty_df['optiontype'] == 'CE']
-        pe_df = nifty_df[nifty_df['optiontype'] == 'PE']
+        # 🔍 Log available columns for debug
+        logger.info(f"NIFTY DF columns: {nifty_df.columns.tolist()}")
+
+        # Robust detection of 'optiontype' column
+        option_column = next(
+            (col for col in nifty_df.columns if col.lower() in ["optiontype", "option_type", "optionType"]),
+            None
+        )
+
+        if not option_column:
+            raise KeyError("❌ Missing 'optiontype' column in NIFTY data")
+
+        ce_df = nifty_df[nifty_df[option_column] == 'CE']
+        pe_df = nifty_df[nifty_df[option_column] == 'PE']
         return ce_df, pe_df
+
     except Exception as e:
         st.error("❌ Failed to fetch Nifty option tokens.")
         logger.error(f"Error in get_nifty_option_tokens: {e}")
         return None, None
 
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Monitor and Alert
+# ─────────────────────────────────────────────────────────────
 def monitor_and_alert():
+    """
+    Runs in background to monitor NIFTY options and trigger Telegram alerts
+    based on option Greeks and volume thresholds.
+    """
     ce_df, pe_df = get_nifty_option_tokens()
     if ce_df is None or pe_df is None:
         return
@@ -60,15 +92,22 @@ def monitor_and_alert():
         except Exception as e:
             logger.warning(f"Skipping symbol {symbol}: {e}")
 
-# 🚀 Background Thread Start (once)
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Start Background Thread
+# ─────────────────────────────────────────────────────────────
 if "alert_thread" not in st.session_state:
     alert_thread = threading.Thread(target=monitor_and_alert, daemon=True)
     alert_thread.start()
     st.session_state.alert_thread = alert_thread
     st.success("✅ Alert monitoring started in background")
 
-# ⏱️ UI Auto Refresh
+
+# ─────────────────────────────────────────────────────────────
+# ✅ UI Auto Refresh
+# ─────────────────────────────────────────────────────────────
 refresh_interval = st.sidebar.selectbox("⏱️ Refresh every", [15, 30, 60], index=1)
 streamlit_autorefresh(seconds=refresh_interval, enable_telegram=True, enable_debug_panel=True)
 
-# ℹ️ You can add token display or charts here using ce_df/pe_df if needed
+# ℹ️ You can extend this script to display charts, CE/PE lists, etc.
+
