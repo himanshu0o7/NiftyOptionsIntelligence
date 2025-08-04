@@ -58,11 +58,16 @@ def load_scrip_data() -> pd.DataFrame:
     """Load scrip data into a DataFrame.
 
     Returns empty DataFrame if download fails.
+    Uses in-memory cache to avoid redundant file/network operations.
     """
+    global _scrip_data_cache
+    if _scrip_data_cache is not None:
+        return _scrip_data_cache
     if download_scrip_master():
         try:
             with open(LOCAL_SCRIP_FILE, "r", encoding="utf-8") as f:
-                return pd.DataFrame(json.load(f))
+                _scrip_data_cache = pd.DataFrame(json.load(f))
+                return _scrip_data_cache
         except (OSError, json.JSONDecodeError) as err:
             logger.error("TokenManager: Failed to read scrip master: %s", err)
             send_telegram_alert(
