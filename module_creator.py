@@ -64,7 +64,7 @@ def create_modules(missing_files):
 
         try:
             with open(file, "w", encoding="utf-8") as f:
-                f.write(TEMPLATES.get(file, "# Empty Module\n"))
+                f.write(TEMPLATES.get(os.path.basename(file), "# Empty Module\n"))
             logger.info(f"module_creator: created module '{file}'")
             summary["created"].append(file)
         except OSError as exc:
