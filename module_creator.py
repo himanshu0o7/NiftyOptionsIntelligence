@@ -46,10 +46,7 @@ def create_modules(missing_files):
             try:
                 os.makedirs(dir_name)
             except OSError as exc:
-                msg = (
-                    f"module_creator: failed to create directory '{dir_name}' for"
-                    f" '{file}': {exc}"
-                )
+                msg = f"module_creator: failed to create directory '{dir_name}' for '{file}': {exc}"
                 logger.error(msg)
                 try:
                     send_telegram_alert(f"🛑 {msg}")
