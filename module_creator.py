@@ -1,4 +1,8 @@
+import argparse
+import logging
 import os
+
+from telegram_alerts import send_telegram_alert
 
 TEMPLATES = {
     "session_manager.py": '''# Handles session re-use and token management
@@ -25,19 +29,40 @@ def check_position_limits():
 '''
 }
 
+logging.basicConfig(level=logging.INFO)
+
+
 def create_modules(missing_files):
     for file in missing_files:
-        dir_name = os.path.dirname(file)
-        if dir_name and not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-        
-        with open(file, "w") as f:
-            f.write(TEMPLATES.get(file, "# Empty Module\n"))
-        print(f"🛠 Created: {file}")
+        try:
+            dir_name = os.path.dirname(file)
+            if dir_name and not os.path.exists(dir_name):
+                os.makedirs(dir_name)
+
+            with open(file, "w") as f:
+                f.write(TEMPLATES.get(file, "# Empty Module\n"))
+            logging.info("🛠 Created: %s", file)
+        except Exception as e:  # pragma: no cover - broad except for robustness
+            error_msg = f"module_creator: Error creating {file}: {e}"
+            logging.error(error_msg)
+            send_telegram_alert(f"⚠️ {error_msg}")
 
 if __name__ == "__main__":
-    from autocode_checker import check_modules
-    missing = check_modules()
-    if missing:
-        create_modules(missing)
+    parser = argparse.ArgumentParser(description="Create placeholder modules.")
+    parser.add_argument(
+        "--files",
+        help="Comma-separated list of files to create. Overrides auto-detection.",
+    )
+    args = parser.parse_args()
+
+    if args.files:
+        files = [f.strip() for f in args.files.split(",") if f.strip()]
+        if files:
+            create_modules(files)
+    else:
+        from autocode_checker import check_modules
+
+        missing = check_modules()
+        if missing:
+            create_modules(missing)
 
