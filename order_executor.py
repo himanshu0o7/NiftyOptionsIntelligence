@@ -1,4 +1,12 @@
+import logging
+
+from telegram_alerts import send_telegram_alert
+
 # Executes orders using SmartAPI
+
+logger = logging.getLogger(__name__)
+
+
 def place_order(order_data, smart_api_obj):
     """
     order_data = {
@@ -16,9 +24,10 @@ def place_order(order_data, smart_api_obj):
     """
     try:
         response = smart_api_obj.placeOrder(order_data)
-        print("✅ Order placed:", response)
+        logger.info("order_executor: Order placed: %s", response)
         return response
     except Exception as e:
-        print("❌ Order failed:", e)
-        return None
+        logger.exception("order_executor: Order failed: %s", e)
+        send_telegram_alert(f"OrderExecutor error: {e}")
+        raise
 
