@@ -35,7 +35,8 @@ jobs:
         if: steps.changes.outputs.files != ''
         run: |
           set +e
-          for file in ${{ steps.changes.outputs.files }}; do
+          echo "${{ steps.changes.outputs.files }}" | while IFS= read -r file; do
+            [ -z "$file" ] && continue
             echo "Fixing $file"
             if ! bash run_codex_fix.sh "$file"; then
               echo "Failed to fix $file"
