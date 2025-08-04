@@ -1,31 +1,73 @@
-import os
 import json
-import requests
-import pandas as pd
+import logging
+import os
 from datetime import datetime
 
-SCRIP_MASTER_URL = "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
+import pandas as pd
+import requests
+
+from telegram_alerts import send_telegram_alert
+
+SCRIP_MASTER_URL = (
+    "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
+)
 LOCAL_SCRIP_FILE = "scrip_master.json"
 
-def download_scrip_master():
-    """Download scrip master if not available."""
-    if not os.path.exists(LOCAL_SCRIP_FILE):
-        print("📥 Downloading scrip master...")
-        response = requests.get(SCRIP_MASTER_URL)
-        if response.status_code == 200:
-            with open(LOCAL_SCRIP_FILE, 'w') as f:
-                json.dump(response.json(), f)
-            print("✅ Scrip master saved.")
-        else:
-            raise Exception("❌ Failed to download scrip master.")
-    else:
-        print("✅ Scrip master already exists.")
+logger = logging.getLogger(__name__)
 
-def load_scrip_data():
+
+def download_scrip_master(retries: int = 3) -> bool:
+    """Download scrip master if not available."""
+    if os.path.exists(LOCAL_SCRIP_FILE):
+        logger.info("ScripMasterUtils: Scrip master already exists.")
+        return True
+
+    logger.info("ScripMasterUtils: Downloading scrip master...")
+    for attempt in range(1, retries + 1):
+        try:
+            response = requests.get(SCRIP_MASTER_URL, timeout=10)
+            response.raise_for_status()
+            try:
+                with open(LOCAL_SCRIP_FILE, "w", encoding="utf-8") as f:
+                    json.dump(response.json(), f)
+                logger.info("ScripMasterUtils: Scrip master saved.")
+                return True
+            except (FileNotFoundError, PermissionError, IOError) as err:
+                logger.error("ScripMasterUtils: File write failed: %s", err)
+                send_telegram_alert(
+                    f"ScripMasterUtils: File write failed: {err}"
+                )
+                return False
+        except requests.exceptions.RequestException as err:
+            logger.warning(
+                "ScripMasterUtils: Download attempt %s failed: %s", attempt, err
+            )
+
+    send_telegram_alert(
+        "ScripMasterUtils: Failed to download scrip master after retries."
+    )
+    logger.error("ScripMasterUtils: Failed to download scrip master.")
+    return False
+
+
+def load_scrip_data() -> pd.DataFrame:
     """Load scrip master into DataFrame and clean expiry."""
-    download_scrip_master()
-    with open(LOCAL_SCRIP_FILE, 'r') as f:
-        data = json.load(f)
+    if not download_scrip_master():
+        logger.warning(
+            "ScripMasterUtils: Using empty DataFrame - scrip master unavailable."
+        )
+        return pd.DataFrame()
+
+    try:
+        with open(LOCAL_SCRIP_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError) as err:
+        logger.error("ScripMasterUtils: Failed to read scrip master: %s", err)
+        send_telegram_alert(
+            f"ScripMasterUtils: Failed to read scrip master: {err}"
+        )
+        return pd.DataFrame()
+
     df = pd.DataFrame(data)
 
     # Clean expiry column
