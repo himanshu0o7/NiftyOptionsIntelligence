@@ -28,7 +28,7 @@ class SessionManager:
             with open(SESSION_CACHE_FILE, "w") as f:
                 json.dump(cache_data, f)
             os.chmod(SESSION_CACHE_FILE, 0o600)  # Secure permissions
-        except (IOError, TypeError, OverflowError) as e:
+        except (IOError, TypeError, OverflowError, ValueError) as e:
             msg = f"[SessionManager] Error saving cache: {e}"
             print(msg)
             send_telegram_alert(msg)
