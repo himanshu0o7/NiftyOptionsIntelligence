@@ -33,7 +33,7 @@ def download_scrip_master(retries: int = 3) -> bool:
                     json.dump(response.json(), f)
                 logger.info("TokenManager: Scrip master downloaded.")
                 return True
-            except OSError as err:
+            except (FileNotFoundError, PermissionError, IOError) as err:
                 logger.error("TokenManager: File write failed: %s", err)
                 send_telegram_alert(
                     f"TokenManager: File write failed: {err}"
