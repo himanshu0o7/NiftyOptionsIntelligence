@@ -41,10 +41,11 @@ class SessionManager:
                 cache_data = json.load(f)
             if "session_data" in cache_data and "last_login_time" in cache_data:
                 return cache_data
-            msg = "[SessionManager] Invalid cache format"
-            print(msg)
-            send_telegram_alert(msg)
-            return None
+            else:
+                msg = "[SessionManager] Invalid cache format"
+                print(msg)
+                send_telegram_alert(msg)
+                return None
         except (IOError, json.JSONDecodeError) as e:
             msg = f"[SessionManager] Error loading cache: {e}"
             print(msg)
