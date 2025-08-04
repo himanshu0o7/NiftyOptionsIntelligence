@@ -3,7 +3,11 @@ set -euo pipefail
 
 send_alert() {
   python - <<'PYTHON' "$1"
-from telegram_alerts import send_telegram_alert
+try:
+    from telegram_alerts import send_telegram_alert
+except ImportError as e:
+    print(f"Telegram alerts module not found: {e}")
+    sys.exit(1)
 import sys
 
 
