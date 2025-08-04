@@ -16,6 +16,7 @@ SCRIP_MASTER_URL = (
 LOCAL_SCRIP_FILE = "scrip_master.json"
 
 logger = logging.getLogger(__name__)
+_scrip_data_cache = None
 
 
 def download_scrip_master(retries: int = 3) -> bool:
@@ -78,6 +79,18 @@ def load_scrip_data() -> pd.DataFrame:
             "TokenManager: Scrip master unavailable. Returning empty DataFrame."
         )
     return pd.DataFrame()
+
+
+def clear_cache() -> None:
+    """Reset the in-memory scrip data cache."""
+    global _scrip_data_cache
+    try:
+        _scrip_data_cache = None
+        logger.info("TokenManager: cache cleared.")
+    except Exception as err:
+        logger.error("TokenManager: Failed to clear cache: %s", err)
+        send_telegram_alert(f"TokenManager: Failed to clear cache: {err}")
+
 
 def get_token_by_symbol(symbol, exchange='NFO', instrumenttype='OPTIDX', expiry=None, optiontype=None, strike=None):
     df = load_scrip_data()
