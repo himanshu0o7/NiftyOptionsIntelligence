@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import threading
 import logging
+
 from utils.sensibull_greeks_fetcher import fetch_option_data
 from utils.instrument_downloader import InstrumentDownloader
 from utils.ui_refresh import streamlit_autorefresh
@@ -18,34 +19,26 @@ logging.basicConfig(level=logging.INFO)
 
 
 # ─────────────────────────────────────────────────────────────
-# ✅ Load Tokens
+# ✅ Load Tokens with fallback for optiontype
 # ─────────────────────────────────────────────────────────────
 def get_nifty_option_tokens():
-    """
-    Fetches and filters NIFTY call and put option tokens from the cached JSON file.
-    Handles column name variations for 'optiontype' gracefully.
-    """
     try:
         downloader = InstrumentDownloader()
         downloader.download_and_process()
 
-        nifty_df = pd.read_json("data/cache/nifty_tokens.json")
-        banknifty_df = pd.read_json("data/cache/banknifty_tokens.json")
+        nifty_df = pd.read_csv("data/cache/nifty_tokens.csv")
+        banknifty_df = pd.read_csv("data/cache/banknifty_tokens.csv")
 
-        # 🔍 Log available columns for debug
         logger.info(f"NIFTY DF columns: {nifty_df.columns.tolist()}")
 
-        # Robust detection of 'optiontype' column
-        option_column = next(
-            (col for col in nifty_df.columns if col.lower() in ["optiontype", "option_type", "optionType"]),
-            None
-        )
+        if 'optiontype' not in nifty_df.columns:
+            # Create fallback column from symbol
+            nifty_df['optiontype'] = nifty_df['symbol'].apply(
+                lambda x: 'CE' if x.endswith('CE') else ('PE' if x.endswith('PE') else None)
+            )
 
-        if not option_column:
-            raise KeyError("❌ Missing 'optiontype' column in NIFTY data")
-
-        ce_df = nifty_df[nifty_df[option_column] == 'CE']
-        pe_df = nifty_df[nifty_df[option_column] == 'PE']
+        ce_df = nifty_df[nifty_df['optiontype'] == 'CE']
+        pe_df = nifty_df[nifty_df['optiontype'] == 'PE']
         return ce_df, pe_df
 
     except Exception as e:
@@ -55,18 +48,23 @@ def get_nifty_option_tokens():
 
 
 # ─────────────────────────────────────────────────────────────
-# ✅ Monitor and Alert
+# ✅ Provide token data to main.py or Streamlit panels
+# ─────────────────────────────────────────────────────────────
+def get_option_data():
+    ce_df, pe_df = get_nifty_option_tokens()
+    if ce_df is not None and pe_df is not None:
+        return pd.concat([ce_df, pe_df])
+    return pd.DataFrame()
+
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Background monitoring with telegram alerts
 # ─────────────────────────────────────────────────────────────
 def monitor_and_alert():
-    """
-    Runs in background to monitor NIFTY options and trigger Telegram alerts
-    based on option Greeks and volume thresholds.
-    """
-    ce_df, pe_df = get_nifty_option_tokens()
-    if ce_df is None or pe_df is None:
+    df_combined = get_option_data()
+    if df_combined.empty:
         return
 
-    df_combined = pd.concat([ce_df, pe_df])
     for _, row in df_combined.iterrows():
         symbol = row.get('symbol') or row.get('tradingsymbol')
         if not symbol:
@@ -94,7 +92,7 @@ def monitor_and_alert():
 
 
 # ─────────────────────────────────────────────────────────────
-# ✅ Start Background Thread
+# ✅ Launch alert background thread
 # ─────────────────────────────────────────────────────────────
 if "alert_thread" not in st.session_state:
     alert_thread = threading.Thread(target=monitor_and_alert, daemon=True)
@@ -104,10 +102,13 @@ if "alert_thread" not in st.session_state:
 
 
 # ─────────────────────────────────────────────────────────────
-# ✅ UI Auto Refresh
+# ✅ Sidebar UI Refresh Interval Control
 # ─────────────────────────────────────────────────────────────
 refresh_interval = st.sidebar.selectbox("⏱️ Refresh every", [15, 30, 60], index=1)
-streamlit_autorefresh(seconds=refresh_interval, enable_telegram=True, enable_debug_panel=True)
+streamlit_autorefresh(
+    seconds=refresh_interval,
+    enable_telegram=True,
+    enable_debug_panel=True
+)
 
-# ℹ️ You can extend this script to display charts, CE/PE lists, etc.
-
+# ℹ️ Extendable: Add charts, filter panels, strike pickers, etc.
