@@ -1,11 +1,16 @@
 import os
+import logging
+from datetime import datetime
+
 import pandas as pd
 import pyotp
-import requests
-import logging
-logger = logging.getLogger(__name__)
 from dotenv import load_dotenv
 from SmartApi import SmartConnect
+
+from telegram_alerts import send_telegram_alert
+from master_contract_fetcher import fetch_and_save_nfo_master_contract
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -44,42 +49,44 @@ class SessionManager:
             self.login()
         return self.client
 
-def load_nfo_scrip_master():
-    if not os.path.exists(SCRIP_MASTER_PATH):
-        url = "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            data = response.json()
-            df = pd.DataFrame(data)
-            nfo_df = df[df['exch_seg'] == 'NFO']
-            nfo_df.to_csv(SCRIP_MASTER_PATH, index=False)
-            print("✅ NFO scrip master downloaded successfully")
-        except Exception as e:
-            print(f"❌ Failed to download scrip master: {e}")
-            raise
-    else:
-        print("✅ Using cached scrip master")
+def load_nfo_scrip_master(force_refresh: bool = False) -> pd.DataFrame:
+    """Load the NFO scrip master contract with cache management.
 
-    return pd.read_csv(SCRIP_MASTER_PATH)
+    Parameters
+    ----------
+    force_refresh : bool, optional
+        When ``True`` the master contract is fetched from the network even if
+        a cached file exists.
+    """
+    try:
+        path = SCRIP_MASTER_PATH
+        if force_refresh or not os.path.exists(path):
+            path = fetch_and_save_nfo_master_contract(path)
 
-load_master_contract = load_nfo_scrip_master
-
-def load_nfo_scrip_master():
-    if not os.path.exists(SCRIP_MASTER_PATH):
-        path = fetch_and_save_nfo_master_contract()  # From master_contract_fetcher.py
-    else:
-        df = pd.read_csv(SCRIP_MASTER_PATH)
-        if 'fetch_timestamp' in df.columns:
-            last_fetch = pd.to_datetime(df['fetch_timestamp'].iloc[0])
+        df = pd.read_csv(path)
+        if "fetch_timestamp" in df.columns:
+            last_fetch = pd.to_datetime(df["fetch_timestamp"].iloc[0])
             if (datetime.now() - last_fetch).days > 1:
                 logger.warning("Cached scrip master is stale. Refetching...")
-                path = fetch_and_save_nfo_master_contract()
+                path = fetch_and_save_nfo_master_contract(path)
+                df = pd.read_csv(path)
         else:
             logger.warning("No timestamp in cache. Refetching...")
-            path = fetch_and_save_nfo_master_contract()
-        df = pd.read_csv(path)
-    if df.empty:
-        raise ValueError("Scrip master is empty.")
-    return df
+            path = fetch_and_save_nfo_master_contract(path)
+            df = pd.read_csv(path)
+
+        if df.empty:
+            raise ValueError("Scrip master is empty.")
+
+        return df
+    except Exception as exc:  # noqa: BLE001
+        logger.exception("angel_utils: failed to load NFO scrip master: %s", exc)
+        try:
+            send_telegram_alert(f"angel_utils load_nfo_scrip_master error: {exc}")
+        except Exception:  # noqa: BLE001
+            logger.exception("angel_utils: failed to send Telegram alert")
+        raise
+
+
+load_master_contract = load_nfo_scrip_master
 

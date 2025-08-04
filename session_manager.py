@@ -5,6 +5,7 @@ import os
 import json
 import time
 from login_manager import AngelLoginManager
+from telegram_alerts import send_telegram_alert
 
 SESSION_CACHE_FILE = "session_cache.json"
 
@@ -27,8 +28,10 @@ class SessionManager:
             with open(SESSION_CACHE_FILE, "w") as f:
                 json.dump(cache_data, f)
             os.chmod(SESSION_CACHE_FILE, 0o600)  # Secure permissions
-        except (IOError, json.JSONEncodeError) as e:
-            print(f"Error saving cache: {e}")
+        except (IOError, TypeError, OverflowError) as e:
+            error_msg = f"session_manager: Error saving cache: {e}"
+            print(error_msg)
+            send_telegram_alert(f"⚠️ {error_msg}")
 
     def _load_from_cache(self):
         if not os.path.exists(SESSION_CACHE_FILE):

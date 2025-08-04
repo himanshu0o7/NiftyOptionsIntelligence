@@ -6,3 +6,5 @@ pandas
 plotly
 matplotlib
 yfinance     # ← Used instead of deprecated nsetools
+
+psutil
