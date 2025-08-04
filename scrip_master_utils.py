@@ -1,30 +1,58 @@
-import os
 import json
-import requests
-import pandas as pd
+import logging
+import os
 from datetime import datetime
+
+import pandas as pd
+import requests
+from requests.exceptions import RequestException
+
+from telegram_alerts import send_telegram_alert
 
 SCRIP_MASTER_URL = "https://margincalculator.angelbroking.com/OpenAPI_File/files/OpenAPIScripMaster.json"
 LOCAL_SCRIP_FILE = "scrip_master.json"
 
-def download_scrip_master():
-    """Download scrip master if not available."""
-    if not os.path.exists(LOCAL_SCRIP_FILE):
-        print("📥 Downloading scrip master...")
-        response = requests.get(SCRIP_MASTER_URL)
-        if response.status_code == 200:
-            with open(LOCAL_SCRIP_FILE, 'w') as f:
+logger = logging.getLogger(__name__)
+
+
+def download_scrip_master(retries: int = 3) -> bool:
+    """Download scrip master with retry and alerting."""
+    if os.path.exists(LOCAL_SCRIP_FILE):
+        logger.info("scrip_master_utils: Scrip master already exists.")
+        return True
+
+    logger.info("scrip_master_utils: downloading scrip master ...")
+    for attempt in range(1, retries + 1):
+        try:
+            response = requests.get(SCRIP_MASTER_URL, timeout=10)
+            response.raise_for_status()
+            with open(LOCAL_SCRIP_FILE, "w") as f:
                 json.dump(response.json(), f)
-            print("✅ Scrip master saved.")
-        else:
-            raise Exception("❌ Failed to download scrip master.")
-    else:
-        print("✅ Scrip master already exists.")
+            logger.info("scrip_master_utils: Scrip master saved.")
+            return True
+        except RequestException as e:
+            logger.warning(
+                "scrip_master_utils: attempt %s failed: %s", attempt, e
+            )
+        except OSError as e:
+            logger.error("scrip_master_utils: Failed to write scrip master: %s", e)
+            send_telegram_alert(
+                f"scrip_master_utils: file save failed - {e}"
+            )
+            return False
+
+    msg = (
+        f"scrip_master_utils: Failed to download scrip master after {retries} attempts."
+    )
+    logger.error(msg)
+    send_telegram_alert(msg)
+    return False
 
 def load_scrip_data():
     """Load scrip master into DataFrame and clean expiry."""
-    download_scrip_master()
-    with open(LOCAL_SCRIP_FILE, 'r') as f:
+    if not download_scrip_master() and not os.path.exists(LOCAL_SCRIP_FILE):
+        raise FileNotFoundError("scrip_master_utils: scrip master unavailable.")
+    with open(LOCAL_SCRIP_FILE, "r") as f:
         data = json.load(f)
     df = pd.DataFrame(data)
 
