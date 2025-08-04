@@ -93,7 +93,7 @@ def download_scrip_master(retries: int = 3) -> bool:
 def load_scrip_data() -> pd.DataFrame:
     """Load scrip master into DataFrame and clean expiry."""
 # codex/wrap-requests.get-in-try/except
-    if not download_scrip_master() and not os.path.exists(LOCAL_SCRIP_FILE):
+    if not download_scrip_master():
         raise FileNotFoundError("scrip_master_utils: scrip master unavailable.")
     with open(LOCAL_SCRIP_FILE, "r") as f:
         data = json.load(f)
