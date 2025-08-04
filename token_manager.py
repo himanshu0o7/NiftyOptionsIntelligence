@@ -66,7 +66,7 @@ def download_scrip_master(retries: int = 3) -> bool:
     return False
 
 def load_scrip_data():
-    if not download_scrip_master() and not os.path.exists(LOCAL_SCRIP_FILE):
+    if not download_scrip_master():
         raise FileNotFoundError("token_manager: scrip master unavailable.")
     with open(LOCAL_SCRIP_FILE, "r") as f:
         return pd.DataFrame(json.load(f))
