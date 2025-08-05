@@ -12,7 +12,7 @@ logger = logging.getLogger(MODULE)
 st.set_page_config(page_title="Self-Learning Viewer", layout="wide")
 
 
-def load_evolve_data(path: str = "evolve_log.json") -> Optional[Any]:
+def load_evolve_data(path: str = "evolve_log.json") -> Optional[dict[str, Any] | list[dict[str, Any]]]:
     """Load evolution log data from JSON file."""
     try:
         with open(path, "r", encoding="utf-8") as f:
