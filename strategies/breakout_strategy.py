@@ -433,3 +433,11 @@ class BreakoutStrategy(BaseStrategy):
     def should_exit(self):
         return self.data["volume"] < 50000  # Example logic
 
+def should_enter(self, option_data):
+    delta = option_data.get("delta", 0)
+    volume = option_data.get("volume", 0)
+    vega = option_data.get("vega", 0)
+
+    if delta > 0.5 and volume > 2000 and vega > 1.0:
+        return True
+    return False

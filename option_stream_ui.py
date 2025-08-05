@@ -17,7 +17,6 @@ st.title("📊 Nifty Options Stream Dashboard")
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
-
 # ─────────────────────────────────────────────────────────────
 # ✅ Load Tokens with fallback for optiontype
 # ─────────────────────────────────────────────────────────────
@@ -111,4 +110,31 @@ streamlit_autorefresh(
     enable_debug_panel=True
 )
 
-# ℹ️ Extendable: Add charts, filter panels, strike pickers, etc.
+# ─────────────────────────────────────────────────────────────
+# ✅ Strike Picker and OI Chart
+# ─────────────────────────────────────────────────────────────
+ce_df, pe_df = get_nifty_option_tokens()
+
+if ce_df is not None and pe_df is not None:
+    st.subheader("📈 Strike-wise Open Interest (OI)")
+
+    if 'strike' in ce_df.columns and 'oi' in ce_df.columns:
+        available_strikes = sorted(set(ce_df['strike']).intersection(set(pe_df['strike'])))
+        selected_strikes = st.multiselect(
+            "🎯 Select Strikes to Compare", available_strikes, default=available_strikes[:5]
+        )
+
+        ce_filtered = ce_df[ce_df['strike'].isin(selected_strikes)]
+        pe_filtered = pe_df[pe_df['strike'].isin(selected_strikes)]
+
+        chart_df = pd.DataFrame({
+            "Strike": selected_strikes,
+            "Call OI": ce_filtered.groupby("strike")["oi"].sum(),
+            "Put OI": pe_filtered.groupby("strike")["oi"].sum()
+        })
+
+        st.bar_chart(chart_df.set_index("Strike"))
+    else:
+        st.warning("⚠️ 'strike' or 'oi' column not found in option tokens.")
+else:
+    st.warning("⚠️ Option data not available for chart rendering.")

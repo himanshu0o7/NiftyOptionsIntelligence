@@ -1,0 +1,5 @@
+{
+  "improvement": "Add vega filter > 1.0 in should_enter",
+  "reason": "Too many false positives on low vega contracts",
+  "file_to_edit": "strategies/breakout_strategy.py"
+}

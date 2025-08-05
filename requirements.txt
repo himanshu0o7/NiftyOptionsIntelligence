@@ -7,3 +7,6 @@ rich
 streamlit
 tqdm
 psutil
+python-dotenv
+plotly
+scipy

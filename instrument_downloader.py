@@ -82,3 +82,4 @@ class InstrumentDownloader:
 if __name__ == '__main__':
     downloader = InstrumentDownloader()
     downloader.download_and_process()
+nifty_df.to_csv("data/cache/nifty_tokens.csv", index=False)
