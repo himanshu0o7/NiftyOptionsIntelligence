@@ -20,6 +20,12 @@ def load_evolve_data(path: str = "evolve_log.json") -> Optional[dict[str, Any] |
     except FileNotFoundError:
         logger.error(f"{MODULE}: {path} not found")
         send_telegram_alert(f"{MODULE}: {path} not found")
+    except PermissionError as exc:
+        logger.error(f"{MODULE}: Permission denied for {path}: {exc}")
+        send_telegram_alert(f"{MODULE}: Permission denied for {path}: {exc}")
+    except json.JSONDecodeError as exc:
+        logger.error(f"{MODULE}: Failed to decode JSON in {path}: {exc}")
+        send_telegram_alert(f"{MODULE}: Failed to decode JSON in {path}: {exc}")
     except Exception as exc:  # pylint: disable=broad-except
         logger.exception(f"{MODULE}: Failed to load {path}: {exc}")
         send_telegram_alert(f"{MODULE}: Failed to load {path}: {exc}")
