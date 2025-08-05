@@ -2,39 +2,69 @@ import streamlit as st
 import pandas as pd
 import threading
 import logging
+
 from utils.sensibull_greeks_fetcher import fetch_option_data
 from utils.instrument_downloader import InstrumentDownloader
 from utils.ui_refresh import streamlit_autorefresh
 from telegram_handler import send_alert
 
+# ─────────────────────────────────────────────────────────────
+# ✅ Page and Logger Setup
+# ─────────────────────────────────────────────────────────────
 st.set_page_config(page_title="Nifty Option Live Dashboard", layout="wide")
 st.title("📊 Nifty Options Stream Dashboard")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Load Tokens with fallback for optiontype
+# ─────────────────────────────────────────────────────────────
 def get_nifty_option_tokens():
     try:
         downloader = InstrumentDownloader()
         downloader.download_and_process()
 
-        nifty_df = pd.read_json("data/cache/nifty_tokens.json")
-        banknifty_df = pd.read_json("data/cache/banknifty_tokens.json")
+        nifty_df = pd.read_csv("data/cache/nifty_tokens.csv")
+        banknifty_df = pd.read_csv("data/cache/banknifty_tokens.csv")
+
+        logger.info(f"NIFTY DF columns: {nifty_df.columns.tolist()}")
+
+        if 'optiontype' not in nifty_df.columns:
+            # Create fallback column from symbol
+            nifty_df['optiontype'] = nifty_df['symbol'].apply(
+                lambda x: 'CE' if x.endswith('CE') else ('PE' if x.endswith('PE') else None)
+            )
 
         ce_df = nifty_df[nifty_df['optiontype'] == 'CE']
         pe_df = nifty_df[nifty_df['optiontype'] == 'PE']
         return ce_df, pe_df
+
     except Exception as e:
         st.error("❌ Failed to fetch Nifty option tokens.")
         logger.error(f"Error in get_nifty_option_tokens: {e}")
         return None, None
 
-def monitor_and_alert():
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Provide token data to main.py or Streamlit panels
+# ─────────────────────────────────────────────────────────────
+def get_option_data():
     ce_df, pe_df = get_nifty_option_tokens()
-    if ce_df is None or pe_df is None:
+    if ce_df is not None and pe_df is not None:
+        return pd.concat([ce_df, pe_df])
+    return pd.DataFrame()
+
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Background monitoring with telegram alerts
+# ─────────────────────────────────────────────────────────────
+def monitor_and_alert():
+    df_combined = get_option_data()
+    if df_combined.empty:
         return
 
-    df_combined = pd.concat([ce_df, pe_df])
     for _, row in df_combined.iterrows():
         symbol = row.get('symbol') or row.get('tradingsymbol')
         if not symbol:
@@ -60,15 +90,25 @@ def monitor_and_alert():
         except Exception as e:
             logger.warning(f"Skipping symbol {symbol}: {e}")
 
-# 🚀 Background Thread Start (once)
+
+# ─────────────────────────────────────────────────────────────
+# ✅ Launch alert background thread
+# ─────────────────────────────────────────────────────────────
 if "alert_thread" not in st.session_state:
     alert_thread = threading.Thread(target=monitor_and_alert, daemon=True)
     alert_thread.start()
     st.session_state.alert_thread = alert_thread
     st.success("✅ Alert monitoring started in background")
 
-# ⏱️ UI Auto Refresh
-refresh_interval = st.sidebar.selectbox("⏱️ Refresh every", [15, 30, 60], index=1)
-streamlit_autorefresh(seconds=refresh_interval, enable_telegram=True, enable_debug_panel=True)
 
-# ℹ️ You can add token display or charts here using ce_df/pe_df if needed
+# ─────────────────────────────────────────────────────────────
+# ✅ Sidebar UI Refresh Interval Control
+# ─────────────────────────────────────────────────────────────
+refresh_interval = st.sidebar.selectbox("⏱️ Refresh every", [15, 30, 60], index=1)
+streamlit_autorefresh(
+    seconds=refresh_interval,
+    enable_telegram=True,
+    enable_debug_panel=True
+)
+
+# ℹ️ Extendable: Add charts, filter panels, strike pickers, etc.

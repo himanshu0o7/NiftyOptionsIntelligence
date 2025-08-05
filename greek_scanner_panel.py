@@ -1,7 +1,3 @@
-from pathlib import Path
-
-# Re-create greek_scanner_panel.py after code execution reset
-greek_scanner_code = '''
 import streamlit as st
 import pandas as pd
 from utils.sensibull_greeks_fetcher import fetch_option_data
@@ -61,6 +57,7 @@ def render_scanner():
         st.info("No data to display.")
         return
 
+
     greek_filter = st.sidebar.checkbox("📌 Filter: Delta > 0.4, |Theta| < 10, Vega > 1.5, Vol > 2000", value=True)
     if greek_filter:
         df = df[
@@ -72,9 +69,8 @@ def render_scanner():
 
     df = df.sort_values(by="Volume", ascending=False)
     st.dataframe(df, use_container_width=True)
-'''
 
-# Write to file
-file_path = Path("greek_scanner_panel.py")
-file_path.write_text(greek_scanner_code.strip())
-file_path.exists()
+def render_scanner():
+    import streamlit as st
+    st.warning("🛠️ Greek scanner is under construction.")
+x
