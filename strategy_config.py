@@ -1,32 +1,25 @@
-import streamlit as st
+"""Thin wrapper to expose the Streamlit strategy configuration page.
 
-st.title("✅ strategy_config loaded")
+This wrapper exists to maintain backward compatibility. It delegates to
+``pages.strategy_config.show_strategy_config`` and reports any runtime errors
+through Telegram alerts.
+"""
 
-def show_strategy_config():
-    st.write("✅ App started")
-
+# Dependency: This module requires `pages.strategy_config` and its `show_strategy_config` function.
+from telegram_alerts import send_telegram_alert
+try:
+    from pages.strategy_config import show_strategy_config
+except (ImportError, ModuleNotFoundError) as exc:
+    send_telegram_alert(f"[strategy_config] Import error: {exc}")
+    raise
+def main() -> None:
+    """Run the strategy configuration page with basic error handling."""
     try:
-        from config.settings import Settings
-        st.success("✅ Settings imported")
-    except Exception as e:
-        st.error(f"❌ Failed to import Settings: {e}")
+        show_strategy_config()
+    except Exception as exc:  # noqa: BLE001
+        send_telegram_alert(f"[strategy_config] {exc}")
+        raise
 
 
-
-# pages/strategy_config.py
-
-import sys
-from pathlib import Path
-
-# Append project root to sys.path so top‑level packages resolve correctly
-CURRENT_DIR = Path(__file__).resolve()
-PROJECT_ROOT = CURRENT_DIR.parent.parent  # parent of the `pages` folder
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.append(str(PROJECT_ROOT))
-
-import json
-import pandas as pd
-# …the rest of your imports…
-from strategies.breakout_strategy import BreakoutStrategy
-from strategies.oi_analysis import OIAnalysis
-from config.settings import Settings
+if __name__ == "__main__":
+    main()
