@@ -16,8 +16,12 @@ def show_risk_monitor():
 
     st.header("🛡️ Risk Management Monitor")
 
+    # Determine default config path relative to this file
+    default_cfg_path = os.path.join(os.path.dirname(__file__), "risk_config.yaml")
+    cfg_path = st.sidebar.text_input("Risk config file path", value=default_cfg_path)
+
     try:
-        with open("risk_config.yaml", "r", encoding="utf-8") as fh:
+        with open(cfg_path, "r", encoding="utf-8") as fh:
             cfg = yaml.safe_load(fh).get("risk_management", {})
 
         risk_calc = RiskCalculator(cfg)
