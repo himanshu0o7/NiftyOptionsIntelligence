@@ -388,16 +388,16 @@ def get_pnl_metrics(period: str) -> Dict:
         )
         df = pd.read_sql_query(summary_query, conn, params=(str(start_date), str(end_date)))
 
-        realized_pnl = float(df.get("total_pnl", [0])[0])
-        total_trades = int(df.get("total_trades", [0])[0])
-        winning_trades = int(df.get("winning_trades", [0])[0])
+        realized_pnl = float(df["total_pnl"].iloc[0]) if not df.empty else 0.0
+        total_trades = int(df["total_trades"].iloc[0]) if not df.empty else 0
+        winning_trades = int(df["winning_trades"].iloc[0]) if not df.empty else 0
 
         unrealized_query = (
             "SELECT COALESCE(SUM(unrealized_pnl),0) AS unrealized FROM positions "
             "WHERE status = 'OPEN'"
         )
         unrealized_df = pd.read_sql_query(unrealized_query, conn)
-        unrealized_pnl = float(unrealized_df.get("unrealized", [0])[0])
+        unrealized_pnl = float(unrealized_df["unrealized"].iloc[0]) if not unrealized_df.empty else 0.0
 
         change_query = (
             "SELECT total_pnl FROM daily_summary ORDER BY date DESC LIMIT 2"
