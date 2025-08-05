@@ -6,7 +6,6 @@ from pathlib import Path
 
 from telegram_alerts import send_telegram_alert
 
-st.set_page_config(page_title="Strategy Configuration", layout="wide")
 st.write("✅ App Loaded")
 
 
