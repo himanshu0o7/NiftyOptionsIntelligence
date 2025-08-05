@@ -4,6 +4,9 @@ import pandas as pd
 import sys
 from pathlib import Path
 
+from telegram_alerts import send_telegram_alert
+
+st.set_page_config(page_title="Strategy Configuration", layout="wide")
 st.write("✅ App Loaded")
 
 
@@ -17,26 +20,32 @@ from strategies.breakout_strategy import BreakoutStrategy
 from strategies.oi_analysis import OIAnalysis
 from config.settings import Settings
 
+MODULE_NAME = "strategy_config"
+
 def show_strategy_config():
     """Display strategy configuration page"""
-    
-    st.header("⚙️ Strategy Configuration")
-    
-    # Strategy selection and management
-    strategy_tab1, strategy_tab2, strategy_tab3 = st.tabs([
-        "🎯 Active Strategies", 
-        "⚙️ Configure Strategy", 
-        "📊 Backtest Results"
-    ])
-    
-    with strategy_tab1:
-        show_active_strategies()
-    
-    with strategy_tab2:
-        show_strategy_configuration()
-    
-    with strategy_tab3:
-        show_backtest_results()
+
+    try:
+        st.header("⚙️ Strategy Configuration")
+
+        # Strategy selection and management
+        strategy_tab1, strategy_tab2, strategy_tab3 = st.tabs([
+            "🎯 Active Strategies",
+            "⚙️ Configure Strategy",
+            "📊 Backtest Results"
+        ])
+
+        with strategy_tab1:
+            show_active_strategies()
+
+        with strategy_tab2:
+            show_strategy_configuration()
+
+        with strategy_tab3:
+            show_backtest_results()
+    except Exception as exc:
+        send_telegram_alert(f"{MODULE_NAME} error: {exc}")
+        st.error("An error occurred while loading the Strategy Configuration page.")
 
 def show_active_strategies():
     """Display and manage active strategies"""

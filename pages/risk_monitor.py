@@ -6,34 +6,43 @@ import numpy as np
 from datetime import datetime, timedelta
 from risk_management.risk_calculator import RiskCalculator
 from risk_management.position_manager import PositionManager
+from telegram_alerts import send_telegram_alert
+
+st.set_page_config(page_title="Risk Monitor", layout="wide")
+
+MODULE_NAME = "risk_monitor"
 
 def show_risk_monitor():
     """Display comprehensive risk monitoring dashboard"""
-    
-    st.header("🛡️ Risk Management Monitor")
-    
-    # Risk overview metrics
-    show_risk_overview()
-    
-    # Main risk monitoring tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "🎯 Position Risk", 
-        "📊 Portfolio Risk", 
-        "⚠️ Risk Alerts", 
-        "🧪 Stress Testing"
-    ])
-    
-    with tab1:
-        show_position_risk()
-    
-    with tab2:
-        show_portfolio_risk()
-    
-    with tab3:
-        show_risk_alerts()
-    
-    with tab4:
-        show_stress_testing()
+
+    try:
+        st.header("🛡️ Risk Management Monitor")
+
+        # Risk overview metrics
+        show_risk_overview()
+
+        # Main risk monitoring tabs
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "🎯 Position Risk",
+            "📊 Portfolio Risk",
+            "⚠️ Risk Alerts",
+            "🧪 Stress Testing"
+        ])
+
+        with tab1:
+            show_position_risk()
+
+        with tab2:
+            show_portfolio_risk()
+
+        with tab3:
+            show_risk_alerts()
+
+        with tab4:
+            show_stress_testing()
+    except Exception as exc:
+        send_telegram_alert(f"{MODULE_NAME} error: {exc}")
+        st.error("An error occurred while loading the Risk Management Monitor page.")
 
 def show_risk_overview():
     """Display high-level risk metrics"""
