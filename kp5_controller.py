@@ -50,6 +50,8 @@ def execute_command(command: str) -> str:
         logger.info("Command %s completed successfully", command)
         send_telegram_alert(f"✅ Command {command} completed successfully.")
         return result
+    except (KeyboardInterrupt, SystemExit):
+        raise
     except Exception as exc:  # noqa: BLE001
         logger.exception("Error while executing command %s: %s", command, exc)
         send_telegram_alert(f"❌ Error in {command}: {exc}")
