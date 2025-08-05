@@ -526,14 +526,12 @@ def get_performance_trends_data(period: str) -> pd.DataFrame:
         end_date = datetime.now().date()
         start_date = end_date - timedelta(days=days - 1)
 
-        conn = sqlite3.connect(db.db_path)
         query = (
             "SELECT date, total_pnl FROM daily_summary "
             "WHERE date BETWEEN ? AND ? ORDER BY date"
         )
-        df = pd.read_sql_query(query, conn, params=(str(start_date), str(end_date)))
-        conn.close()
-
+        with sqlite3.connect(db.db_path) as conn:
+            df = pd.read_sql_query(query, conn, params=(str(start_date), str(end_date)))
         if df.empty:
             return pd.DataFrame()
 
