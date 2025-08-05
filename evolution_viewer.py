@@ -1,14 +1,14 @@
 """Self-learning viewer for evolution log."""
 
 import json
-from typing import List
-
+from typing import List, Union
+from pathlib import Path
 from telegram_alerts import send_telegram_alert
 
 EVOLVE_LOG_PATH = "evolve_log.json"
 
 
-def load_evolution_records(path: str = EVOLVE_LOG_PATH) -> List[dict]:
+def load_evolution_records(path: Union[str, Path] = EVOLVE_LOG_PATH) -> List[dict]:
     """Load evolution records from ``path``.
 
     Returns an empty list if the file is missing, empty, or contains
