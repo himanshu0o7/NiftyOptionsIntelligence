@@ -10,9 +10,95 @@ from risk_management.risk_calculator import RiskCalculator
 from risk_management.position_manager import PositionManager
 from telegram_alerts import send_telegram_alert
 
+# codex/update-page-configurations-and-error-handling
+st.set_page_config(page_title="Risk Monitor", layout="wide")
+
+MODULE_NAME = "risk_monitor"
+
+# fix-bot-2025-07-24
 
 def show_risk_monitor():
     """Display comprehensive risk monitoring dashboard"""
+
+# codex/update-page-configurations-and-error-handling
+    try:
+        st.header("🛡️ Risk Management Monitor")
+
+        # Risk overview metrics
+        show_risk_overview()
+
+        # Main risk monitoring tabs
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "🎯 Position Risk",
+            "📊 Portfolio Risk",
+            "⚠️ Risk Alerts",
+            "🧪 Stress Testing"
+        ])
+
+        with tab1:
+            show_position_risk()
+
+        with tab2:
+            show_portfolio_risk()
+
+        with tab3:
+            show_risk_alerts()
+
+        with tab4:
+            show_stress_testing()
+    except Exception as exc:
+        tb = traceback.format_exc()
+        send_telegram_alert(f"{MODULE_NAME} error: {exc}\nTraceback:\n{tb}")
+        st.error("An error occurred while loading the Risk Management Monitor page.")
+
+def show_risk_overview():
+    """Display high-level risk metrics"""
+    st.subheader("📈 Risk Overview")
+    
+    # Risk metrics row
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        st.metric("Portfolio VaR (95%)", "₹15,240", "-₹1,200")
+    
+    with col2:
+        st.metric("Max Drawdown", "8.5%", "+1.2%")
+    
+    with col3:
+        st.metric("Sharpe Ratio", "1.85", "+0.12")
+    
+    with col4:
+        st.metric("Portfolio Beta", "1.23", "-0.05")
+    
+    with col5:
+        st.metric("Risk Score", "Medium", "")
+    
+    # Risk status indicator
+    risk_status = get_current_risk_status()
+    
+    if risk_status == "Low":
+        st.success("🟢 **Risk Status: LOW** - Portfolio is within acceptable risk limits")
+    elif risk_status == "Medium":
+        st.warning("🟡 **Risk Status: MEDIUM** - Monitor closely for risk limit breaches")
+    else:
+        st.error("🔴 **Risk Status: HIGH** - Immediate attention required!")
+
+def show_position_risk():
+    """Display individual position risk analysis"""
+    st.subheader("🎯 Position-Level Risk Analysis")
+    
+    # Position risk controls
+    col1, col2 = st.columns([1, 3])
+    
+    with col1:
+        sort_by = st.selectbox(
+            "Sort Positions By",
+            ["Risk Score", "P&L", "Position Size", "Time to Expiry"]
+        )
+        
+        risk_filter = st.selectbox(
+            "Risk Filter",
+            ["All Positions", "High Risk", "Medium Risk", "Low Risk"]
 
     st.header("🛡️ Risk Management Monitor")
 
@@ -37,6 +123,7 @@ def show_risk_monitor():
 
         tab1, tab2, tab3, tab4 = st.tabs(
             ["🎯 Position Risk", "📊 Portfolio Risk", "⚠️ Risk Alerts", "🧪 Stress Testing"]
+# fix-bot-2025-07-24
         )
 
         with tab1:

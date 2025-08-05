@@ -10,36 +10,46 @@ from core.database import Database
 from telegram_alerts import send_telegram_alert
 from utils.helpers import helper
 from utils.logger import Logger
+from telegram_alerts import send_telegram_alert
+
+st.set_page_config(page_title="P&L Analysis", layout="wide")
+
+MODULE_NAME = "pnl_analysis"
 
 MODULE_NAME = "pnl_analysis"
 
 def show_pnl_analysis():
     """Display comprehensive P&L analysis dashboard"""
-    
-    st.header("📈 P&L Analysis & Performance")
-    
-    # P&L overview metrics
-    show_pnl_overview()
-    
-    # Main P&L analysis tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "📊 Daily P&L", 
-        "📈 Performance Trends", 
-        "🎯 Strategy Performance", 
-        "📋 Trade Analysis"
-    ])
-    
-    with tab1:
-        show_daily_pnl()
-    
-    with tab2:
-        show_performance_trends()
-    
-    with tab3:
-        show_strategy_performance()
-    
-    with tab4:
-        show_trade_analysis()
+
+    try:
+        st.header("📈 P&L Analysis & Performance")
+
+        # P&L overview metrics
+        show_pnl_overview()
+
+        # Main P&L analysis tabs
+        tab1, tab2, tab3, tab4 = st.tabs([
+            "📊 Daily P&L",
+            "📈 Performance Trends",
+            "🎯 Strategy Performance",
+            "📋 Trade Analysis"
+        ])
+
+        with tab1:
+            show_daily_pnl()
+
+        with tab2:
+            show_performance_trends()
+
+        with tab3:
+            show_strategy_performance()
+
+        with tab4:
+            show_trade_analysis()
+    except Exception as exc:
+        tb = traceback.format_exc()
+        send_telegram_alert(f"{MODULE_NAME} error: {exc}\nTraceback:\n{tb}")
+        st.error("An error occurred while loading the P&L Analysis page.")
 
 def show_pnl_overview():
     """Display high-level P&L metrics"""
