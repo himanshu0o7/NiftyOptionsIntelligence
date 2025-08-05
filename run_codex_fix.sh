@@ -1,35 +1,54 @@
 #!/bin/bash
+set -euo pipefail
 
-# Check if filename is passed
-if [ -z "$1" ]; then
+send_alert() {
+  python - <<'PYTHON' "$1"
+try:
+    from telegram_alerts import send_telegram_alert
+except ImportError as e:
+    print(f"Telegram alerts module not found: {e}")
+    sys.exit(1)
+import sys
+
+
+def main():
+    message = sys.argv[1]
+    try:
+        send_telegram_alert(message)
+    except Exception as exc:  # pragma: no cover
+        print(f"Telegram send failed: {exc}")
+
+
+if __name__ == "__main__":
+    main()
+PYTHON
+}
+
+if [ -z "${1:-}" ]; then
   echo "❌ Error: No file passed."
+  send_alert "❌ Codex fix: No file provided."
   echo "Usage: ./run_codex_fix.sh <filename>"
   exit 1
 fi
 
 FILE_TO_FIX="$1"
 CONFIG_FILE="codex_config.json"
-COMMIT_MSG="\U0001F680 Auto fix using Codex - Best of 3"
+COMMIT_MSG="🚀 Auto fix using Codex - Best of 3"
 
-# Check if config file exists
 if [ ! -f "$CONFIG_FILE" ]; then
   echo "❌ Error: Config file '$CONFIG_FILE' not found."
+  send_alert "❌ Codex fix: config file missing."
   exit 1
 fi
 
 echo "🛠 Running Codex Auto Fix for: $FILE_TO_FIX"
 
-# Fix the file using Codex
-codex fix "$FILE_TO_FIX" \
-  --config "$CONFIG_FILE" \
-  --commit "$COMMIT_MSG"
-
-# Check for errors in Codex run
-if [ $? -ne 0 ]; then
+if codex fix "$FILE_TO_FIX" --config "$CONFIG_FILE" --commit "$COMMIT_MSG"; then
+  echo "✅ Diff created. Review using: codex diff"
+  send_alert "✅ Codex fix applied for $FILE_TO_FIX"
+else
   echo "❌ Codex fix failed. Check your inputs or Codex login."
+  send_alert "❌ Codex fix failed for $FILE_TO_FIX"
   exit 1
 fi
-
-# Confirm diff created
-echo "✅ Diff created. Review using: codex diff"
 

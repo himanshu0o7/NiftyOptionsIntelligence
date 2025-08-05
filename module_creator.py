@@ -1,7 +1,12 @@
+import argparse
+import logging
 import os
 
 from telegram_alerts import send_telegram_alert
+# codex/wrap-file-writing-logic-in-try/except
 from utils.logger import default_logger as logger
+
+# fix-bot-2025-07-24
 
 TEMPLATES = {
     "session_manager.py": '''# Handles session re-use and token management
@@ -28,6 +33,11 @@ def check_position_limits():
 '''
 }
 
+# codex/wrap-file-writing-logic-in-try/except
+
+logging.basicConfig(level=logging.INFO)
+
+# fix-bot-2025-07-24
 
 def create_modules(missing_files):
     """Create missing module files and directories.
@@ -41,6 +51,7 @@ def create_modules(missing_files):
     summary = {"created": [], "failed": []}
 
     for file in missing_files:
+# codex/wrap-file-writing-logic-in-try/except
         dir_name = os.path.dirname(file)
         if dir_name and not os.path.exists(dir_name):
             try:
@@ -87,4 +98,37 @@ if __name__ == "__main__":
     if missing:
         result = create_modules(missing)
         print(result)
+
+        try:
+            dir_name = os.path.dirname(file)
+            if dir_name and not os.path.exists(dir_name):
+                os.makedirs(dir_name)
+
+            with open(file, "w") as f:
+                f.write(TEMPLATES.get(file, "# Empty Module\n"))
+            logging.info("🛠 Created: %s", file)
+        except Exception as e:  # pragma: no cover - broad except for robustness
+            error_msg = f"module_creator: Error creating {file}: {e}"
+            logging.error(error_msg)
+            send_telegram_alert(f"⚠️ {error_msg}")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Create placeholder modules.")
+    parser.add_argument(
+        "--files",
+        help="Comma-separated list of files to create. Overrides auto-detection.",
+    )
+    args = parser.parse_args()
+
+    if args.files:
+        files = [f.strip() for f in args.files.split(",") if f.strip()]
+        if files:
+            create_modules(files)
+    else:
+        from autocode_checker import check_modules
+
+        missing = check_modules()
+        if missing:
+            create_modules(missing)
+# fix-bot-2025-07-24
 
