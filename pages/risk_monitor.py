@@ -284,7 +284,7 @@ def show_stress_testing(risk_calc, pos_manager):
                 with c2:
                     pct = (
                         results['total_impact'] / results['current_value'] * 100
-                        if results['current_value'] else 0
+                        if results['current_value'] != 0 else 0
                     )
                     st.metric("Impact %", f"{pct:.1f}%")
                 with c3:
