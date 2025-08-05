@@ -43,7 +43,8 @@ def show_strategy_config():
         with strategy_tab3:
             show_backtest_results()
     except Exception as exc:
-        send_telegram_alert(f"{MODULE_NAME} error: {exc}")
+        tb = traceback.format_exc()
+        send_telegram_alert(f"{MODULE_NAME} error: {exc}\nTraceback:\n{tb}")
         st.error("An error occurred while loading the Strategy Configuration page.")
 
 def show_active_strategies():
