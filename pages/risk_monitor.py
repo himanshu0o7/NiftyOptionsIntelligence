@@ -41,7 +41,8 @@ def show_risk_monitor():
         with tab4:
             show_stress_testing()
     except Exception as exc:
-        send_telegram_alert(f"{MODULE_NAME} error: {exc}")
+        tb = traceback.format_exc()
+        send_telegram_alert(f"{MODULE_NAME} error: {exc}\nTraceback:\n{tb}")
         st.error("An error occurred while loading the Risk Management Monitor page.")
 
 def show_risk_overview():
