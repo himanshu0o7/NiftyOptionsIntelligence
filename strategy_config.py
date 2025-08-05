@@ -5,10 +5,13 @@ This wrapper exists to maintain backward compatibility. It delegates to
 through Telegram alerts.
 """
 
-from pages.strategy_config import show_strategy_config
+# Dependency: This module requires `pages.strategy_config` and its `show_strategy_config` function.
 from telegram_alerts import send_telegram_alert
-
-
+try:
+    from pages.strategy_config import show_strategy_config
+except (ImportError, ModuleNotFoundError) as exc:
+    send_telegram_alert(f"[strategy_config] Import error: {exc}")
+    raise
 def main() -> None:
     """Run the strategy configuration page with basic error handling."""
     try:
