@@ -1,3 +1,4 @@
+import sqlite3
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -6,8 +7,11 @@ import numpy as np
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from core.database import Database
+from telegram_alerts import send_telegram_alert
 from utils.helpers import helper
 from utils.logger import Logger
+
+MODULE_NAME = "pnl_analysis"
 
 def show_pnl_analysis():
     """Display comprehensive P&L analysis dashboard"""
@@ -355,53 +359,113 @@ def refresh_pnl_data():
 
 def get_pnl_metrics(period: str) -> Dict:
     """Get P&L metrics for specified period"""
-    # In real implementation, fetch from database
     db = Database()
-    logger = Logger()
-    
+    logger = Logger(MODULE_NAME)
+
     try:
-        # Sample metrics - replace with actual database queries
+        end_date = datetime.now().date()
+        period = period.lower()
+        if period == "today":
+            start_date = end_date
+        elif period == "this week":
+            start_date = end_date - timedelta(days=end_date.weekday())
+        elif period == "this month":
+            start_date = end_date.replace(day=1)
+        elif period == "last 3 months":
+            start_date = end_date - timedelta(days=90)
+        elif period == "ytd":
+            start_date = end_date.replace(month=1, day=1)
+        else:
+            start_date = datetime(1970, 1, 1).date()
+
+        conn = sqlite3.connect(db.db_path)
+
+        summary_query = (
+            "SELECT COALESCE(SUM(total_pnl),0) AS total_pnl, "
+            "COALESCE(SUM(total_trades),0) AS total_trades, "
+            "COALESCE(SUM(winning_trades),0) AS winning_trades "
+            "FROM daily_summary WHERE date BETWEEN ? AND ?"
+        )
+        df = pd.read_sql_query(summary_query, conn, params=(str(start_date), str(end_date)))
+
+        realized_pnl = float(df["total_pnl"].iloc[0]) if not df.empty else 0.0
+        total_trades = int(df["total_trades"].iloc[0]) if not df.empty else 0
+        winning_trades = int(df["winning_trades"].iloc[0]) if not df.empty else 0
+
+        unrealized_query = (
+            "SELECT COALESCE(SUM(unrealized_pnl),0) AS unrealized FROM positions "
+            "WHERE status = 'OPEN'"
+        )
+        unrealized_df = pd.read_sql_query(unrealized_query, conn)
+        unrealized_pnl = float(unrealized_df["unrealized"].iloc[0]) if not unrealized_df.empty else 0.0
+
+        change_query = (
+            "SELECT total_pnl FROM daily_summary ORDER BY date DESC LIMIT 2"
+        )
+        change_df = pd.read_sql_query(change_query, conn)
+        pnl_change = 0.0
+        if len(change_df) == 2:
+            pnl_change = float(change_df.iloc[0]["total_pnl"] - change_df.iloc[1]["total_pnl"])
+
+        conn.close()
+
+        win_rate = (winning_trades / total_trades * 100) if total_trades else 0
+        avg_trade_pnl = (realized_pnl / total_trades) if total_trades else 0
+        total_pnl = realized_pnl + unrealized_pnl
+
         return {
-            'total_pnl': 12450.75,
-            'pnl_change': 2340.25,
-            'realized_pnl': 8750.50,
-            'unrealized_pnl': 3700.25,
-            'win_rate': 68.5,
-            'avg_trade_pnl': 425.30
+            "total_pnl": round(total_pnl, 2),
+            "pnl_change": round(pnl_change, 2),
+            "realized_pnl": round(realized_pnl, 2),
+            "unrealized_pnl": round(unrealized_pnl, 2),
+            "win_rate": round(win_rate, 2),
+            "avg_trade_pnl": round(avg_trade_pnl, 2),
         }
     except Exception as e:
-        logger.error(f"Error fetching P&L metrics: {str(e)}")
+        error_msg = f"{MODULE_NAME} get_pnl_metrics error: {e}"
+        logger.error(error_msg)
+        send_telegram_alert(error_msg)
         return {
-            'total_pnl': 0,
-            'pnl_change': 0,
-            'realized_pnl': 0,
-            'unrealized_pnl': 0,
-            'win_rate': 0,
-            'avg_trade_pnl': 0
+            "total_pnl": 0,
+            "pnl_change": 0,
+            "realized_pnl": 0,
+            "unrealized_pnl": 0,
+            "win_rate": 0,
+            "avg_trade_pnl": 0,
         }
 
 def get_daily_pnl_data(start_date, end_date) -> pd.DataFrame:
     """Get daily P&L data for date range"""
-    # In real implementation, fetch from database
     db = Database()
-    logger = Logger()
-    
+    logger = Logger(MODULE_NAME)
+
     try:
-        # Generate date range
-        date_range = pd.date_range(start=start_date, end=end_date, freq='D')
-        
-        # Filter only business days
-        business_days = [d for d in date_range if helper.is_business_day(d)]
-        
-        if not business_days:
+        conn = sqlite3.connect(db.db_path)
+        query = (
+            "SELECT date, total_pnl, total_trades, win_rate "
+            "FROM daily_summary WHERE date BETWEEN ? AND ? ORDER BY date"
+        )
+        df = pd.read_sql_query(query, conn, params=(str(start_date), str(end_date)))
+        conn.close()
+
+        if df.empty:
             return pd.DataFrame()
-        
-        # Return empty DataFrame if no data available
-        # In real implementation: return db.get_daily_pnl(start_date, end_date)
-        return pd.DataFrame()
-        
+
+        df.rename(
+            columns={
+                "total_pnl": "daily_pnl",
+                "total_trades": "trades_count",
+                "win_rate": "win_rate",
+            },
+            inplace=True,
+        )
+        df["date"] = pd.to_datetime(df["date"])
+        return df
+
     except Exception as e:
-        logger.error(f"Error fetching daily P&L data: {str(e)}")
+        error_msg = f"{MODULE_NAME} get_daily_pnl_data error: {e}"
+        logger.error(error_msg)
+        send_telegram_alert(error_msg)
         return pd.DataFrame()
 
 def create_daily_pnl_chart(data: pd.DataFrame) -> go.Figure:
@@ -447,8 +511,42 @@ def create_daily_pnl_chart(data: pd.DataFrame) -> go.Figure:
 
 def get_performance_trends_data(period: str) -> pd.DataFrame:
     """Get performance trends data"""
-    # In real implementation, fetch from database
-    return pd.DataFrame()
+    db = Database()
+    logger = Logger(MODULE_NAME)
+
+    period_map = {
+        "last 30 days": 30,
+        "last 3 months": 90,
+        "last 6 months": 180,
+        "last year": 365,
+    }
+
+    try:
+        days = period_map.get(period.lower(), 90)
+        end_date = datetime.now().date()
+        start_date = end_date - timedelta(days=days - 1)
+
+        query = (
+            "SELECT date, total_pnl FROM daily_summary "
+            "WHERE date BETWEEN ? AND ? ORDER BY date"
+        )
+        with sqlite3.connect(db.db_path) as conn:
+            df = pd.read_sql_query(query, conn, params=(str(start_date), str(end_date)))
+        if df.empty:
+            return pd.DataFrame()
+
+        df["date"] = pd.to_datetime(df["date"])
+        df.rename(columns={"total_pnl": "daily_pnl"}, inplace=True)
+        df["cumulative_pnl"] = df["daily_pnl"].cumsum()
+        max_abs = max(abs(df["daily_pnl"]).max(), 1)
+        df["daily_returns"] = df["daily_pnl"] / max_abs
+        return df
+
+    except Exception as e:
+        error_msg = f"{MODULE_NAME} get_performance_trends_data error: {e}"
+        logger.error(error_msg)
+        send_telegram_alert(error_msg)
+        return pd.DataFrame()
 
 def create_cumulative_pnl_chart(data: pd.DataFrame) -> go.Figure:
     """Create cumulative P&L chart"""
