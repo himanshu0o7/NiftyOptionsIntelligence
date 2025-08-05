@@ -45,7 +45,7 @@ def main() -> None:
                 st.json(data)
         else:
             st.warning("No evolution data available.")
-    except Exception as exc:  # pylint: disable=broad-except
+    except (ValueError, TypeError, StreamlitAPIException) as exc:
         logger.exception(f"{MODULE}: Display error: {exc}")
         send_telegram_alert(f"{MODULE}: Display error - {exc}")
         st.error("Failed to display evolution data.")
