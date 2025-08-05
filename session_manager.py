@@ -28,10 +28,17 @@ class SessionManager:
             with open(SESSION_CACHE_FILE, "w") as f:
                 json.dump(cache_data, f)
             os.chmod(SESSION_CACHE_FILE, 0o600)  # Secure permissions
+# codex/replace-json.jsonencodeerror-exceptions
         except (IOError, TypeError, OverflowError, ValueError) as e:
             msg = f"[SessionManager] Error saving cache: {e}"
             print(msg)
             send_telegram_alert(msg)
+
+        except (IOError, TypeError, OverflowError) as e:
+            error_msg = f"session_manager: Error saving cache: {e}"
+            print(error_msg)
+            send_telegram_alert(f"⚠️ {error_msg}")
+# fix-bot-2025-07-24
 
     def _load_from_cache(self):
         if not os.path.exists(SESSION_CACHE_FILE):
