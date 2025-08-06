@@ -1,0 +1,4 @@
+echo "def detect_trend(symbol, expiry):
+    # Analyze CE/PE delta, OI change, and LTP
+    # Classify NIFTY trend as Bullish, Bearish, or Sideways
+    pass" > trend_detector.py

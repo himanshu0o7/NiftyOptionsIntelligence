@@ -1,9 +1,9 @@
+__pycache__/\n*.log\nvenv/\n.env\n*backup.py\ndata/cache/*.json\n.streamlit/
 venv/
-*.log
 __pycache__/
+*.pyc
+*.log
+*.json
 .env
-*.db
-*.zip
-
-codex/
-codex/
+.logs/
+.pytest_cache/

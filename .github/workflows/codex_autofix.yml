@@ -1,0 +1,54 @@
+name: Codex Autofix
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  codex-autofix:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Codex CLI
+        run: npm install -g @anthropic-ai/codex-cli
+
+      - name: Get changed Python files
+        id: changes
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            BASE_SHA=${{ github.event.pull_request.base.sha }}
+          else
+            BASE_SHA=${{ github.event.before }}
+          fi
+          git fetch origin ${{ github.ref_name }} --depth=2
+          CHANGED_FILES=$(git diff --name-only "$BASE_SHA" "$GITHUB_SHA" -- '*.py')
+          echo "$CHANGED_FILES"
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$CHANGED_FILES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Run Codex fixes
+        if: steps.changes.outputs.files != ''
+        run: |
+          set +e
+          echo "${{ steps.changes.outputs.files }}" | while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            echo "Fixing $file"
+            if ! bash run_codex_fix.sh "$file"; then
+              echo "Failed to fix $file"
+            fi
+          done
+          set -e
+
+      - name: Commit and push changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git commit -am "Auto-fix via Codex"
+            git push
+          fi

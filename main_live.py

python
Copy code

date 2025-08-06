@@ -1,0 +1,13 @@
+from angel_utils import SmartAPIClient
+from data_ingest import SensibullListener
+from strategy import ProfessionalStrategy
+from risk_manager import RiskManager
+from telegram_bot import TelegramClient
+
+client = SmartAPIClient(...)
+listener = SensibullListener(callback=...)
+strategy = ProfessionalStrategy(...)
+risk = RiskManager(...)
+telegram = TelegramClient(...)
+
+listener.run_async()

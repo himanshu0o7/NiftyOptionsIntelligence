@@ -5,6 +5,7 @@ import os
 import json
 import time
 from login_manager import AngelLoginManager
+from telegram_alerts import send_telegram_alert
 
 SESSION_CACHE_FILE = "session_cache.json"
 
@@ -27,8 +28,17 @@ class SessionManager:
             with open(SESSION_CACHE_FILE, "w") as f:
                 json.dump(cache_data, f)
             os.chmod(SESSION_CACHE_FILE, 0o600)  # Secure permissions
-        except (IOError, json.JSONEncodeError) as e:
-            print(f"Error saving cache: {e}")
+# codex/replace-json.jsonencodeerror-exceptions
+        except (IOError, TypeError, OverflowError, ValueError) as e:
+            msg = f"[SessionManager] Error saving cache: {e}"
+            print(msg)
+            send_telegram_alert(msg)
+
+        except (IOError, TypeError, OverflowError) as e:
+            error_msg = f"session_manager: Error saving cache: {e}"
+            print(error_msg)
+            send_telegram_alert(f"⚠️ {error_msg}")
+# fix-bot-2025-07-24
 
     def _load_from_cache(self):
         if not os.path.exists(SESSION_CACHE_FILE):
@@ -39,10 +49,14 @@ class SessionManager:
             if "session_data" in cache_data and "last_login_time" in cache_data:
                 return cache_data
             else:
-                print("Invalid cache format")
+                msg = "[SessionManager] Invalid cache format"
+                print(msg)
+                send_telegram_alert(msg)
                 return None
         except (IOError, json.JSONDecodeError) as e:
-            print(f"Error loading cache: {e}")
+            msg = f"[SessionManager] Error loading cache: {e}"
+            print(msg)
+            send_telegram_alert(msg)
             return None
 
     def is_expired(self):

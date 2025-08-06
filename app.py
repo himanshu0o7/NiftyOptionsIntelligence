@@ -1,87 +1,122 @@
-# app.py - Fixed and cleaned version with safe threading and no duplicate key issue
+import logging
+from datetime import datetime
 
-import streamlit as st
-from streamlit_autorefresh import st_autorefresh
 import pandas as pd
-import time
-import threading
+import plotly.express as px
+import pytz
+import streamlit as st
 
-# Local module imports (make sure these files exist and are error-free)
-from session_manager import SessionManager
-from option_stream_ui import get_option_data
+from greek_scanner_panel import render_scanner
+from option_stream_ui import get_nifty_option_tokens
+from telegram_handler import send_alert
+from utils.sensibull_greeks_fetcher import fetch_option_data
+from utils.ui_refresh import streamlit_autorefresh
 
-# ---------------------------
-# PAGE SETUP
-# ---------------------------
-st.set_page_config(layout="wide")
-st_autorefresh(interval=5000, limit=100, key="refresh_autokey_001")
+# Somewhere below main content
+st.divider()
+render_scanner()
 
-st.title("📈 Nifty Options Intelligence Dashboard")
-st.markdown("Use this app to monitor live CE/PE option data for NIFTY/BANKNIFTY")
 
-# ---------------------------
-# GLOBALS
-# ---------------------------
-tokens = None
-last_login_time = 0
+# 📄 Streamlit Page Config
+st.set_page_config(layout="wide", page_title="📈 Nifty Live Option Dashboard")
 
-# ---------------------------
-# TOKEN REFRESH FUNCTION
-# ---------------------------
-def ensure_tokens_fresh():
-    global tokens, last_login_time
-    if time.time() - last_login_time > (14 * 60):  # refresh every 14 min
-        time.sleep(1)  # prevent aggressive retry
-        sm = SessionManager()
-        session = sm.get_session()
-        tokens = session
-        last_login_time = time.time()
+# 🔧 Logger Setup
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
-# ---------------------------
-# STREAMLIT UI
-# ---------------------------
-col1, col2 = st.columns(2)
+# 🔁 Auto-Refresh Controls
+st.sidebar.markdown("## 🔄 Auto Refresh Settings")
+refresh_interval = st.sidebar.selectbox(
+    "Refresh Interval (seconds)", [15, 30, 60], index=1
+)
+pause_refresh = st.sidebar.checkbox("⏸️ Pause Auto-Refresh", value=False)
 
-with col1:
-    symbol = st.selectbox("Select Symbol", ["NIFTY", "BANKNIFTY"])
-    option_type = st.radio("Option Type", ["CE", "PE"], horizontal=True)
+if not pause_refresh:
+    streamlit_autorefresh(
+        seconds=refresh_interval,
+        enable_telegram=True,
+        enable_debug_panel=True
+    )
+    st.sidebar.success(f"🔁 Refreshing every {refresh_interval} sec")
+else:
+    st.sidebar.warning("⏸️ Auto-refresh is paused")
 
-with col2:
-    strike_price = st.number_input(
-        "Select Strike Price", min_value=10000, max_value=50000, step=50, value=22500
+# 🕒 Market Hours
+IST = pytz.timezone("Asia/Kolkata")
+
+
+def is_market_open():
+    """Check if the current time is within Indian market hours."""
+    now = datetime.now(IST)
+    return (
+        now.replace(hour=9, minute=15)
+        <= now
+        <= now.replace(hour=15, minute=30)
     )
 
-# ---------------------------
-# DATA FETCH + DISPLAY
-# ---------------------------
-try:
-    ensure_tokens_fresh()
-    data = get_option_data(symbol, strike_price, option_type)
 
-    if data and "error" not in data:
-        st.subheader(f"📊 Live Data for {symbol} {strike_price} {option_type}")
-        st.dataframe(pd.DataFrame([data]))
-    else:
-        st.error(data.get("error", "Unknown error occurred"))
+# 🧠 Load Token Data
+ce_df, pe_df = get_nifty_option_tokens()
+if ce_df is None or ce_df.empty:
+    st.error("⚠️ Could not load Nifty option tokens.")
+    st.stop()
+
+# 🎛️ User Filters
+strikes = sorted(ce_df["strike"].unique())
+expiries = sorted(ce_df["expiry"].unique())
+
+selected_strike = st.sidebar.selectbox(
+    "🎯 Select Strike", strikes, index=len(strikes) // 2
+)
+selected_expiry = st.sidebar.selectbox("🗓️ Select Expiry", expiries)
+
+token_df = pd.concat(
+    [
+        ce_df[
+            (ce_df["strike"] == selected_strike)
+            & (ce_df["expiry"] == selected_expiry)
+        ],
+        pe_df[
+            (pe_df["strike"] == selected_strike)
+            & (pe_df["expiry"] == selected_expiry)
+        ],
+    ]
+)
+
+# 📊 Main Dashboard
+try:
+    if not is_market_open():
+        st.warning(
+            "⚠️ Market is closed (9:15 AM – 3:30 PM IST). Data may be stale."
+        )
+
+    df = fetch_option_data(token_df['token'].tolist())
+
+    if df.empty:
+        st.error("🚫 No option data found. Check filters or API connectivity.")
+        st.stop()
+
+    st.success("✅ Live Option Data Fetched")
+    st.write(f"🧮 Data Shape: {df.shape}")
+
+    # 📊 OI + Volume Chart
+    fig = px.bar(df, x='Token', y=['oi', 'volume'], color='type',
+                 title="OI vs Volume", barmode='group')
+    st.plotly_chart(fig, use_container_width=True)
+
+    # 📉 Greeks Chart
+    if all(col in df.columns for col in ['delta', 'theta', 'vega']):
+        greek_chart = px.line(df, x='strike', y=['delta', 'theta', 'vega'],
+                              title="Option Greeks by Strike")
+        st.plotly_chart(greek_chart, use_container_width=True)
+
+    # 🔎 Full Data Table
+    st.dataframe(df)
 
 except Exception as e:
-    st.error(f"⚠️ App error: {e}")
-
-# ---------------------------
-# SAFELY HANDLE SIGNALS IF NEEDED
-# ---------------------------
-try:
-    import signal
-    if threading.current_thread() is threading.main_thread():
-        def handler(signum, frame):
-            print(f"Signal {signum} received")
-        signal.signal(signal.SIGTERM, handler)
-except Exception as err:
-    print(f"[Signal Handling Skipped] Reason: {err}")
-
-import subprocess
-
-if st.button("Start Live WebSocket"):
-    subprocess.Popen(["python3", "websocket_runner.py"])
-    st.success("WebSocket started in background.")
-
+    logger.exception("❌ Fetch failed")
+    st.error(f"❌ Error: {e}")
+    try:
+        send_alert(f"❌ Fetch failed in app.py: {e}")
+    except Exception as alert_err:
+        logger.error(f"Telegram alert failed: {alert_err}")
