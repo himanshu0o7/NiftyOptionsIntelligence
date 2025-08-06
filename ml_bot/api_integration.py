@@ -12,13 +12,13 @@ from datetime import datetime
 
 class APIIntegration:
     """Handle API communication with main trading system"""
-    
+
     def __init__(self, websocket_url: str, http_api_url: str):
         self.websocket_url = websocket_url
         self.http_api_url = http_api_url
         self.logger = logging.getLogger(__name__)
         self.websocket_connection = None
-        
+
     async def connect_websocket(self):
         """Establish WebSocket connection"""
         try:
@@ -28,7 +28,7 @@ class APIIntegration:
         except Exception as e:
             self.logger.error(f"WebSocket connection failed: {e}")
             return False
-    
+
     async def send_ml_signal(self, signal_data: Dict):
         """Send ML signal to main system"""
         try:
@@ -42,7 +42,7 @@ class APIIntegration:
         except Exception as e:
             self.logger.error(f"Failed to send signal: {e}")
             await self._send_http_signal(signal_data)
-    
+
     async def _send_http_signal(self, signal_data: Dict):
         """Send signal via HTTP API"""
         import requests
@@ -58,7 +58,7 @@ class APIIntegration:
                 self.logger.error(f"HTTP API error: {response.status_code}")
         except Exception as e:
             self.logger.error(f"HTTP API failed: {e}")
-    
+
     async def fetch_market_data(self, symbol: str) -> Dict:
         """Fetch current market data from main system"""
         import requests
@@ -76,7 +76,7 @@ class APIIntegration:
         except Exception as e:
             self.logger.error(f"Market data fetch error: {e}")
             return {}
-    
+
     async def close_connection(self):
         """Close WebSocket connection"""
         if self.websocket_connection:

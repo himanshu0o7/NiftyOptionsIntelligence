@@ -25,8 +25,8 @@ def get_nifty_option_tokens():
         downloader = InstrumentDownloader()
         downloader.download_and_process()
 
-        nifty_df = pd.read_csv("data/cache/nifty_tokens.csv")
-        banknifty_df = pd.read_csv("data/cache/banknifty_tokens.csv")
+        nifty_df = pd.read_csv("data/cache/nifty_tokens.json")
+        banknifty_df = pd.read_json("data/cache/banknifty_tokens.json")
 
         logger.info(f"NIFTY DF columns: {nifty_df.columns.tolist()}")
 

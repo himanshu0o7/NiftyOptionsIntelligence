@@ -36,23 +36,23 @@ def analyze_market_conditions():
 
 def generate_ai_strategy(market_condition, focus_index, risk_level):
     """Generate trading strategy using AI analysis"""
-    
+
     if not OPENAI_AVAILABLE:
         return generate_rule_based_strategy(market_condition, focus_index, risk_level)
-    
+
     # Get market analysis
     market_data = analyze_market_conditions()
-    
+
     # Create AI prompt for strategy generation
     prompt = f"""
     As an expert options trading strategist, create a detailed trading strategy based on:
-    
+
     Market Conditions:
     - Primary Trend: {market_condition}
     - Focus Index: {focus_index}
     - Risk Tolerance: {risk_level}/10
     - Current Data: {json.dumps(market_data, indent=2)}
-    
+
     Generate a comprehensive options trading strategy with:
     1. Strategy name and description
     2. Entry conditions (technical + sentiment)
@@ -60,13 +60,13 @@ def generate_ai_strategy(market_condition, focus_index, risk_level):
     4. Risk management (SL, TP, position sizing)
     5. Expected accuracy and reasoning
     6. Implementation steps
-    
+
     Focus on {focus_index} options with proper Greeks validation.
     Capital limit: ₹17,000 total, max ₹3,400 per position.
-    
+
     Respond in JSON format.
     """
-    
+
     try:
         # Use GPT-4o for strategy generation
         response = client.chat.completions.create(
@@ -78,22 +78,22 @@ def generate_ai_strategy(market_condition, focus_index, risk_level):
             response_format={"type": "json_object"},
             temperature=0.7
         )
-        
+
         strategy = json.loads(response.choices[0].message.content)
         strategy["ai_generated"] = True
         strategy["generation_time"] = datetime.now().isoformat()
-        
+
         return strategy
-        
+
     except Exception as e:
         print(f"AI strategy generation failed: {e}")
         return generate_rule_based_strategy(market_condition, focus_index, risk_level)
 
 def generate_rule_based_strategy(market_condition, focus_index, risk_level):
     """Generate strategy using rule-based logic (fallback)"""
-    
+
     market_data = analyze_market_conditions()
-    
+
     strategy = {
         "name": f"{market_condition} {focus_index} Strategy",
         "description": f"Rule-based {market_condition.lower()} strategy for {focus_index}",
@@ -106,7 +106,7 @@ def generate_rule_based_strategy(market_condition, focus_index, risk_level):
         },
         "strike_selection": {
             "bullish": "ATM CE or slightly ITM",
-            "bearish": "ATM PE or slightly ITM", 
+            "bearish": "ATM PE or slightly ITM",
             "sideways": "ATM straddle or strangle"
         },
         "risk_management": {
@@ -125,19 +125,19 @@ def generate_rule_based_strategy(market_condition, focus_index, risk_level):
         "ai_generated": False,
         "generation_time": datetime.now().isoformat()
     }
-    
+
     return strategy
 
 def demonstrate_error_fixing():
     """Demonstrate auto error fixing capability"""
-    
+
     if not OPENAI_AVAILABLE:
         return {
             "status": "Limited",
             "message": "OpenAI API key required for auto error fixing",
             "available_fixes": ["Basic error detection", "Rule-based corrections"]
         }
-    
+
     # Simulate common ML errors
     errors = [
         {
@@ -147,15 +147,15 @@ def demonstrate_error_fixing():
             "severity": "High"
         },
         {
-            "type": "PerformanceWarning", 
+            "type": "PerformanceWarning",
             "message": "Model accuracy dropped to 62%",
             "context": "Previous accuracy: 74%",
             "severity": "Medium"
         }
     ]
-    
+
     fixes = []
-    
+
     for error in errors:
         try:
             # Generate AI fix
@@ -164,13 +164,13 @@ def demonstrate_error_fixing():
             Type: {error['type']}
             Message: {error['message']}
             Context: {error['context']}
-            
+
             Provide a specific code fix and explanation for this ML trading bot error.
             Focus on practical solutions for options trading applications.
-            
+
             Respond in JSON format with: root_cause, fix_code, explanation, prevention.
             """
-            
+
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -179,12 +179,12 @@ def demonstrate_error_fixing():
                 ],
                 response_format={"type": "json_object"}
             )
-            
+
             fix_data = json.loads(response.choices[0].message.content)
             fix_data["error"] = error
             fix_data["ai_generated"] = True
             fixes.append(fix_data)
-            
+
         except Exception as e:
             # Fallback fix
             fixes.append({
@@ -195,7 +195,7 @@ def demonstrate_error_fixing():
                 "prevention": "Implement feature consistency checks",
                 "ai_generated": False
             })
-    
+
     return {
         "status": "Active",
         "errors_detected": len(errors),
@@ -205,7 +205,7 @@ def demonstrate_error_fixing():
 
 def demonstrate_performance_analysis():
     """Demonstrate AI performance analysis"""
-    
+
     # Simulate trading performance data
     performance_data = {
         "total_trades": 45,
@@ -218,11 +218,11 @@ def demonstrate_performance_analysis():
         "recent_performance": [0.72, 0.68, 0.71, 0.65, 0.74],
         "strategy_breakdown": {
             "breakout": {"trades": 20, "accuracy": 75},
-            "oi_analysis": {"trades": 15, "accuracy": 67}, 
+            "oi_analysis": {"trades": 15, "accuracy": 67},
             "ml_signals": {"trades": 10, "accuracy": 60}
         }
     }
-    
+
     if not OPENAI_AVAILABLE:
         return {
             "status": "Limited",
@@ -233,23 +233,23 @@ def demonstrate_performance_analysis():
                 "Reduce position size during drawdown"
             ]
         }
-    
+
     try:
         analysis_prompt = f"""
         Trading Performance Analysis:
         {json.dumps(performance_data, indent=2)}
-        
+
         As an expert trading system analyst, provide:
         1. Performance assessment
         2. Specific improvement recommendations
         3. Parameter optimization suggestions
         4. Risk management enhancements
         5. Strategy refinements
-        
+
         Focus on practical, actionable improvements for Indian options trading.
         Respond in JSON format.
         """
-        
+
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -258,13 +258,13 @@ def demonstrate_performance_analysis():
             ],
             response_format={"type": "json_object"}
         )
-        
+
         analysis = json.loads(response.choices[0].message.content)
         analysis["performance_data"] = performance_data
         analysis["ai_generated"] = True
-        
+
         return analysis
-        
+
     except Exception as e:
         return {
             "status": "Error",
@@ -276,38 +276,38 @@ def run_demo():
     """Run complete ML Bot demonstration"""
     print("🤖 ML Bot Self-Evolution Demo")
     print("=" * 50)
-    
+
     # Check OpenAI status
     if OPENAI_AVAILABLE:
         print("✅ OpenAI GPT-4o: Connected")
     else:
         print("⚠️ OpenAI GPT-4o: Not Available (Limited features)")
-    
+
     print("\n1. 📈 AI Strategy Generation")
     print("-" * 30)
-    
+
     # Generate strategy
     strategy = generate_ai_strategy("Bullish", "NIFTY", 6)
     print(f"Strategy: {strategy.get('name', 'Generated Strategy')}")
     print(f"AI Generated: {strategy.get('ai_generated', False)}")
     print(json.dumps(strategy, indent=2)[:500] + "...")
-    
+
     print("\n2. 🔧 Auto Error Fixing")
     print("-" * 30)
-    
+
     # Demonstrate error fixing
     error_analysis = demonstrate_error_fixing()
     print(f"Status: {error_analysis['status']}")
     print(f"Errors Detected: {error_analysis.get('errors_detected', 0)}")
-    
+
     print("\n3. 📊 Performance Analysis")
     print("-" * 30)
-    
+
     # Demonstrate performance analysis
     analysis = demonstrate_performance_analysis()
     print(f"Analysis Status: {analysis.get('status', 'Unknown')}")
     print(f"AI Powered: {analysis.get('ai_generated', False)}")
-    
+
     print("\n✅ Demo Complete!")
     print("Access full features at: http://localhost:8501")
 

@@ -32,7 +32,7 @@ def download_scrip_master(retries: int = 3) -> bool:
         return True
 
     logger.info("scrip_master_utils: downloading scrip master ...")
- 
+
     """Download scrip master if not available."""
     if os.path.exists(LOCAL_SCRIP_FILE):
         logger.info("ScripMasterUtils: Scrip master already exists.")
@@ -65,7 +65,7 @@ def download_scrip_master(retries: int = 3) -> bool:
     )
     logger.error(msg)
     send_telegram_alert(msg)
- 
+
             try:
                 with open(LOCAL_SCRIP_FILE, "w", encoding="utf-8") as f:
                     json.dump(response.json(), f)
@@ -97,7 +97,7 @@ def load_scrip_data() -> pd.DataFrame:
         raise FileNotFoundError("scrip_master_utils: scrip master unavailable.")
     with open(LOCAL_SCRIP_FILE, "r") as f:
         data = json.load(f)
- 
+
     if not download_scrip_master():
         logger.warning(
             "ScripMasterUtils: Using empty DataFrame - scrip master unavailable."
@@ -124,7 +124,7 @@ def load_scrip_data() -> pd.DataFrame:
         df['expiry'] = pd.to_datetime(df['expiry'], errors='coerce', format='%d-%b-%Y')
     else:
         raise ValueError("❌ 'expiry' column missing from scrip master.")
-    
+
     return df
 
 def normalize_expiry(expiry_str):

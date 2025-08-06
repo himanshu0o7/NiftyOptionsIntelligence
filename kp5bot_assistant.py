@@ -55,12 +55,12 @@ def wait_for_completion(thread_id, run_id):
 if __name__ == "__main__":
     files = ["bot_modules/greeks_handler.py", "data/sample_option_chain.csv"]
     file_ids = upload_files(files)
-    
+
     assistant = create_kp5bot_assistant(file_ids)
     print(f"✅ Assistant Created: {assistant.id}")
-    
+
     thread_id, run_id = run_code_thread(assistant.id, "Fix any issues in greeks_handler.py and generate test_greeks_handler.py using pytest.")
     print(f"🧵 Thread: {thread_id}\n🏃‍♂️ Run: {run_id}")
-    
+
     wait_for_completion(thread_id, run_id)
 

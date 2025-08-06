@@ -9,29 +9,29 @@ from datetime import datetime
 
 def main():
     st.title("🤖 ML Bot Quick Start Demo")
-    
+
     st.markdown("""
     ## How to Use the ML Bot System
-    
+
     **Two Applications Running:**
-    - **Main Trading**: http://localhost:5000 (Complete trading dashboard)  
+    - **Main Trading**: http://localhost:5000 (Complete trading dashboard)
     - **ML Bot GUI**: http://localhost:8501 (AI evolution features)
     """)
-    
+
     # Feature demonstration
     tab1, tab2, tab3 = st.tabs(["🧠 AI Strategy Generator", "🔧 Auto Error Fixing", "📊 Performance Analysis"])
-    
+
     with tab1:
         st.header("AI Strategy Generator Demo")
-        
+
         col1, col2 = st.columns(2)
-        
+
         with col1:
             st.subheader("Input Parameters")
             market = st.selectbox("Market Condition", ["Bullish", "Bearish", "Sideways"])
             index = st.selectbox("Index", ["NIFTY", "BANKNIFTY", "FINNIFTY"])
             risk = st.slider("Risk Level", 1, 10, 5)
-            
+
         with col2:
             st.subheader("Generated Strategy")
             if st.button("🚀 Generate AI Strategy"):
@@ -46,15 +46,15 @@ def main():
                         "expected_accuracy": f"{65 + risk}%",
                         "ai_reasoning": f"Based on {market.lower()} sentiment and {index} technical analysis"
                     }
-                    
+
                     st.success("✅ Strategy Generated!")
                     st.json(strategy)
-    
+
     with tab2:
         st.header("Auto Error Fixing Demo")
-        
+
         st.info("**Error Detection & Auto-Fix System**")
-        
+
         if st.button("🔍 Scan for Errors"):
             with st.spinner("AI scanning system for issues..."):
                 errors = {
@@ -63,9 +63,9 @@ def main():
                     "performance_issues": 1,
                     "auto_fixes_available": 2
                 }
-                
+
                 st.success("✅ System Scan Complete!")
-                
+
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
                     st.metric("Critical Errors", errors["critical_errors"], delta="✅ None")
@@ -75,7 +75,7 @@ def main():
                     st.metric("Performance Issues", errors["performance_issues"], delta="📊 Detected")
                 with col4:
                     st.metric("Auto-Fixes", errors["auto_fixes_available"], delta="🔧 Ready")
-                
+
                 # Show sample auto-fix
                 with st.expander("🔧 Sample Auto-Fix"):
                     st.code("""
@@ -90,12 +90,12 @@ def validate_features(X_train, expected_features=10):
     return X_train
                     """)
                     st.success("✅ Auto-fix applied successfully!")
-    
+
     with tab3:
         st.header("Performance Analysis Demo")
-        
+
         st.info("**AI-Powered Performance Analysis**")
-        
+
         if st.button("📊 Analyze Performance"):
             with st.spinner("GPT-4o analyzing trading performance..."):
                 analysis = {
@@ -117,42 +117,42 @@ def validate_features(X_train, expected_features=10):
                         "Implement dynamic stop-loss based on Greeks"
                     ]
                 }
-                
+
                 st.success("✅ AI Analysis Complete!")
-                
+
                 col1, col2 = st.columns(2)
-                
+
                 with col1:
                     st.subheader("✅ Strengths")
                     for strength in analysis["key_strengths"]:
                         st.write(f"• {strength}")
-                
+
                 with col2:
                     st.subheader("🎯 Improvements")
                     for improvement in analysis["improvement_areas"]:
                         st.write(f"• {improvement}")
-                
+
                 st.subheader("🧠 AI Recommendations")
                 for rec in analysis["ai_recommendations"]:
                     st.write(f"• {rec}")
-    
+
     # Quick access guide
     st.markdown("---")
     st.markdown("""
     ## 🚀 Quick Access Guide
-    
+
     **Main Trading System (Port 5000):**
     - Live trading dashboard
     - Multi-index support (NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY, NIFTYNXT50)
     - Real-time signals and order placement
     - Risk management and P&L tracking
-    
+
     **ML Bot GUI (Port 8501):**
     - AI-powered strategy generation
     - Automatic error detection and fixing
     - Performance analysis with GPT-4o
     - Continuous learning and evolution
-    
+
     **Key Benefits:**
     ✓ Automated trading with AI enhancement
     ✓ Self-improving algorithms

@@ -52,7 +52,7 @@ class SmartWebSocketHandler:
         logger.info("WebSocket opened")
         self.connected = True
         self.retry_count = 0  # Reset retry count on successful connection
-        
+
         # Subscribe to tokens once connected
         if self.token_list and self.mode is not None and self.sws:
             try:
@@ -91,7 +91,7 @@ class SmartWebSocketHandler:
         """Handle WebSocket connection closed."""
         logger.warning("WebSocket closed")
         self.connected = False
-        
+
         # Attempt to reconnect if not at max retries
         if self.retry_count < self.max_retries:
             self.retry_count += 1
@@ -110,11 +110,11 @@ class SmartWebSocketHandler:
             if not session:
                 logger.error("Failed to get fresh session for reconnection")
                 return
-            
+
             api_key = os.getenv("ANGEL_API_KEY") or session.get('apikey')
             if not api_key:
                 raise EnvironmentError("ANGEL_API_KEY is not set and not available in session")
-            
+
             # Reinitialize WebSocket with fresh credentials
             self.sws = SmartWebSocketV2(
                 auth_token=session['jwtToken'],
@@ -127,22 +127,22 @@ class SmartWebSocketHandler:
                 retry_multiplier=2,
                 ping_interval=5
             )
-            
+
             # Bind event handlers
             self.sws.on_open = self._on_open
             self.sws.on_data = self._on_data
             self.sws.on_error = self._on_error
             self.sws.on_close = self._on_close
-            
+
             # Connect
             self.sws.connect()
-            
+
         except Exception as e:
             logger.error(f"Reconnection failed: {e}")
 
     def start_websocket(self, token_list: list, mode: int = 1) -> None:
         """Start the WebSocket connection and subscribe to tokens.
-        
+
         Parameters
         ----------
         token_list: list
@@ -153,17 +153,17 @@ class SmartWebSocketHandler:
         """
         self.token_list = token_list
         self.mode = mode
-        
+
         try:
             # Get session credentials
             session = self.session_manager.get_session()
             if not session:
                 raise RuntimeError("Failed to get session credentials")
-            
+
             api_key = os.getenv("ANGEL_API_KEY") or session.get('apikey')
             if not api_key:
                 raise EnvironmentError("ANGEL_API_KEY is not set and not available in session")
-            
+
             # Initialize WebSocket
             self.sws = SmartWebSocketV2(
                 auth_token=session['jwtToken'],
@@ -176,13 +176,13 @@ class SmartWebSocketHandler:
                 retry_multiplier=2,
                 ping_interval=5
             )
-            
+
             # Bind event handlers
             self.sws.on_open = self._on_open
             self.sws.on_data = self._on_data
             self.sws.on_error = self._on_error
             self.sws.on_close = self._on_close
-            
+
             # Connect in a separate thread to avoid blocking
             def connect_thread():
                 try:
@@ -190,12 +190,12 @@ class SmartWebSocketHandler:
                 except Exception as exc:
                     logger.error(f"Connect failed: {exc}")
                     self._reconnect()
-            
+
             thread = threading.Thread(target=connect_thread, daemon=True)
             thread.start()
-            
+
             logger.info("WebSocket connection initiated")
-            
+
         except Exception as e:
             logger.error(f"Failed to start WebSocket: {e}")
             raise

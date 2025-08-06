@@ -4,7 +4,7 @@ from angel_utils import find_token, get_ltp
 
 def check_market_signal(client, symbol, strike, expiry, option_type):
     print(f"🔍 Checking signal for {symbol} {strike} {option_type} {expiry}")
-    
+
     token = find_token(symbol, strike, option_type, expiry)
     if not token:
         print("❌ Token not found")

@@ -45,7 +45,7 @@ def test_download_scrip_master_failure(tmp_path, monkeypatch):
     assert not token_manager.download_scrip_master(retries=1)
     assert messages and "Failed to download scrip master" in messages[0]
     assert not temp_file.exists()
- 
+
 import os
 import json
 import builtins

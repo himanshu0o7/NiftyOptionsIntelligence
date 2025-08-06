@@ -40,12 +40,12 @@ class StrategySignal:
 
 class MarketSpecificStrategies:
     """Implement market-specific strategies for 5 indices"""
-    
+
     def __init__(self):
         self.logger = Logger()
         self.indicators = TechnicalIndicators()
         self.audit_filters = AuditBasedFilters()
-        
+
         # Lot sizes for all indices
         self.lot_sizes = {
             'NIFTY': 75,
@@ -54,13 +54,13 @@ class MarketSpecificStrategies:
             'MIDCPNIFTY': 50,
             'NIFTYNXT50': 120
         }
-        
+
         # Capital allocation
         self.total_capital = 17000
         self.daily_risk_limit = 3400
         self.buffer = 500
         self.usable_capital = self.total_capital - self.buffer
-        
+
         # Strategy parameters
         self.strategy_params = {
             'bullish': {
@@ -92,32 +92,32 @@ class MarketSpecificStrategies:
                 'tp_percent': (20, 40)
             }
         }
-    
+
     def detect_market_mode(self, market_data: pd.DataFrame, underlying: str) -> MarketMode:
         """Detect current market mode based on technical indicators"""
         try:
             if len(market_data) < 50:
                 return MarketMode.RANGEBOUND
-            
+
             # Calculate indicators
             rsi = self.indicators.calculate_rsi(market_data['close'])
             current_rsi = rsi.iloc[-1]
-            
+
             # Price vs VWAP
             vwap = self.indicators.calculate_vwap(market_data)
             current_price = market_data['close'].iloc[-1]
             current_vwap = vwap.iloc[-1]
             price_vs_vwap = (current_price - current_vwap) / current_vwap * 100
-            
+
             # EMA crossover
             ema20 = self.indicators.calculate_ema(market_data['close'], 20)
             ema50 = self.indicators.calculate_ema(market_data['close'], 50)
             ema_crossover = ema20.iloc[-1] > ema50.iloc[-1]
-            
+
             # Volume analysis
             volume_sma = market_data['volume'].rolling(20).mean()
             volume_ratio = market_data['volume'].iloc[-1] / volume_sma.iloc[-1]
-            
+
             # Decision logic
             if current_rsi > 60 and price_vs_vwap > 0.2 and ema_crossover and volume_ratio > 1.2:
                 return MarketMode.BULLISH
@@ -127,58 +127,58 @@ class MarketSpecificStrategies:
                 return MarketMode.RANGEBOUND
             else:
                 return MarketMode.RANGEBOUND
-                
+
         except Exception as e:
             self.logger.error(f"Error detecting market mode: {e}")
             return MarketMode.RANGEBOUND
-    
-    def generate_bullish_signal(self, market_data: pd.DataFrame, underlying: str, 
+
+    def generate_bullish_signal(self, market_data: pd.DataFrame, underlying: str,
                                spot_price: float, options_chain: List[Dict]) -> Optional[StrategySignal]:
         """Generate bullish market signal (CE Buy)"""
         try:
             # Check bullish entry triggers
             rsi = self.indicators.calculate_rsi(market_data['close'])
             current_rsi = rsi.iloc[-1]
-            
+
             if current_rsi <= self.strategy_params['bullish']['rsi_threshold']:
                 return None
-            
+
             # Price vs VWAP
             vwap = self.indicators.calculate_vwap(market_data)
             current_price = market_data['close'].iloc[-1]
             current_vwap = vwap.iloc[-1]
-            
+
             if current_price <= current_vwap:
                 return None
-            
+
             # EMA crossover
             ema20 = self.indicators.calculate_ema(market_data['close'], 20)
             ema50 = self.indicators.calculate_ema(market_data['close'], 50)
-            
+
             if ema20.iloc[-1] <= ema50.iloc[-1]:
                 return None
-            
+
             # Select ATM/slightly OTM CE
-            best_option = self._select_best_option(options_chain, spot_price, 'CE', 
+            best_option = self._select_best_option(options_chain, spot_price, 'CE',
                                                   self.strategy_params['bullish'])
-            
+
             if not best_option:
                 return None
-            
+
             # Calculate position sizing
             lot_size = self.lot_sizes[underlying]
             premium = best_option['premium']
             capital_required = premium * lot_size
-            
+
             # Check capital availability
             if capital_required > self.usable_capital:
                 return None
-            
+
             # Calculate risk parameters
             sl_price = premium * (1 - self.strategy_params['bullish']['sl_percent'] / 100)
             tp_price = premium * (1 + np.random.uniform(*self.strategy_params['bullish']['tp_percent']) / 100)
             tsl_price = premium * (1 + self.strategy_params['bullish']['tsl_trigger'] / 100)
-            
+
             # Entry triggers
             entry_triggers = [
                 f"RSI {current_rsi:.1f} > 60",
@@ -186,7 +186,7 @@ class MarketSpecificStrategies:
                 f"EMA20 {ema20.iloc[-1]:.0f} > EMA50 {ema50.iloc[-1]:.0f}",
                 f"Delta {best_option['delta']:.2f} in range"
             ]
-            
+
             signal = StrategySignal(
                 symbol=f"{underlying}{best_option['strike']:.0f}CE",
                 underlying=underlying,
@@ -205,60 +205,60 @@ class MarketSpecificStrategies:
                 capital_required=capital_required,
                 risk_reward_ratio=(tp_price - premium) / (premium - sl_price)
             )
-            
+
             return signal
-            
+
         except Exception as e:
             self.logger.error(f"Error generating bullish signal: {e}")
             return None
-    
-    def generate_bearish_signal(self, market_data: pd.DataFrame, underlying: str, 
+
+    def generate_bearish_signal(self, market_data: pd.DataFrame, underlying: str,
                                spot_price: float, options_chain: List[Dict]) -> Optional[StrategySignal]:
         """Generate bearish market signal (PE Buy)"""
         try:
             # Check bearish entry triggers
             rsi = self.indicators.calculate_rsi(market_data['close'])
             current_rsi = rsi.iloc[-1]
-            
+
             if current_rsi >= self.strategy_params['bearish']['rsi_threshold']:
                 return None
-            
+
             # Price vs VWAP
             vwap = self.indicators.calculate_vwap(market_data)
             current_price = market_data['close'].iloc[-1]
             current_vwap = vwap.iloc[-1]
-            
+
             if current_price >= current_vwap:
                 return None
-            
+
             # EMA crossover downward
             ema20 = self.indicators.calculate_ema(market_data['close'], 20)
             ema50 = self.indicators.calculate_ema(market_data['close'], 50)
-            
+
             if ema20.iloc[-1] >= ema50.iloc[-1]:
                 return None
-            
+
             # Select ATM/slightly OTM PE
-            best_option = self._select_best_option(options_chain, spot_price, 'PE', 
+            best_option = self._select_best_option(options_chain, spot_price, 'PE',
                                                   self.strategy_params['bearish'])
-            
+
             if not best_option:
                 return None
-            
+
             # Calculate position sizing
             lot_size = self.lot_sizes[underlying]
             premium = best_option['premium']
             capital_required = premium * lot_size
-            
+
             # Check capital availability
             if capital_required > self.usable_capital:
                 return None
-            
+
             # Calculate risk parameters
             sl_price = premium * (1 - self.strategy_params['bearish']['sl_percent'] / 100)
             tp_price = premium * (1 + np.random.uniform(*self.strategy_params['bearish']['tp_percent']) / 100)
             tsl_price = premium * (1 + self.strategy_params['bearish']['tsl_trigger'] / 100)
-            
+
             # Entry triggers
             entry_triggers = [
                 f"RSI {current_rsi:.1f} < 40",
@@ -266,7 +266,7 @@ class MarketSpecificStrategies:
                 f"EMA20 {ema20.iloc[-1]:.0f} < EMA50 {ema50.iloc[-1]:.0f}",
                 f"Delta {best_option['delta']:.2f} in range"
             ]
-            
+
             signal = StrategySignal(
                 symbol=f"{underlying}{best_option['strike']:.0f}PE",
                 underlying=underlying,
@@ -285,38 +285,38 @@ class MarketSpecificStrategies:
                 capital_required=capital_required,
                 risk_reward_ratio=(tp_price - premium) / (premium - sl_price)
             )
-            
+
             return signal
-            
+
         except Exception as e:
             self.logger.error(f"Error generating bearish signal: {e}")
             return None
-    
-    def generate_rangebound_signal(self, market_data: pd.DataFrame, underlying: str, 
+
+    def generate_rangebound_signal(self, market_data: pd.DataFrame, underlying: str,
                                   spot_price: float, options_chain: List[Dict]) -> Optional[StrategySignal]:
         """Generate rangebound market signal (directional bias on breakout)"""
         try:
             # Check rangebound conditions
             rsi = self.indicators.calculate_rsi(market_data['close'])
             current_rsi = rsi.iloc[-1]
-            
+
             rsi_range = self.strategy_params['rangebound']['rsi_range']
             if not (rsi_range[0] <= current_rsi <= rsi_range[1]):
                 return None
-            
+
             # Price vs VWAP (tight range)
             vwap = self.indicators.calculate_vwap(market_data)
             current_price = market_data['close'].iloc[-1]
             current_vwap = vwap.iloc[-1]
             price_vs_vwap = abs(current_price - current_vwap) / current_vwap * 100
-            
+
             if price_vs_vwap > self.strategy_params['rangebound']['vwap_range']:
                 return None
-            
+
             # Look for breakout attempt
             recent_high = market_data['high'].rolling(20).max().iloc[-1]
             recent_low = market_data['low'].rolling(20).min().iloc[-1]
-            
+
             # Determine direction bias
             if current_price > (recent_high + recent_low) / 2:
                 option_type = 'CE'
@@ -324,28 +324,28 @@ class MarketSpecificStrategies:
             else:
                 option_type = 'PE'
                 action = 'BUY_PE'
-            
+
             # Select option
-            best_option = self._select_best_option(options_chain, spot_price, option_type, 
+            best_option = self._select_best_option(options_chain, spot_price, option_type,
                                                   self.strategy_params['rangebound'])
-            
+
             if not best_option:
                 return None
-            
+
             # Calculate position sizing
             lot_size = self.lot_sizes[underlying]
             premium = best_option['premium']
             capital_required = premium * lot_size
-            
+
             # Check capital availability
             if capital_required > self.usable_capital:
                 return None
-            
+
             # Calculate risk parameters
             sl_price = premium * (1 - self.strategy_params['rangebound']['sl_percent'] / 100)
             tp_price = premium * (1 + np.random.uniform(*self.strategy_params['rangebound']['tp_percent']) / 100)
             tsl_price = premium * (1 + self.strategy_params['rangebound']['tsl_trigger'] / 100)
-            
+
             # Entry triggers
             entry_triggers = [
                 f"RSI {current_rsi:.1f} in range 45-55",
@@ -353,7 +353,7 @@ class MarketSpecificStrategies:
                 f"Range breakout bias: {option_type}",
                 f"Delta {best_option['delta']:.2f} optimal"
             ]
-            
+
             signal = StrategySignal(
                 symbol=f"{underlying}{best_option['strike']:.0f}{option_type}",
                 underlying=underlying,
@@ -372,32 +372,32 @@ class MarketSpecificStrategies:
                 capital_required=capital_required,
                 risk_reward_ratio=(tp_price - premium) / (premium - sl_price)
             )
-            
+
             return signal
-            
+
         except Exception as e:
             self.logger.error(f"Error generating rangebound signal: {e}")
             return None
-    
-    def _select_best_option(self, options_chain: List[Dict], spot_price: float, 
+
+    def _select_best_option(self, options_chain: List[Dict], spot_price: float,
                            option_type: str, strategy_params: Dict) -> Optional[Dict]:
         """Select best option based on strategy parameters"""
         try:
             # Filter options by type
             filtered_options = [opt for opt in options_chain if opt['option_type'] == option_type]
-            
+
             if not filtered_options:
                 return None
-            
+
             # Find ATM/slightly OTM options
             best_option = None
             best_score = -1
-            
+
             for option in filtered_options:
                 # Check Greeks criteria
                 delta = abs(option.get('delta', 0))
                 theta = abs(option.get('theta', 0))
-                
+
                 # Delta range check
                 if option_type == 'CE':
                     delta_range = strategy_params.get('delta_range', (0.4, 0.5))
@@ -407,50 +407,50 @@ class MarketSpecificStrategies:
                     delta_range = strategy_params.get('delta_range', (-0.5, -0.4))
                     if not (delta_range[0] <= delta <= delta_range[1]):
                         continue
-                
+
                 # Theta check
                 if theta > strategy_params.get('theta_max', 12):
                     continue
-                
+
                 # Volume check
                 volume = option.get('volume', 0)
                 if volume < 1000:
                     continue
-                
+
                 # Distance from ATM
                 strike_distance = abs(option['strike'] - spot_price) / spot_price * 100
-                
+
                 # Calculate score (prefer closer to ATM with good Greeks)
                 score = (1 / (1 + strike_distance)) * delta * 100 - theta
-                
+
                 if score > best_score:
                     best_score = score
                     best_option = option
-            
+
             return best_option
-            
+
         except Exception as e:
             self.logger.error(f"Error selecting best option: {e}")
             return None
-    
+
     def calculate_dynamic_capital_allocation(self, underlying: str, premium: float) -> Dict:
         """Calculate dynamic capital allocation with buffer"""
         try:
             lot_size = self.lot_sizes[underlying]
-            
+
             # Base capital requirement
             base_capital = premium * lot_size
-            
+
             # Add buffer for slippage and brokerage
             total_capital_required = base_capital + self.buffer
-            
+
             # Check against limits
             within_daily_limit = total_capital_required <= self.daily_risk_limit
             within_total_capital = total_capital_required <= self.total_capital
-            
+
             # Calculate remaining capital
             remaining_capital = self.total_capital - total_capital_required
-            
+
             return {
                 'underlying': underlying,
                 'lot_size': lot_size,
@@ -463,32 +463,32 @@ class MarketSpecificStrategies:
                 'within_total_capital': within_total_capital,
                 'allocation_valid': within_daily_limit and within_total_capital
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error calculating capital allocation: {e}")
             return {}
-    
-    def generate_multi_index_signals(self, market_data_dict: Dict[str, pd.DataFrame], 
-                                    spot_prices: Dict[str, float], 
+
+    def generate_multi_index_signals(self, market_data_dict: Dict[str, pd.DataFrame],
+                                    spot_prices: Dict[str, float],
                                     options_chains: Dict[str, List[Dict]]) -> List[StrategySignal]:
         """Generate signals for all 5 indices"""
         try:
             all_signals = []
-            
+
             for underlying in self.lot_sizes.keys():
                 if underlying not in market_data_dict:
                     continue
-                
+
                 market_data = market_data_dict[underlying]
                 spot_price = spot_prices.get(underlying, 0)
                 options_chain = options_chains.get(underlying, [])
-                
+
                 if len(market_data) < 50 or spot_price == 0 or not options_chain:
                     continue
-                
+
                 # Detect market mode
                 market_mode = self.detect_market_mode(market_data, underlying)
-                
+
                 # Generate signal based on market mode
                 signal = None
                 if market_mode == MarketMode.BULLISH:
@@ -497,20 +497,20 @@ class MarketSpecificStrategies:
                     signal = self.generate_bearish_signal(market_data, underlying, spot_price, options_chain)
                 elif market_mode == MarketMode.RANGEBOUND:
                     signal = self.generate_rangebound_signal(market_data, underlying, spot_price, options_chain)
-                
+
                 if signal:
                     all_signals.append(signal)
                     self.logger.info(f"Generated {signal.action} signal for {underlying}: {signal.symbol}")
-            
+
             # Sort by confidence and capital efficiency
             all_signals.sort(key=lambda x: (x.confidence, x.risk_reward_ratio), reverse=True)
-            
+
             return all_signals
-            
+
         except Exception as e:
             self.logger.error(f"Error generating multi-index signals: {e}")
             return []
-    
+
     def validate_signal_against_audit(self, signal: StrategySignal) -> Tuple[bool, str]:
         """Validate signal against audit-based filters"""
         try:
@@ -522,25 +522,25 @@ class MarketSpecificStrategies:
                 'vega': signal.greeks.get('vega', 0),
                 'implied_volatility': signal.greeks.get('iv', 0)
             }
-            
+
             if self.audit_filters.check_greeks_based_sl(greeks_data):
                 return False, "Greeks-based SL criteria triggered"
-            
+
             # Check capital allocation
             capital_check = self.calculate_dynamic_capital_allocation(signal.underlying, signal.entry_price)
-            
+
             if not capital_check.get('allocation_valid', False):
                 return False, "Capital allocation limits exceeded"
-            
+
             # Check if avoid conditions are met
             if signal.greeks.get('theta', 0) > 15:
                 return False, "High theta decay risk"
-            
+
             if signal.greeks.get('iv', 0) > 50:
                 return False, "High IV spike risk"
-            
+
             return True, "Signal passed all audit checks"
-            
+
         except Exception as e:
             self.logger.error(f"Error validating signal: {e}")
             return False, f"Validation error: {e}"

@@ -1,99 +1,84 @@
 import streamlit as st
 import json
 import os
+import pandas as pd
+import plotly.express as px
 from datetime import datetime
 
-# ─────────────────────────────────────────────
-# ✅ Setup Page
-# ─────────────────────────────────────────────
-st.set_page_config(page_title="📘 AI Self-Learning Log", layout="wide")
-st.title("🤖 Self-Learning Log Viewer")
-st.markdown("Displays what KP5Bot has learned from the web (Trendlyne, Google News, YouTube, etc.)")
+# ✅ Set Page Config
+st.set_page_config(page_title="📖 KP5 Self Learning Viewer", layout="wide")
+st.title("📚 KP5Bot Self Learning Log Viewer")
 
-log_path = "logs/self_learning.jsonl"
+# ✅ Load log file
+log_path = "logs/memory_log.json"
 if not os.path.exists(log_path):
-    st.warning("No learning logs found.")
+    st.warning("No learning log found.")
     st.stop()
 
-# ─────────────────────────────────────────────
-# ✅ Load Logs
-# ─────────────────────────────────────────────
-with open(log_path, "r") as f:
-    logs = [json.loads(line.strip()) for line in f if line.strip()]
+entries = []
+with open(log_path, "r") as file:
+    for line in file:
+        try:
+            data = json.loads(line.strip())
+            entries.append(data)
+        except json.JSONDecodeError:
+            continue
 
-# ─────────────────────────────────────────────
-# ✅ Sidebar: Topic Filter
-# ─────────────────────────────────────────────
-topics = sorted(set(log["topic"] for log in logs))
-selected_topic = st.sidebar.selectbox("🔍 Select Topic", topics)
+if not entries:
+    st.warning("Learning log is empty or invalid.")
+    st.stop()
 
-filtered_logs = [log for log in logs if log["topic"] == selected_topic]
+# ✅ Convert to DataFrame
+df = pd.DataFrame(entries)
+df['timestamp'] = pd.to_datetime(df['timestamp'])
 
-# ─────────────────────────────────────────────
-# ✅ Display Logs
-# ─────────────────────────────────────────────
-for log in filtered_logs[::-1]:  # Newest first
-    st.markdown(f"### 📅 {log['timestamp']}")
-    for item in log["results"]:
-        st.markdown(f"**🔗 URL:** [{item['url']}]({item['url']})")
-        st.markdown(f"""
-        **📝 Summary:**
+# ✅ Sidebar filters
+all_topics = sorted(df['topic'].unique())
+selected_topics = st.sidebar.multiselect("🧠 Select Topics", all_topics, default=all_topics)
+date_range = st.sidebar.date_input("📅 Date Range", [df['timestamp'].min().date(), df['timestamp'].max().date()])
 
-        {item['summary']}
-        """)
+# ✅ Apply filters
+filtered = df[
+    (df['topic'].isin(selected_topics)) &
+    (df['timestamp'].dt.date >= date_range[0]) &
+    (df['timestamp'].dt.date <= date_range[1])
+]
+
+# ✅ Chart - Learning Frequency
+st.subheader("📊 Learning Frequency Over Time")
+daily_count = filtered.groupby(filtered['timestamp'].dt.date).size().reset_index(name='Learnings')
+fig = px.bar(daily_count, x='timestamp', y='Learnings', title="Daily Learning Events")
+st.plotly_chart(fig, use_container_width=True)
+
+# ✅ Detailed Comparison
+st.subheader("📋 Learning Summaries by Topic")
+for idx, row in filtered.iterrows():
+    st.markdown(f"### 📌 {row['topic']}")
+    st.caption(f"🕒 {row['timestamp']}")
+    for res in row['results']:
+        st.markdown(f"**🔗 URL:** [{res['url']}]({res['url']})")
+        st.markdown("**📝 Summary:**")
+        st.write(res['summary'])
         st.markdown("---")
-import json
-import logging
-from typing import Any, Optional
 
-import streamlit as st
+# ✅ Export section
+st.subheader("📦 Export Options")
 
-from telegram_alerts import send_telegram_alert
+# Prepare flat exportable data
+export_rows = []
+for idx, row in filtered.iterrows():
+    for res in row['results']:
+        export_rows.append({
+            "timestamp": row['timestamp'],
+            "topic": row['topic'],
+            "url": res['url'],
+            "summary": res['summary']
+        })
 
-MODULE = "self_learning_viewer"
-logger = logging.getLogger(MODULE)
+export_df = pd.DataFrame(export_rows)
+st.download_button("📁 Export CSV", export_df.to_csv(index=False), file_name="kp5bot_learning_log.csv")
 
-st.set_page_config(page_title="Self-Learning Viewer", layout="wide")
+# Optional: Export PDF (not native in Streamlit - needs workaround or separate script)
+# e.g., use pdfkit, reportlab, or send to backend
 
-
-def load_evolve_data(path: str = "evolve_log.json") -> Optional[dict[str, Any] | list[dict[str, Any]]]:
-    """Load evolution log data from JSON file."""
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except FileNotFoundError:
-        logger.error(f"{MODULE}: {path} not found")
-        send_telegram_alert(f"{MODULE}: {path} not found")
-    except PermissionError as exc:
-        logger.error(f"{MODULE}: Permission denied for {path}: {exc}")
-        send_telegram_alert(f"{MODULE}: Permission denied for {path}: {exc}")
-    except json.JSONDecodeError as exc:
-        logger.error(f"{MODULE}: Failed to decode JSON in {path}: {exc}")
-        send_telegram_alert(f"{MODULE}: Failed to decode JSON in {path}: {exc}")
-    except Exception as exc:  # pylint: disable=broad-except
-        logger.exception(f"{MODULE}: Failed to load {path}: {exc}")
-        send_telegram_alert(f"{MODULE}: Failed to load {path}: {exc}")
-    return None
-
-
-def main() -> None:
-    """Render the Self-Learning Viewer page."""
-    st.title("🤖 Self-Learning Viewer")
-    try:
-        data = load_evolve_data()
-        if data is not None:
-            st.subheader("Evolution Summary")
-            if isinstance(data, list):
-                st.dataframe(data)
-            else:
-                st.json(data)
-        else:
-            st.warning("No evolution data available.")
-    except (ValueError, TypeError, StreamlitAPIException) as exc:
-        logger.exception(f"{MODULE}: Display error: {exc}")
-        send_telegram_alert(f"{MODULE}: Display error - {exc}")
-        st.error("Failed to display evolution data.")
-
-
-if __name__ == "__main__":
-    main()
+st.success("✅ Done displaying filtered learning logs.")

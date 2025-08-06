@@ -1,0 +1,10 @@
+{
+  "topic": "Stock Market",
+  "timestamp": "2025-08-06 12:34:56",
+  "results": [
+    {
+      "url": "https://example.com/article",
+      "summary": "Summary of what was learned from the article."
+    }
+  ]
+}

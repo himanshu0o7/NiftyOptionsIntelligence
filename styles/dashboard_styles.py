@@ -356,7 +356,7 @@ DASHBOARD_CSS = """
         background: rgba(40, 44, 52, 0.95);
         color: white;
     }
-    
+
     .popup-content {
         background: linear-gradient(135deg, rgba(40, 44, 52, 0.95) 0%, rgba(40, 44, 52, 0.85) 100%);
         color: white;
@@ -368,18 +368,18 @@ DASHBOARD_CSS = """
     .main-header h1 {
         font-size: 2rem;
     }
-    
+
     .stTabs [data-baseweb="tab"] {
         height: 50px;
         font-size: 14px;
         padding: 0 15px;
     }
-    
+
     .dashboard-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .popup-content {
         margin: 20px;
         padding: 25px;
@@ -401,7 +401,7 @@ function showPopup(content, title) {
             closePopup(overlay);
         }
     };
-    
+
     const popup = document.createElement('div');
     popup.className = 'popup-content';
     popup.innerHTML = `
@@ -409,10 +409,10 @@ function showPopup(content, title) {
         <h2 style="margin-top: 0; color: #1e3c72; font-weight: 600;">${title}</h2>
         <div>${content}</div>
     `;
-    
+
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
-    
+
     // Animation
     popup.style.transform = 'scale(0.8)';
     popup.style.opacity = '0';

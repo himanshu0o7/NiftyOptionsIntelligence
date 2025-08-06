@@ -1,0 +1,188 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.12, pytest-8.4.1, pluggy-1.6.0
+rootdir: /root/NiftyOptionsIntelligence
+plugins: cov-6.2.1, anyio-4.9.0
+collected 39 items / 17 errors
+
+==================================== ERRORS ====================================
+_ ERROR collecting NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_trend.py _
+NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_trend.py:1: in <module>
+    from utils.trend_detector import detect_trend
+NiftyOptionsIntelligence/utils/trend_detector.py:93: in <module>
+    def fetch_option_chain(symbol: str) -> Dict:
+E   NameError: name 'Dict' is not defined
+_ ERROR collecting NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_ws_import.py _
+ImportError while importing test module '/root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_ws_import.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_ws_import.py:1: in <module>
+    from SmartApi.smartWebSocketV2 import WebSocketV2
+E   ImportError: cannot import name 'WebSocketV2' from 'SmartApi.smartWebSocketV2' (/usr/local/lib/python3.10/dist-packages/SmartApi/smartWebSocketV2.py)
+___________ ERROR collecting NiftyOptionsIntelligence/test_trend.py ____________
+NiftyOptionsIntelligence/test_trend.py:1: in <module>
+    from utils.trend_detector import detect_trend
+NiftyOptionsIntelligence/utils/trend_detector.py:93: in <module>
+    def fetch_option_chain(symbol: str) -> Dict:
+E   NameError: name 'Dict' is not defined
+_____________ ERROR collecting NiftyOptionsIntelligence/test_ws.py _____________
+NiftyOptionsIntelligence/test_ws.py:8: in <module>
+    ws_handler.start_websocket(tokens, mode=2)  # mode=2 means 'Quote'
+NiftyOptionsIntelligence/smart_websocket_handler.py:169: in start_websocket
+    auth_token=session['jwtToken'],
+E   KeyError: 'jwtToken'
+------------------------------- Captured stderr --------------------------------
+[I 250805 17:03:18 smartConnect:124] in pool
+[E 250805 17:03:20 smart_websocket_handler:200] Failed to start WebSocket: 'jwtToken'
+_________ ERROR collecting NiftyOptionsIntelligence/test_ws_import.py __________
+ImportError while importing test module '/root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_ws_import.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+NiftyOptionsIntelligence/test_ws_import.py:1: in <module>
+    from SmartApi.smartWebSocketV2 import WebSocketV2
+E   ImportError: cannot import name 'WebSocketV2' from 'SmartApi.smartWebSocketV2' (/usr/local/lib/python3.10/dist-packages/SmartApi/smartWebSocketV2.py)
+_________ ERROR collecting NiftyOptionsIntelligence/tests/test_foo.py __________
+import file mismatch:
+imported module 'test_foo' has this __file__ attribute:
+  /root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/NiftyOptionsIntelligence/tests/test_foo.py
+which is not the same as the test file we want to collect:
+  /root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/tests/test_foo.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_ ERROR collecting NiftyOptionsIntelligence/tests/test_live_market_readiness.py _
+import file mismatch:
+imported module 'test_live_market_readiness' has this __file__ attribute:
+  /root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/NiftyOptionsIntelligence/tests/test_live_market_readiness.py
+which is not the same as the test file we want to collect:
+  /root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/tests/test_live_market_readiness.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+________________________ ERROR collecting test_trend.py ________________________
+test_trend.py:1: in <module>
+    from utils.trend_detector import detect_trend
+NiftyOptionsIntelligence/utils/trend_detector.py:93: in <module>
+    def fetch_option_chain(symbol: str) -> Dict:
+E   NameError: name 'Dict' is not defined
+_________________________ ERROR collecting test_ws.py __________________________
+test_ws.py:8: in <module>
+    ws_handler.start_websocket(tokens, mode=2)  # mode=2 means 'Quote'
+NiftyOptionsIntelligence/smart_websocket_handler.py:169: in start_websocket
+    auth_token=session['jwtToken'],
+E   KeyError: 'jwtToken'
+------------------------------- Captured stderr --------------------------------
+[I 250805 17:03:20 smartConnect:124] in pool
+[E 250805 17:03:20 smart_websocket_handler:200] Failed to start WebSocket: 'jwtToken'
+______________________ ERROR collecting test_ws_import.py ______________________
+ImportError while importing test module '/root/NiftyOptionsIntelligence/test_ws_import.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+test_ws_import.py:1: in <module>
+    from SmartApi.smartWebSocketV2 import WebSocketV2
+E   ImportError: cannot import name 'WebSocketV2' from 'SmartApi.smartWebSocketV2' (/usr/local/lib/python3.10/dist-packages/SmartApi/smartWebSocketV2.py)
+____________________ ERROR collecting tests/test_alerts.py _____________________
+ImportError while importing test module '/root/NiftyOptionsIntelligence/tests/test_alerts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_alerts.py:3: in <module>
+    from utils.alerts import send_alert
+E   ModuleNotFoundError: No module named 'utils.alerts'
+______________________ ERROR collecting tests/test_foo.py ______________________
+import file mismatch:
+imported module 'test_foo' has this __file__ attribute:
+  /root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/NiftyOptionsIntelligence/tests/test_foo.py
+which is not the same as the test file we want to collect:
+  /root/NiftyOptionsIntelligence/tests/test_foo.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+_____________ ERROR collecting tests/test_live_market_readiness.py _____________
+import file mismatch:
+imported module 'test_live_market_readiness' has this __file__ attribute:
+  /root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/NiftyOptionsIntelligence/tests/test_live_market_readiness.py
+which is not the same as the test file we want to collect:
+  /root/NiftyOptionsIntelligence/tests/test_live_market_readiness.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+__________________ ERROR collecting tests/test_risk_guard.py ___________________
+ImportError while importing test module '/root/NiftyOptionsIntelligence/tests/test_risk_guard.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+tests/test_risk_guard.py:10: in <module>
+    import risk_guard
+risk_guard.py:11: in <module>
+    import psutil
+E   ModuleNotFoundError: No module named 'psutil'
+_____________ ERROR collecting tests/test_self_learning_viewer.py ______________
+tests/test_self_learning_viewer.py:4: in <module>
+    from pages import self_learning_viewer as slv
+pages/self_learning_viewer.py:19: in <module>
+    with open(log_path, "r") as file:
+E   FileNotFoundError: [Errno 2] No such file or directory: 'logs/memory_log.json'
+------------------------------- Captured stderr --------------------------------
+2025-08-05 17:03:22.433 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2025-08-05 17:03:22.433 WARNING streamlit.runtime.scriptrunner_utils.script_run_context: Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+_________________ ERROR collecting tests/test_token_manager.py _________________
+/usr/local/lib/python3.10/dist-packages/_pytest/python.py:498: in importtestmodule
+    mod = import_path(
+/usr/local/lib/python3.10/dist-packages/_pytest/pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+/usr/lib/python3.10/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+<frozen importlib._bootstrap>:1050: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1027: in _find_and_load
+    ???
+<frozen importlib._bootstrap>:1006: in _find_and_load_unlocked
+    ???
+<frozen importlib._bootstrap>:688: in _load_unlocked
+    ???
+/usr/local/lib/python3.10/dist-packages/_pytest/assertion/rewrite.py:186: in exec_module
+    exec(co, module.__dict__)
+tests/test_token_manager.py:9: in <module>
+    import token_manager
+E     File "/root/NiftyOptionsIntelligence/token_manager.py", line 74
+E       try:
+E   IndentationError: unexpected indent
+__________________ ERROR collecting utils/test_greeks_api.py ___________________
+import file mismatch:
+imported module 'utils.test_greeks_api' has this __file__ attribute:
+  /root/NiftyOptionsIntelligence/NiftyOptionsIntelligence/utils/test_greeks_api.py
+which is not the same as the test file we want to collect:
+  /root/NiftyOptionsIntelligence/utils/test_greeks_api.py
+HINT: remove __pycache__ / .pyc files and/or use a unique basename for your test file modules
+=============================== warnings summary ===============================
+../../usr/local/lib/python3.10/dist-packages/SmartApi/smartConnect.py:110
+../../usr/local/lib/python3.10/dist-packages/SmartApi/smartConnect.py:110
+  /usr/local/lib/python3.10/dist-packages/SmartApi/smartConnect.py:110: DeprecationWarning: ssl.OP_NO_SSL*/ssl.OP_NO_TLS* options are deprecated
+    self.ssl_context.options |= ssl.OP_NO_TLSv1  # Disable TLS 1.0
+
+../../usr/local/lib/python3.10/dist-packages/SmartApi/smartConnect.py:111
+../../usr/local/lib/python3.10/dist-packages/SmartApi/smartConnect.py:111
+  /usr/local/lib/python3.10/dist-packages/SmartApi/smartConnect.py:111: DeprecationWarning: ssl.OP_NO_SSL*/ssl.OP_NO_TLS* options are deprecated
+    self.ssl_context.options |= ssl.OP_NO_TLSv1_1  # Disable TLS 1.1
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_trend.py - NameE...
+ERROR NiftyOptionsIntelligence/NiftyOptionsIntelligence/test_ws_import.py
+ERROR NiftyOptionsIntelligence/test_trend.py - NameError: name 'Dict' is not ...
+ERROR NiftyOptionsIntelligence/test_ws.py - KeyError: 'jwtToken'
+ERROR NiftyOptionsIntelligence/test_ws_import.py
+ERROR NiftyOptionsIntelligence/tests/test_foo.py
+ERROR NiftyOptionsIntelligence/tests/test_live_market_readiness.py
+ERROR test_trend.py - NameError: name 'Dict' is not defined
+ERROR test_ws.py - KeyError: 'jwtToken'
+ERROR test_ws_import.py
+ERROR tests/test_alerts.py
+ERROR tests/test_foo.py
+ERROR tests/test_live_market_readiness.py
+ERROR tests/test_risk_guard.py
+ERROR tests/test_self_learning_viewer.py - FileNotFoundError: [Errno 2] No su...
+ERROR tests/test_token_manager.py
+ERROR utils/test_greeks_api.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 17 errors during collection !!!!!!!!!!!!!!!!!!!
+======================== 4 warnings, 17 errors in 5.84s ========================

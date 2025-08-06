@@ -8,7 +8,7 @@ from utils.instrument_downloader import InstrumentDownloader
 def audit_and_suggest():
     strategy = BreakoutStrategy("NIFTY", [])
     print("🔍 Loaded Strategy:", strategy.__class__.__name__)
-    
+
     # Dummy audit logic (you can integrate Codex later)
     suggestion = {
         "improvement": "Add vega filter > 1.0 in should_enter",
@@ -18,7 +18,7 @@ def audit_and_suggest():
 
     with open("evolve_log.json", "w") as f:
         json.dump(suggestion, f, indent=2)
-    
+
     print("✅ Audit Complete. Suggestion saved to evolve_log.json")
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@ import pandas as pd
 import requests
 # codex/wrap-requests.get-in-try/except
 from requests.exceptions import RequestException
- 
+
 # fix-bot-2025-07-24
 
 from telegram_alerts import send_telegram_alert
@@ -27,7 +27,7 @@ def download_scrip_master(retries: int = 3) -> bool:
     """Download the scrip master with retry and alerting."""
     if os.path.exists(LOCAL_SCRIP_FILE):
         logger.info("token_manager: Using existing scrip master.")
- 
+
 _scrip_data_cache = None
 
 
@@ -70,7 +70,7 @@ def load_scrip_data():
         raise FileNotFoundError("token_manager: scrip master unavailable.")
     with open(LOCAL_SCRIP_FILE, "r") as f:
         return pd.DataFrame(json.load(f))
- 
+
             try:
                 with open(LOCAL_SCRIP_FILE, "w", encoding="utf-8") as f:
                     json.dump(response.json(), f)

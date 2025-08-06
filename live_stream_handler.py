@@ -32,9 +32,9 @@ class LiveStreamHandler:
             if df.empty:
                 logger.error(f"No options data for {symbol} in scrip master.")
                 return []
-            
+
             logger.info(f"Raw {symbol} DF shape: {df.shape}")
-            
+
             # Convert expiry to datetime for safe sorting
             df['expiry_dt'] = pd.to_datetime(df['expiry'], format='%d-%b-%Y', errors='coerce')
             valid_expiries = df['expiry_dt'].dropna().unique()
@@ -42,20 +42,20 @@ class LiveStreamHandler:
                 logger.error(f"No valid expiry dates for {symbol}.")
                 return []
             nearest_expiry = sorted(valid_expiries)[0].strftime('%d-%b-%Y')
-            
+
             # Strike in paise (e.g., 2480000 for 24800)
             atm_strike = round(df['strike'].mean() / 10000) * 100
             atm_strike_paise = atm_strike * 100
-            
+
             logger.info(f"Fetching for {symbol}, strike {atm_strike}, expiry {nearest_expiry}")
-            
+
             ce_df = df[(df['strike'] == atm_strike_paise) & (df['expiry'] == nearest_expiry) & (df['symbol'].str.endswith('CE'))]
             pe_df = df[(df['strike'] == atm_strike_paise) & (df['expiry'] == nearest_expiry) & (df['symbol'].str.endswith('PE'))]
-            
+
             if ce_df.empty or pe_df.empty:
                 logger.error(f"No ATM CE/PE for {symbol} at strike {atm_strike}, expiry {nearest_expiry}. CE shape: {ce_df.shape}, PE shape: {pe_df.shape}")
                 return []
-            
+
             ce_token = str(ce_df['token'].iloc[0])
             pe_token = str(pe_df['token'].iloc[0])
             logger.info(f"Fetched tokens for {symbol}: CE={ce_token}, PE={pe_token}")
@@ -67,13 +67,13 @@ class LiveStreamHandler:
     def start(self):
         if not self.is_market_open():
             logger.warning("Market is closed. Using cached data or skipping live stream.")
-        
+
         # Fetch for NIFTY and BANKNIFTY
         self.token_lists = self.fetch_tokens("NIFTY") + self.fetch_tokens("BANKNIFTY")
         if not self.token_lists:
             logger.error("No tokens fetched. Cannot start WebSocket.")
             return
-        
+
         self.sws.start_websocket(self.token_lists, mode=2)
         logger.info("WebSocket started for NIFTY and BANKNIFTY ATM options.")
 
