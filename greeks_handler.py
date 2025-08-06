@@ -101,3 +101,37 @@ def fetch_option_greeks(symbol, strike, option_type, tokens):
         "ask": live.get("ask"),
     }
 
+
+def get_option_greeks(symbol, strike, option_type):
+    """
+    Dummy function for testing purposes that returns mock option greeks data.
+    This function simulates the return format of fetch_option_greeks without 
+    making actual API calls.
+    """
+    if not symbol or not isinstance(symbol, str):
+        return {"error": "Invalid symbol provided"}
+    
+    if not isinstance(strike, (int, float)) or strike <= 0:
+        return {"error": "Invalid strike price provided"}
+    
+    if option_type not in ["CE", "PE"]:
+        return {"error": "Invalid option type. Must be 'CE' or 'PE'"}
+    
+    # Mock data for testing
+    return {
+        "symbol": f"{symbol}25JUL{int(strike)}{option_type}",
+        "strike": float(strike),
+        "option_type": option_type,
+        "expiry": "25JUL2025",
+        "ltp": 100.50,
+        "iv": 15.25,
+        "delta": 0.5 if option_type == "CE" else -0.5,
+        "gamma": 0.02,
+        "theta": -2.5,
+        "vega": 12.8,
+        "oi": 50000,
+        "volume": 10000,
+        "bid": 99.50,
+        "ask": 101.50,
+    }
+
