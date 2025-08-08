@@ -28,3 +28,17 @@ dependencies:
     - pylint
     - pytest
     - flake8
+
+order_routing:
+  product_type: "MIS"
+  order_type: "LIMIT"
+  slippage_bps: 15
+  timeout_seconds: 5
+  fail_closed_on_feed_gap: true
+
+trading_rules:
+  liquidity_requirements:
+    bid_ask_spread_max_abs: 2
+    bid_ask_spread_max_pct: 0.8
+    min_oi_change_percent: 1.0
+    opposite_side_oi_unwind_percent: -0.5
