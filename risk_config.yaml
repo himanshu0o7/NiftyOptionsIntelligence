@@ -2,72 +2,87 @@
 # All monetary values in INR
 
 risk_management:
-  # Capital Management
   total_capital: 17000
-  max_daily_loss: 850  # 5% of capital
-  max_position_size: 3400  # 20% of capital per position
-  risk_per_trade: 340  # 2% of capital
-  max_concurrent_positions: 5
+  max_daily_loss: 850                 # 5% of capital (HARD STOP: halt trading)
+  max_position_size: 3000             # dynamic sizing preferred; keep conservative cap
+  risk_per_trade: 340                 # 2% of capital (used as cap in SL math)
+  max_concurrent_positions: 2         # compute from live premium at runtime; cap at 2
 
-  # Stop Loss Rules
   stop_loss:
-    fixed_sl_percent: 50  # 50% of premium paid
-    fixed_sl_amount: 340  # Max loss per trade (2% of capital)
+    # Use the tighter of fixed % vs fixed amount
+    fixed_sl_percent: 50              # 50% of premium paid
+    fixed_sl_amount: 340              # 2% of capital
+    policy: "min"                     # <-- implement: effective_SL = min(percent, amount)
+
     greeks_based_sl:
-      delta_threshold: 0.05  # Auto square off if delta < 0.05
-      iv_threshold: 5  # Auto square off if IV < 5%
+      delta_exit_below: 0.05          # auto exit if coupling collapses
+      iv_exit_below: 10               # if IV crashes abnormally (absolute IV %)
+      enabled: true
+
     time_based_sl:
-      minutes_before_expiry: 30  # Square off 30 min before expiry
-      intraday_cutoff: "15:15"  # Square off at 3:15 PM
+      minutes_before_expiry: 30       # exit 30 min before expiry
+      intraday_last_entry: "15:05"    # block new entries after 3:05 pm
+      intraday_square_off: "15:19"    # hard square-off
 
-  # Take Profit Rules
   take_profit:
-    quick_profit_percent: 20  # 20% gain in first 30 minutes
-    target_profit_amount: 850  # Target profit per trade
-    expiry_day_profit: 30  # 30% profit booking on expiry day
-    end_of_day_profit: 50  # 50% of max profit at EOD
+    quick_profit_percent: 20          # book fast gains in first 30 mins
+    target_profit_amount: 850         # soft target; TSL may trail further
+    expiry_day_profit: 30             # expiry special booking
+    end_of_day_profit: 50             # % of max seen profit to bank at EOD
 
-  # Trailing Stop Loss Rules
   trailing_stop_loss:
-    activation_profit: 15  # Activate TSL after 15% profit
-    trail_percent: 10  # Trail 10% of highest profit
-    minimum_trail_amount: 50  # Minimum trail amount per lot
-    dynamic_adjustment: true  # Adjust based on volatility
+    activation_profit: 15
+    trail_percent: 10
+    minimum_trail_amount: 50
+    atr_based: true                   # <-- implement: trail = max(minimum_trail_amount, 0.35 * ATR_option)
+    atr_window: 5                     # tighter on expiry/midday noise
+    dynamic_adjustment: true
 
-# Trading Rules
+  session_guards:
+    max_losses_before_size_cut: 2     # after 2 SLs, reduce size by 50%
+    max_losses_halt: 3                # after 3 SLs, halt for the day
+    cooldown_minutes_after_sl: 12     # avoid clustering
+
 trading_rules:
-  # Market Modes
   market_modes:
     rangebound:
-      strategy: "straddle_buying"
+      strategy: "disabled"            # straddle disabled for ₹17k capital
       confidence_threshold: 0.6
       preferred_strikes: "ATM"
     bullish:
       strategy: "call_buying"
       confidence_threshold: 0.7
-      preferred_strikes: "ATM_to_OTM"
+      preferred_strikes: "ATM_to_1ITM"
     bearish:
       strategy: "put_buying"
       confidence_threshold: 0.7
-      preferred_strikes: "ATM_to_OTM"
+      preferred_strikes: "ATM_to_1ITM"
 
-  # Greeks Validation
   greeks_thresholds:
-    delta_min: 0.1
-    delta_max: 0.9
-    iv_min: 10
-    iv_max: 50
-    theta_max: -5  # Maximum theta decay acceptable
-    vega_min: 0.05  # Minimum vega for volatility sensitivity
+    delta_min: 0.35                   # tighter for buyers
+    delta_max: 0.60
+    iv_min: 10                        # absolute IV% guard if percentile not available
+    iv_max: 45                        # avoid overpaying vol
+    iv_percentile_max: 50             # if percentile available from feed
+    theta_premium_ratio_max: 0.015    # |theta| ≤ 1.5% of premium per day
+    vega_min: 0.05
 
-  # Volume and OI Requirements
   liquidity_requirements:
-    min_volume: 1000
-    min_oi_change: 100
+    min_volume: 0                     # use relative rule instead
+    relative_volume_multiplier: 1.5   # vol >= 1.5x median(5m, last 20 bars)
+    min_oi_change_percent: 1.0        # >= +1% build-up
+    opposite_side_oi_unwind_percent: -0.5
+    bid_ask_spread_max_pct: 0.8       # <= 0.8% of LTP
+    bid_ask_spread_max_abs: 2         # or <= ₹2, whichever higher
     liquidity_score_min: 0.6
-    bid_ask_spread_max: 5  # Maximum spread percentage
 
-# Alert Configuration
+order_routing:
+  product_type: "MIS"
+  order_type: "LIMIT"                 # protect against slippage
+  slippage_bps: 15                    # entry guard; cancel-replace if not filled in 5s
+  timeout_seconds: 5
+  fail_closed_on_feed_gap: true       # freeze signals if data gaps/disconnects
+
 alerts:
   telegram:
     enabled: true
@@ -76,37 +91,35 @@ alerts:
       - "api_connection_failed"
       - "position_limit_exceeded"
       - "daily_loss_limit_approached"
-    
   mtm_alerts:
-    loss_threshold_percent: 2  # Alert if MTM loss > 2% of capital
-    halt_trading_threshold: 5  # Halt trading if loss > 5% of capital
-    
+    loss_threshold_percent: 2
+    halt_trading_threshold: 5
   position_alerts:
     high_risk_positions: true
     greeks_deviation: true
     expiry_warnings: true
+  ops:
+    tunnel_health: true               # daily URL push + heartbeat
 
-# Backtesting Configuration
 backtesting:
-  sample_size: 10  # Number of trades to simulate
-  historical_data_days: 30
-  success_rate_threshold: 60  # Minimum acceptable success rate %
-  max_drawdown_percent: 10  # Maximum acceptable drawdown
-  
-# Lot Size Configuration
+  sample_size: 200                    # minimum trades
+  historical_data_days: 60
+  success_rate_threshold: 60
+  max_drawdown_percent: 10
+  include_slippage_commissions: true
+
 lot_sizes:
   NIFTY: 75
-  BANKNIFTY: 35
-  
-# Exchange Configuration
+  BANKNIFTY: 35                       # verify daily from instruments master at runtime
+
 exchanges:
   primary: "NFO"
   allowed_segments: ["OPTIDX"]
-  
-# System Configuration
+
 system:
   paper_trading: false
   live_trading: true
   auto_square_off: true
   risk_monitoring: true
   performance_tracking: true
+  time_zone: "Asia/Kolkata"
