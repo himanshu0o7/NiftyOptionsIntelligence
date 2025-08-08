@@ -1,0 +1,32 @@
+# logging_setup.py
+import logging, sys, json, time, socket, os
+from logging import Logger
+from pythonjsonlogger import jsonlogger
+
+_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
+
+def _ts():
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime()) + f".{int((time.time()%1)*1000):03d}"
+
+class ExtraJSON(jsonlogger.JsonFormatter):
+    def process_log_record(self, record):
+        # Standard fields for observability
+        record["ts"] = _ts()
+        record["host"] = socket.gethostname()
+        record["app"] = "KP5Bot"
+        record["env"] = os.getenv("ENV", "dev")
+        return super().process_log_record(record)
+
+def configure_logger(name: str = "kp5") -> Logger:
+    logger = logging.getLogger(name)
+    logger.setLevel(_LEVEL)
+    if not logger.handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        fmt = ExtraJSON("%(levelname)s %(name)s %(message)s")
+        handler.setFormatter(fmt)
+        logger.addHandler(handler)
+        logger.propagate = False
+    # suppress noisy libs
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("websocket").setLevel(logging.WARNING)
+    return logger
