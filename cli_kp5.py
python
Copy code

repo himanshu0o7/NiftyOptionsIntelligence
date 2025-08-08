@@ -1,0 +1,44 @@
+# cli_kp5.py
+import typer, json, time
+from typing import Optional
+from logging_setup import configure_logger
+from utils.config import load_config
+from kp5_controller import KP5Controller
+
+app = typer.Typer(add_completion=False)
+log = configure_logger("kp5.cli")
+
+@app.command("run")
+def run(mode: str = typer.Option("live", help="live|paper"),
+        config_path: str = typer.Option("risk_config.yaml", "--config"),
+        log_level: str = typer.Option("INFO", "--log-level")):
+
+    import os
+    os.environ["LOG_LEVEL"] = log_level
+    cfg = load_config(config_path)
+    if mode == "paper":
+        cfg["system"]["paper_trading"] = True
+        cfg["system"]["live_trading"] = False
+
+    ctl = KP5Controller(cfg)
+    ctl.start()
+    log.info("controller_running", extra={"mode": mode})
+
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        ctl.stop(reason="keyboard")
+
+@app.command("health")
+def health():
+    # lightweight config parse check
+    cfg = load_config("risk_config.yaml")
+    typer.echo(json.dumps({
+        "status": "ok",
+        "paper_trading": cfg["system"]["paper_trading"],
+        "live_trading": cfg["system"]["live_trading"]
+    }))
+
+if __name__ == "__main__":
+    app()
