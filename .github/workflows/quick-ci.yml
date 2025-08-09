@@ -1,0 +1,13 @@
+# .github/workflows/quick-ci.yml
+name: quick-ci
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/uv-action@v1
+      - run: uv python install 3.10
+      - run: uv pip install ruff==0.5.0
+      - run: ruff check . --select E9,F63,F7,F82  # syntax & obvious errors only
+      
